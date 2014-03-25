@@ -5,10 +5,12 @@ A Firebase API for .NET.
 
 # Fun Facts
 
-- This is a .NET Portable Library.
-- It currently only consumes and delivers JSON - maybe I'll add type converters to the API tomorrow.
-- It has synch and async (TPL) versions of all methods.
-- It probably sucks.
+- This is a .NET Portable Library
+- It currently only consumes and delivers JSON
+- It has synch and async (TPL) versions of all methods
+- It does not support auth or custom headers
+- It throws on error HTTP status codes  (happy path is always success)
+- It probably sucks
 
 # Usage
 
