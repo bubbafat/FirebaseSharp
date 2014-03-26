@@ -55,11 +55,13 @@ namespace FirebaseSharp.Portable
             response.EnsureSuccessStatusCode();
         }
 
-        internal async Task Patch(Uri path, string payload)
+        internal async Task<string> Patch(Uri path, string payload)
         {
             HttpResponseMessage response = await Query(new HttpMethod("PATCH"), path, payload);
 
             response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStringAsync();
         }
 
         internal async Task<string> Put(Uri path, string payload)
@@ -75,11 +77,9 @@ namespace FirebaseSharp.Portable
         {
             HttpResponseMessage response = await Query(HttpMethod.Post, path, payload);
 
-            dynamic result = JsonConvert.DeserializeObject(await response.Content.ReadAsStringAsync());
-
             response.EnsureSuccessStatusCode();
 
-            return result.name;
+            return await response.Content.ReadAsStringAsync();
         }
 
         private Task<HttpResponseMessage> Query(HttpMethod method, Uri path, string payload = null,

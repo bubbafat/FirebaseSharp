@@ -45,8 +45,11 @@ namespace FirebaseSharp.Tests
             // Then delete the individual node and perform another
             // get to make sure it is missing.
 
-            foreach (string key in created)
+            foreach (string keyResponse in created)
             {
+                dynamic keyObj = JsonConvert.DeserializeObject(keyResponse);
+                string key = keyObj.name;
+
                 var found = callbackResults.First(c => c.Payload.Contains(key));
                 Assert.IsNotNull(found, "The key was added but missing from stream");
 

@@ -42,14 +42,14 @@ namespace FirebaseSharp.Portable
             return await _request.Put(BuildPath(path), payload);
         }
 
-        public void Patch(string path, string payload)
+        public string Patch(string path, string payload)
         {
-            PatchAsync(path, payload).Wait();
+            return PatchAsync(path, payload).Result;
         }
 
-        public async Task PatchAsync(string path, string payload)
+        public async Task<string> PatchAsync(string path, string payload)
         {
-            await _request.Patch(BuildPath(path), payload);
+            return await _request.Patch(BuildPath(path), payload);
         }
 
         public void Delete(string path)
