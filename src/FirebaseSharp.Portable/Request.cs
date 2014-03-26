@@ -70,7 +70,7 @@ namespace FirebaseSharp.Portable
 
         internal async Task<string> Put(string path, string payload)
         {
-            HttpResponseMessage response = await Query(HttpMethod.Post, path, payload);
+            HttpResponseMessage response = await Query(HttpMethod.Put, path, payload);
             
             response.EnsureSuccessStatusCode();
 
