@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>FirebaseSharp</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Robert Horvick</authors>
+    <owners>bubbafat</owners>
+    <licenseUrl>https://raw.githubusercontent.com/bubbafat/FreebaseSharp/master/LICENSE.txt</licenseUrl>
+    <projectUrl>https://github.com/bubbafat/FreebaseSharp</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/bubbafat/FreebaseSharp/master/img/logo.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A portable .NET client library for Firebase.io.  Includes all the REST verbs, streaming GETs, and support for auth tokens.</description>
+    <releaseNotes>
+      * 1.0.0.0 - Initial version
+    </releaseNotes>
+    <copyright>Copyright 2014</copyright>
+    <tags>Firebase realtime API</tags>
+    <dependencies>
+      <dependency id="Microsoft.Net.Http" />
+    </dependencies>
+  </metadata>
+</package>
