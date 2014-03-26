@@ -6,14 +6,20 @@ namespace FirebaseSharp.Portable
     public sealed class Firebase : IDisposable
     {
         private readonly Request _request;
-        public Firebase(Uri rootUri)
+
+        public Firebase(string rootUri, string authToken = null)
+            : this(new Uri(rootUri), authToken)
+        {            
+        }
+
+        public Firebase(Uri rootUri, string authToken = null)
         {
             if (rootUri == null)
             {
                 throw new ArgumentNullException("rootUri");
             }
 
-            _request = new Request(rootUri);
+            _request = new Request(rootUri, authToken);
         }
 
         public Uri RootUri
@@ -28,9 +34,8 @@ namespace FirebaseSharp.Portable
 
         public async Task<string> PostAsync(string path, string payload)
         {
-            return await _request.Post(BuildPath(path), payload);
+            return await _request.Post(path, payload);
         }
-
 
         public string Put(string path, string payload)
         {
@@ -39,7 +44,7 @@ namespace FirebaseSharp.Portable
 
         public async Task<string> PutAsync(string path, string payload)
         {
-            return await _request.Put(BuildPath(path), payload);
+            return await _request.Put(path, payload);
         }
 
         public string Patch(string path, string payload)
@@ -49,7 +54,7 @@ namespace FirebaseSharp.Portable
 
         public async Task<string> PatchAsync(string path, string payload)
         {
-            return await _request.Patch(BuildPath(path), payload);
+            return await _request.Patch(path, payload);
         }
 
         public void Delete(string path)
@@ -58,7 +63,7 @@ namespace FirebaseSharp.Portable
         }
         public async Task DeleteAsync(string path)
         {
-            await _request.Delete(BuildPath(path));
+            await _request.Delete(path);
         }
 
         public string Get(string path)
@@ -68,7 +73,7 @@ namespace FirebaseSharp.Portable
 
         public async Task<string> GetAsync(string path)
         {
-            return await _request.GetSingle(BuildPath(path));
+            return await _request.GetSingle(path);
         }
 
         public Response GetStreaming(string path, Action<StreamingEvent> callback)
@@ -78,12 +83,7 @@ namespace FirebaseSharp.Portable
 
         public async Task<Response> GetStreamingAsync(string path, Action<StreamingEvent> callback)
         {
-            return await _request.GetStreaming(BuildPath(path), callback);
-        }
-
-        private Uri BuildPath(string path)
-        {
-            return new Uri(RootUri.AbsoluteUri + path + ".json");
+            return await _request.GetStreaming(path, callback);
         }
 
         public void Dispose()

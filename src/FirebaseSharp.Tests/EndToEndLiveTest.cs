@@ -11,12 +11,10 @@ namespace FirebaseSharp.Tests
     [TestClass]
     public class EndToEndLiveTest
     {
-        private const string RootUrl = "https://dazzling-fire-1575.firebaseio.com/";
-
         [TestMethod]
         public void EndToEnd()
         {
-            Firebase fb = new Firebase(new Uri(RootUrl));
+            Portable.Firebase fb = new Portable.Firebase(new Uri(TestConfig.RootUrl));
 
             string testRoot = string.Format("/test/{0}", DateTime.UtcNow.Ticks);
 
