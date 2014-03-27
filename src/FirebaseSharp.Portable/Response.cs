@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace FirebaseSharp.Portable
 {
@@ -11,14 +13,24 @@ namespace FirebaseSharp.Portable
         private readonly HttpResponseMessage _response;
         private readonly CancellationTokenSource _cancel;
         private readonly Task _pollingTask;
+        private readonly FirebaseCache _cache;
 
-        internal Response(HttpResponseMessage response, Action<StreamingEvent> callback)
+        internal Response(HttpResponseMessage response, 
+            ValueAddedEventHandler added = null,
+            ValueChangedEventHandler changed = null,
+            ValueRemovedEventHandler removed = null)
         {
             _response = response;
 
             _cancel = new CancellationTokenSource();
 
-            _pollingTask = ReadLoop(_response, callback, _cancel.Token);
+            _cache = new FirebaseCache();
+
+            if(added != null) { _cache.Added += added; }
+            if (changed != null) { _cache.Changed += changed; }
+            if (removed != null) { _cache.Removed += removed; }
+
+            _pollingTask = ReadLoop(_response, _cancel.Token);
         }
 
         public void Cancel()
@@ -26,17 +38,9 @@ namespace FirebaseSharp.Portable
             _cancel.Cancel();
         }
 
-        public void Wait()
+        private async Task ReadLoop(HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            Wait(TimeSpan.MaxValue);
-        }
-        public void Wait(TimeSpan timeout)
-        {
-            _pollingTask.Wait(timeout);
-        }
-
-        private static async Task ReadLoop(HttpResponseMessage response, Action<StreamingEvent> callback, CancellationToken cancellationToken)
-        {
+            using (response)
             using (var content = await response.Content.ReadAsStreamAsync())
             using (StreamReader sr = new StreamReader(content))
             {
@@ -47,6 +51,9 @@ namespace FirebaseSharp.Portable
                     cancellationToken.ThrowIfCancellationRequested();
 
                     string read = await sr.ReadLineAsync();
+
+                    System.Diagnostics.Debug.WriteLine(read);
+
                     if (read.StartsWith("event: "))
                     {
                         eventName = read.Substring(7);
@@ -57,10 +64,11 @@ namespace FirebaseSharp.Portable
                     {
                         if (string.IsNullOrEmpty(eventName))
                         {
-                            throw new InvalidOperationException("Payload data was received but an event did not preceed it.");
+                            throw new InvalidOperationException(
+                                "Payload data was received but an event did not preceed it.");
                         }
 
-                        callback(new StreamingEvent(eventName, read.Substring(6)));
+                        Update(eventName, read.Substring(6));
                     }
 
                     // start over
@@ -68,9 +76,44 @@ namespace FirebaseSharp.Portable
                 }
             }
         }
+
+        private void Update(string eventName, string p)
+        {
+            switch (eventName)
+            {
+                case "put":
+                    using (StringReader r = new StringReader(p))
+                    using(JsonReader reader = new JsonTextReader(r))
+                    {
+                        ReadToNamedPropertyValue(reader, "path");
+                        reader.Read();
+                        string path = reader.Value.ToString();
+                        _cache.Update(path, ReadToNamedPropertyValue(reader, "data"));
+
+                    }
+                    break;
+            }
+        }
+
+        private JsonReader ReadToNamedPropertyValue(JsonReader reader, string property)
+        {
+            while (reader.Read() && reader.TokenType != JsonToken.PropertyName)
+            {
+                // skip the property
+            }
+
+            string prop = reader.Value.ToString();
+            if (property != prop)
+            {
+                throw new InvalidOperationException("Error parsing response.  Expected json property named: " + property);
+            }
+
+            return reader;
+        }
+
         public void Dispose()
         {
-            using (_response) { }
+            Cancel();
             using (_cancel) { }
         }
     }

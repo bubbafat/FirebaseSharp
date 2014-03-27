@@ -76,14 +76,20 @@ namespace FirebaseSharp.Portable
             return await _request.GetSingle(path);
         }
 
-        public Response GetStreaming(string path, Action<StreamingEvent> callback)
+        public Response GetStreaming(string path, 
+            ValueAddedEventHandler added = null,
+            ValueChangedEventHandler changed = null,
+            ValueRemovedEventHandler removed = null)
         {
-            return GetStreamingAsync(path, callback).Result;
+            return GetStreamingAsync(path, added, changed, removed).Result;
         }
 
-        public async Task<Response> GetStreamingAsync(string path, Action<StreamingEvent> callback)
+        public async Task<Response> GetStreamingAsync(string path,
+            ValueAddedEventHandler added = null,
+            ValueChangedEventHandler changed = null,
+            ValueRemovedEventHandler removed = null)
         {
-            return await _request.GetStreaming(path, callback);
+            return await _request.GetStreaming(path, added, changed, removed);
         }
 
         public void Dispose()

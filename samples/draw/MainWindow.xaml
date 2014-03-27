@@ -1,0 +1,13 @@
+﻿<Window x:Class="FirebaseWpfDraw.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="460" Width="490">
+    <Grid Margin="0,0,0,0">
+        <Canvas Name="PaintCanvas" MouseDown="PaintCanvas_OnMouseDown" MouseMove="PaintCanvas_OnMouseMove" Loaded="PaintCanvas_OnLoaded"
+                HorizontalAlignment="Left" Height="420" VerticalAlignment="Top" Width="480" Cursor="Pen">
+            <Canvas.Background>
+                <SolidColorBrush Color="White" Opacity="0" />
+            </Canvas.Background>
+        </Canvas>
+    </Grid>
+</Window>

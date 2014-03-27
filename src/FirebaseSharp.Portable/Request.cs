@@ -31,7 +31,10 @@ namespace FirebaseSharp.Portable
             get { return _client.BaseAddress; }
         }
 
-        public async Task<Response> GetStreaming(string path, Action<StreamingEvent> callback)
+        public async Task<Response> GetStreaming(string path, 
+            ValueAddedEventHandler added = null,
+            ValueChangedEventHandler changed = null,
+            ValueRemovedEventHandler removed = null)
         {
             Uri uri = BuildPath(path);
 
@@ -41,7 +44,7 @@ namespace FirebaseSharp.Portable
             HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
-            return new Response(response, callback);
+            return new Response(response, added, changed, removed);
         }
 
         internal async Task<string> GetSingle(string path)

@@ -18,14 +18,14 @@ namespace FirebaseSharp.Tests
 
             string testRoot = string.Format("/test/{0}", DateTime.UtcNow.Ticks);
 
-            List<StreamingEvent> callbackResults = new List<StreamingEvent>();
+            List<FirebaseValueAddedEventArgs> callbackResults = new List<FirebaseValueAddedEventArgs>();
             List<string> created = new List<string>();
 
             ManualResetEvent received = new ManualResetEvent(false);
 
-            using (fb.GetStreaming(testRoot, response =>
+            using (fb.GetStreaming(testRoot, added: (sender, args) =>
             {
-                callbackResults.Add(response);
+                callbackResults.Add(args);
                 received.Set();
             }))
             {
@@ -48,18 +48,16 @@ namespace FirebaseSharp.Tests
                 dynamic keyObj = JsonConvert.DeserializeObject(keyResponse);
                 string key = keyObj.name;
 
-                var found = callbackResults.First(c => c.Payload.Contains(key));
+                var found = callbackResults.First(c => c.Path.Contains(key));
                 Assert.IsNotNull(found, "The key was added but missing from stream");
 
-                dynamic payload = JsonConvert.DeserializeObject(found.Payload);
-
-                string singlePath = testRoot + payload.path.ToString();
+                string singlePath = testRoot + found.Path;
 
                 string single = fb.Get(singlePath);
 
                 dynamic payloadSingle = JsonConvert.DeserializeObject(single);
 
-                Assert.AreEqual(payload.data.value.ToString(), payloadSingle.value.ToString());
+                Assert.AreEqual(found.Data, payloadSingle);
 
                 fb.Delete(singlePath);
 
