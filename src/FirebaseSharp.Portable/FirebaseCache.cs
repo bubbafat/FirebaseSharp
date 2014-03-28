@@ -1,20 +1,34 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace FirebaseSharp.Portable
 {
     internal class CacheItem
     {
-        public string Name;
-        public string Value;
-        public CacheItem Parent;
-        public List<CacheItem> Children = new List<CacheItem>();
-        public bool Created;
+        private List<CacheItem> _children;
+
+        public string Name { get; set; }
+        public string Value { get; set; }
+        public CacheItem Parent { get; set; }
+        public bool Created { get; set; }
+
+        public List<CacheItem> Children
+        {
+            get
+            {
+                // we don't need a lock here because the tree is already 
+                // synchronized so there will never be concurrent requests
+                if (_children == null)
+                {
+                    _children = new List<CacheItem>();
+                }
+
+                return _children;
+            }
+        }
     }
     public class FirebaseValueAddedEventArgs : EventArgs
     {
@@ -63,6 +77,8 @@ namespace FirebaseSharp.Portable
         private readonly CacheItem _tree = new CacheItem();
         private readonly object _treeLock = new object();
 
+        private readonly char[] _seperator = {'/'};
+
         public FirebaseCache()
         {
             _tree.Name = string.Empty;
@@ -82,7 +98,7 @@ namespace FirebaseSharp.Portable
 
         private CacheItem FindRoot(string path)
         {
-            string[] segments = path.Split(new char[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] segments = path.Split(_seperator, StringSplitOptions.RemoveEmptyEntries);
 
             CacheItem root = _tree;
 
@@ -132,19 +148,30 @@ namespace FirebaseSharp.Portable
                         }
                         else
                         {
-                            string oldData = root.Value.ToString();
+                            string oldData = root.Value;
                             root.Value = reader.Value.ToString();
-                            OnUpdated(new FirebaseValueChangedEventArgs(PathFromRoot(root), root.Value.ToString(),
-                                oldData));
+                            OnUpdated(new FirebaseValueChangedEventArgs(PathFromRoot(root), root.Value, oldData));
                         }
 
                         return;
                     case JsonToken.Null:
+                        // if we're not the root, delete this from the parent
                         if (root.Parent != null)
                         {
                             if (RemoveChildFromParent(root))
                             {
                                 OnRemoved(new FirebaseValueRemovedEventArgs(PathFromRoot(root)));
+                            }
+                        }
+                        else
+                        {
+                            // we just cleared out the root - so delete all
+                            // the children one-by-one (so events fire in proper order)
+                            // we're modifying the collection, so ToArray
+                            foreach (var child in root.Children.ToArray())
+                            {
+                                RemoveChildFromParent(child);
+                                OnRemoved(new FirebaseValueRemovedEventArgs(PathFromRoot(child)));
                             }
                         }
                         return;
@@ -165,34 +192,35 @@ namespace FirebaseSharp.Portable
             return false;
         }
 
+        // dont' need a lock since access is serialized
+        readonly LinkedList<CacheItem> _pathFromRootList = new LinkedList<CacheItem>();
         private string PathFromRoot(CacheItem root)
         {
-            LinkedList<CacheItem> inOrder = new LinkedList<CacheItem>();
+            // track the sizeso when we allocate our builder we get the right size up front
+            int size = 1;
 
             while(root.Name != null)
             {
-                inOrder.AddFirst(root);
+                size += root.Name.Length + 1;
+                _pathFromRootList.AddFirst(root);
                 root = root.Parent;
 
             }
 
-            if (inOrder.Count == 0)
+            if (_pathFromRootList.Count == 0)
             {
                 return "/";
             }
 
-            StringBuilder sb = new StringBuilder();
-            foreach (CacheItem d in inOrder)
+            StringBuilder sb = new StringBuilder(size);
+            foreach (CacheItem d in _pathFromRootList)
             {
                 sb.AppendFormat("/{0}", d.Name);
             }
 
-            return sb.ToString();
-        }
+            _pathFromRootList.Clear();
 
-        private void ReadValue(CacheItem expando, JsonReader reader)
-        {
-            expando.Value = reader.ReadAsString();
+            return sb.ToString();
         }
 
         private void OnAdded(FirebaseValueAddedEventArgs args)

@@ -10,7 +10,6 @@ namespace FirebaseSharp.Portable
 {
     public sealed class Response : IDisposable
     {
-        private readonly HttpResponseMessage _response;
         private readonly CancellationTokenSource _cancel;
         private readonly Task _pollingTask;
         private readonly FirebaseCache _cache;
@@ -20,8 +19,6 @@ namespace FirebaseSharp.Portable
             ValueChangedEventHandler changed = null,
             ValueRemovedEventHandler removed = null)
         {
-            _response = response;
-
             _cancel = new CancellationTokenSource();
 
             _cache = new FirebaseCache();
@@ -30,7 +27,7 @@ namespace FirebaseSharp.Portable
             if (changed != null) { _cache.Changed += changed; }
             if (removed != null) { _cache.Removed += removed; }
 
-            _pollingTask = ReadLoop(_response, _cancel.Token);
+            _pollingTask = ReadLoop(response, _cancel.Token);
         }
 
         public void Cancel()
@@ -50,6 +47,7 @@ namespace FirebaseSharp.Portable
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
+                    // TODO: it really sucks that this does not take a cancellation token
                     string read = await sr.ReadLineAsync();
 
                     System.Diagnostics.Debug.WriteLine(read);
