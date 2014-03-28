@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,6 +8,14 @@ using Newtonsoft.Json;
 
 namespace FirebaseSharp.Portable
 {
+    internal class CacheItem
+    {
+        public string Name;
+        public string Value;
+        public CacheItem Parent;
+        public List<CacheItem> Children = new List<CacheItem>();
+        public bool Created;
+    }
     public class FirebaseValueAddedEventArgs : EventArgs
     {
         public FirebaseValueAddedEventArgs(string path, string data)
@@ -53,32 +60,31 @@ namespace FirebaseSharp.Portable
 
     internal sealed class FirebaseCache
     {
-        private readonly dynamic _tree = new ExpandoObject();
+        private readonly CacheItem _tree = new CacheItem();
         private readonly object _treeLock = new object();
 
         public FirebaseCache()
         {
-            _tree.name = string.Empty;
-            _tree.deleted = false;
-            _tree.created = false;
-            _tree.parent = null;
-            _tree.name = null;
+            _tree.Name = string.Empty;
+            _tree.Created = false;
+            _tree.Parent = null;
+            _tree.Name = null;
         }
 
         public void Update(string path, JsonReader data)
         {
             lock (_treeLock)
             {
-                dynamic root = FindRoot(path);
+                CacheItem root = FindRoot(path);
                 Update(root, data);
             }
         }
 
-        private ExpandoObject FindRoot(string path)
+        private CacheItem FindRoot(string path)
         {
             string[] segments = path.Split(new char[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
 
-            dynamic root = _tree;
+            CacheItem root = _tree;
 
             foreach (string segment in segments)
             {
@@ -89,37 +95,27 @@ namespace FirebaseSharp.Portable
         }
     
 
-        private static dynamic GetNamedChild(dynamic root, string segment)
+        private static CacheItem GetNamedChild(CacheItem root, string segment)
         {
-            IDictionary<string, object> dict = (IDictionary<string, object>) root;
+            CacheItem newRoot = root.Children.FirstOrDefault(c => c.Name == segment);
 
-            dynamic newRoot;
-            object child;
-
-            if (!dict.TryGetValue(segment, out child))
+            if (newRoot == null)
             {
-                newRoot = new ExpandoObject();
-                newRoot.name = segment;
-                newRoot.parent = root;
-                newRoot.created = true;
-                dict.Add(segment, newRoot);
-            }
-            else
-            {
-                newRoot = child as ExpandoObject;
+                newRoot = new CacheItem {Name = segment, Parent = root, Created = true};
+                root.Children.Add(newRoot);
             }
 
             return newRoot;
         }
 
-        private void Update(dynamic root, JsonReader reader)
+        private void Update(CacheItem root, JsonReader reader)
         {
             while (reader.Read())
             {
                 switch (reader.TokenType)
                 {
                     case JsonToken.PropertyName:
-                        dynamic expando = GetNamedChild(root, reader.Value.ToString());
+                        CacheItem expando = GetNamedChild(root, reader.Value.ToString());
                         Update(expando, reader);
                         break;
                     case JsonToken.Boolean:
@@ -128,23 +124,23 @@ namespace FirebaseSharp.Portable
                     case JsonToken.Float:
                     case JsonToken.Integer:
                     case JsonToken.String:
-                        if (root.created)
+                        if (root.Created)
                         {
-                            root.value = reader.Value;
+                            root.Value = reader.Value.ToString();
                             OnAdded(new FirebaseValueAddedEventArgs(PathFromRoot(root), reader.Value.ToString()));
-                            root.created = false;
+                            root.Created = false;
                         }
                         else
                         {
-                            string oldData = root.value.ToString();
-                            root.value = reader.Value;
-                            OnUpdated(new FirebaseValueChangedEventArgs(PathFromRoot(root), root.value.ToString(),
+                            string oldData = root.Value.ToString();
+                            root.Value = reader.Value.ToString();
+                            OnUpdated(new FirebaseValueChangedEventArgs(PathFromRoot(root), root.Value.ToString(),
                                 oldData));
                         }
 
                         return;
                     case JsonToken.Null:
-                        if (root.parent != null)
+                        if (root.Parent != null)
                         {
                             if (RemoveChildFromParent(root))
                             {
@@ -159,24 +155,24 @@ namespace FirebaseSharp.Portable
             } 
         }
 
-        private bool RemoveChildFromParent(dynamic child)
+        private bool RemoveChildFromParent(CacheItem child)
         {
-            if (child.parent != null)
+            if (child.Parent != null)
             {
-                return ((IDictionary<string, object>)child.parent).Remove(child.name);
+                return child.Parent.Children.Remove(child);
             }
 
             return false;
         }
 
-        private string PathFromRoot(dynamic root)
+        private string PathFromRoot(CacheItem root)
         {
-            LinkedList<dynamic> inOrder = new LinkedList<dynamic>();
+            LinkedList<CacheItem> inOrder = new LinkedList<CacheItem>();
 
-            while(root.name != null)
+            while(root.Name != null)
             {
                 inOrder.AddFirst(root);
-                root = root.parent;
+                root = root.Parent;
 
             }
 
@@ -186,17 +182,17 @@ namespace FirebaseSharp.Portable
             }
 
             StringBuilder sb = new StringBuilder();
-            foreach (dynamic d in inOrder)
+            foreach (CacheItem d in inOrder)
             {
-                sb.AppendFormat("/{0}", d.name);
+                sb.AppendFormat("/{0}", d.Name);
             }
 
             return sb.ToString();
         }
 
-        private void ReadValue(dynamic expando, JsonReader reader)
+        private void ReadValue(CacheItem expando, JsonReader reader)
         {
-            expando.value = reader.ReadAsString();
+            expando.Value = reader.ReadAsString();
         }
 
         private void OnAdded(FirebaseValueAddedEventArgs args)
