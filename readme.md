@@ -6,9 +6,8 @@ A Firebase API for .NET.
 # Fun Facts
 
 - This is a .NET Portable Library
-- It currently only consumes and delivers JSON
 - It has synch and async (TPL) versions of all methods
-- It supports streaming gets and parses the event 
+- It supports streaming gets and produces events for item added, updated, and removed
 - Custom headers are not yet supported
 - It throws on error HTTP status codes  (happy path is always success)
 - It probably sucks
@@ -16,6 +15,7 @@ A Firebase API for .NET.
 # Updates
 
 - Auth is now supported.  Pass in your token to the Firebase constructor
+- Events during streaming reads are now generated for add, update and remove
 
 # Usage
 
@@ -43,13 +43,26 @@ A Firebase API for .NET.
    
 ## Stream Data
 
-    Response resp = fb.GetStreaming(path, response => {
-       // see https://www.firebase.com/docs/rest-api.html
-       // response.Event
-       // response.Payload
-    });
-        
-    // resp.Dispose() !
+    fb.GetStreaming("path/to/monitor", 
+        added: (s, args) => AddedItem(args),
+        changed: (s, args) => UpdatedItem(args),
+        removed: (s, args) => RemovedItem(args));
+                
+                
+    private void AddedItem(ValueAddedEventArgs args)
+    {
+        // process addition
+    }
+    
+    private void RemovedItem(ValueRemovedEventArgs args)
+    {
+        // process removal
+    }
+    
+    private void UpdatedItem(ValueChangedEventArgs args)
+    {
+        // process update
+    }
     
 ## Delete Data
 
