@@ -16,6 +16,7 @@ A Firebase API for .NET.
 
 - Auth is now supported.  Pass in your token to the Firebase constructor
 - Events during streaming reads are now generated for add, update and remove
+- Improved support for event: patch
 
 # Usage
 
