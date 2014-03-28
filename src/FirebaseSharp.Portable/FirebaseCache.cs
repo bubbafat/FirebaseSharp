@@ -105,6 +105,8 @@ namespace FirebaseSharp.Portable
             }
         }
 
+        internal CacheItem Root { get { return _tree; } }
+
         private CacheItem FindRoot(string path)
         {
             string[] segments = path.Split(_seperator, StringSplitOptions.RemoveEmptyEntries);
@@ -143,6 +145,12 @@ namespace FirebaseSharp.Portable
             if (replace)
             {
                 DeleteChild(root);
+
+                // if we just deleted this, we need to wire it back up
+                if (root.Parent != null)
+                {
+                    root.Parent.Children.Add(root);
+                }
             }
 
             while (reader.Read())
@@ -150,8 +158,7 @@ namespace FirebaseSharp.Portable
                 switch (reader.TokenType)
                 {
                     case JsonToken.PropertyName:
-                        CacheItem expando = GetNamedChild(root, reader.Value.ToString());
-                        UpdateChildren(expando, reader);
+                        UpdateChildren(GetNamedChild(root, reader.Value.ToString()), reader);
                         break;
                     case JsonToken.Boolean:
                     case JsonToken.Bytes:

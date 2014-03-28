@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="AuthTests.cs" />
     <Compile Include="EndToEndLiveTest.cs" />
+    <Compile Include="PatchTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestConfig.cs" />
     <Compile Include="ComplexTypeTests.cs" />
