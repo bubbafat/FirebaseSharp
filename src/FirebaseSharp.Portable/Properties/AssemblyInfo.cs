@@ -7,5 +7,5 @@ using System.Resources;
 [assembly: AssemblyTitle("Firebase.Portable")]
 [assembly: AssemblyDescription(".NET client for Firebase.io (Portable library)")]
 [assembly: AssemblyProduct("Firebase.Portable")]
-[assembly: AssemblyVersion("1.0.0.1")]
-[assembly: AssemblyFileVersion("1.0.0.1")]
+[assembly: AssemblyVersion("1.0.0.2")]
+[assembly: AssemblyFileVersion("1.0.0.2")]

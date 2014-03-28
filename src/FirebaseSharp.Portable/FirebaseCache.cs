@@ -30,9 +30,9 @@ namespace FirebaseSharp.Portable
             }
         }
     }
-    public class FirebaseValueAddedEventArgs : EventArgs
+    public class ValueAddedEventArgs : EventArgs
     {
-        public FirebaseValueAddedEventArgs(string path, string data)
+        public ValueAddedEventArgs(string path, string data)
         {
             Path = path;
             Data = data;
@@ -42,9 +42,9 @@ namespace FirebaseSharp.Portable
         public string Data { get; private set; }
     }
 
-    public class FirebaseValueChangedEventArgs : EventArgs
+    public class ValueChangedEventArgs : EventArgs
     {
-        public FirebaseValueChangedEventArgs(string path, string data, string oldData)
+        public ValueChangedEventArgs(string path, string data, string oldData)
         {
             Path = path;
             Data = data;
@@ -57,9 +57,9 @@ namespace FirebaseSharp.Portable
         public string OldData { get; private set; }
     }
 
-    public class FirebaseValueRemovedEventArgs : EventArgs
+    public class ValueRemovedEventArgs : EventArgs
     {
-        public FirebaseValueRemovedEventArgs(string path)
+        public ValueRemovedEventArgs(string path)
         {
             Path = path;
         }
@@ -67,9 +67,9 @@ namespace FirebaseSharp.Portable
         public string Path { get; private set; }
     }
 
-    public delegate void ValueAddedEventHandler(object sender, FirebaseValueAddedEventArgs args);
-    public delegate void ValueChangedEventHandler(object sender, FirebaseValueChangedEventArgs args);
-    public delegate void ValueRemovedEventHandler(object sender, FirebaseValueRemovedEventArgs args);
+    public delegate void ValueAddedEventHandler(object sender, ValueAddedEventArgs args);
+    public delegate void ValueChangedEventHandler(object sender, ValueChangedEventArgs args);
+    public delegate void ValueRemovedEventHandler(object sender, ValueRemovedEventArgs args);
 
 
     internal sealed class FirebaseCache
@@ -143,14 +143,14 @@ namespace FirebaseSharp.Portable
                         if (root.Created)
                         {
                             root.Value = reader.Value.ToString();
-                            OnAdded(new FirebaseValueAddedEventArgs(PathFromRoot(root), reader.Value.ToString()));
+                            OnAdded(new ValueAddedEventArgs(PathFromRoot(root), reader.Value.ToString()));
                             root.Created = false;
                         }
                         else
                         {
                             string oldData = root.Value;
                             root.Value = reader.Value.ToString();
-                            OnUpdated(new FirebaseValueChangedEventArgs(PathFromRoot(root), root.Value, oldData));
+                            OnUpdated(new ValueChangedEventArgs(PathFromRoot(root), root.Value, oldData));
                         }
 
                         return;
@@ -160,7 +160,7 @@ namespace FirebaseSharp.Portable
                         {
                             if (RemoveChildFromParent(root))
                             {
-                                OnRemoved(new FirebaseValueRemovedEventArgs(PathFromRoot(root)));
+                                OnRemoved(new ValueRemovedEventArgs(PathFromRoot(root)));
                             }
                         }
                         else
@@ -171,7 +171,7 @@ namespace FirebaseSharp.Portable
                             foreach (var child in root.Children.ToArray())
                             {
                                 RemoveChildFromParent(child);
-                                OnRemoved(new FirebaseValueRemovedEventArgs(PathFromRoot(child)));
+                                OnRemoved(new ValueRemovedEventArgs(PathFromRoot(child)));
                             }
                         }
                         return;
@@ -223,7 +223,7 @@ namespace FirebaseSharp.Portable
             return sb.ToString();
         }
 
-        private void OnAdded(FirebaseValueAddedEventArgs args)
+        private void OnAdded(ValueAddedEventArgs args)
         {
             var added = Added;
             if (added != null)
@@ -232,7 +232,7 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        private void OnUpdated(FirebaseValueChangedEventArgs args)
+        private void OnUpdated(ValueChangedEventArgs args)
         {
             var updated = Changed;
             if (updated != null)
@@ -242,7 +242,7 @@ namespace FirebaseSharp.Portable
         }
 
 
-        private void OnRemoved(FirebaseValueRemovedEventArgs args)
+        private void OnRemoved(ValueRemovedEventArgs args)
         {
             var removed = Removed;
             if (removed != null)

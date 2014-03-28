@@ -95,7 +95,7 @@ namespace FirebaseWpfDraw
             return string.Format("{0}:{1}", p.X, p.Y);
         }
 
-        private void RemovedItem(FirebaseValueRemovedEventArgs args)
+        private void RemovedItem(ValueRemovedEventArgs args)
         {
             PaintCanvas.Dispatcher.Invoke(() =>
             {
@@ -121,7 +121,7 @@ namespace FirebaseWpfDraw
             });
         }
 
-        private void UpdateExistingItem(FirebaseValueChangedEventArgs args)
+        private void UpdateExistingItem(ValueChangedEventArgs args)
         {
             PaintCanvas.Dispatcher.Invoke(() =>
             {
@@ -140,7 +140,7 @@ namespace FirebaseWpfDraw
             });
         }
 
-        private void PaintNewitem(FirebaseValueAddedEventArgs args)
+        private void PaintNewitem(ValueAddedEventArgs args)
         {
             Point p = NormalizedPointFromFirebase(args.Path.Substring(1));
             Brush b = GetBrushFromFirebaseColor(args.Data);

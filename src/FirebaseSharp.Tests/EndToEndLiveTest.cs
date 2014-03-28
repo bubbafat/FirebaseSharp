@@ -18,7 +18,7 @@ namespace FirebaseSharp.Tests
 
             string testRoot = string.Format("/test/{0}", DateTime.UtcNow.Ticks);
 
-            List<FirebaseValueAddedEventArgs> callbackResults = new List<FirebaseValueAddedEventArgs>();
+            List<ValueAddedEventArgs> callbackResults = new List<ValueAddedEventArgs>();
             List<string> created = new List<string>();
 
             ManualResetEvent received = new ManualResetEvent(false);
