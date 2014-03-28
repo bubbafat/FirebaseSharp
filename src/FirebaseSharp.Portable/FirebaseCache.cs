@@ -87,12 +87,21 @@ namespace FirebaseSharp.Portable
             _tree.Name = null;
         }
 
+        public void Replace(string path, JsonReader data)
+        {
+            lock (_treeLock)
+            {
+                CacheItem root = FindRoot(path);
+                Replace(root, data);
+            }
+        }
+
         public void Update(string path, JsonReader data)
         {
             lock (_treeLock)
             {
                 CacheItem root = FindRoot(path);
-                Update(root, data);
+                UpdateChildren(root, data);
             }
         }
 
@@ -124,6 +133,79 @@ namespace FirebaseSharp.Portable
             return newRoot;
         }
 
+        private void Replace(CacheItem root, JsonReader reader)
+        {
+            UpdateChildren(root, reader, true);
+        }
+
+        private void UpdateChildren(CacheItem root, JsonReader reader, bool replace = false)
+        {
+            if (replace)
+            {
+                DeleteChild(root);
+            }
+
+            while (reader.Read())
+            {
+                switch (reader.TokenType)
+                {
+                    case JsonToken.PropertyName:
+                        CacheItem expando = GetNamedChild(root, reader.Value.ToString());
+                        UpdateChildren(expando, reader);
+                        break;
+                    case JsonToken.Boolean:
+                    case JsonToken.Bytes:
+                    case JsonToken.Date:
+                    case JsonToken.Float:
+                    case JsonToken.Integer:
+                    case JsonToken.String:
+                        if (root.Created)
+                        {
+                            root.Value = reader.Value.ToString();
+                            OnAdded(new ValueAddedEventArgs(PathFromRoot(root), reader.Value.ToString()));
+                            root.Created = false;
+                        }
+                        else
+                        {
+                            string oldData = root.Value;
+                            root.Value = reader.Value.ToString();
+                            OnUpdated(new ValueChangedEventArgs(PathFromRoot(root), root.Value, oldData));
+                        }
+
+                        return;
+                    case JsonToken.Null:
+                        DeleteChild(root);
+                        return;
+                    default:
+                        // do nothing
+                        break;
+                }
+            }
+        }
+
+        private void DeleteChild(CacheItem root)
+        {
+            // if we're not the root, delete this from the parent
+            if (root.Parent != null)
+            {
+                if (RemoveChildFromParent(root))
+                {
+                    OnRemoved(new ValueRemovedEventArgs(PathFromRoot(root)));
+                }
+            }
+            else
+            {
+                // we just cleared out the root - so delete all
+                // the children one-by-one (so events fire in proper order)
+                // we're modifying the collection, so ToArray
+                foreach (var child in root.Children.ToArray())
+                {
+                    RemoveChildFromParent(child);
+                    OnRemoved(new ValueRemovedEventArgs(PathFromRoot(child)));
+                }
+            }
+        }
+
         private void Update(CacheItem root, JsonReader reader)
         {
             while (reader.Read())
@@ -132,7 +214,7 @@ namespace FirebaseSharp.Portable
                 {
                     case JsonToken.PropertyName:
                         CacheItem expando = GetNamedChild(root, reader.Value.ToString());
-                        Update(expando, reader);
+                        Replace(expando, reader);
                         break;
                     case JsonToken.Boolean:
                     case JsonToken.Bytes:
@@ -179,9 +261,8 @@ namespace FirebaseSharp.Portable
                         // do nothing
                         break;
                 }
-            } 
+            }
         }
-
         private bool RemoveChildFromParent(CacheItem child)
         {
             if (child.Parent != null)

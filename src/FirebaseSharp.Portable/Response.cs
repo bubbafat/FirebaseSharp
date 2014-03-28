@@ -80,13 +80,22 @@ namespace FirebaseSharp.Portable
             switch (eventName)
             {
                 case "put":
+                case "patch":
                     using (StringReader r = new StringReader(p))
                     using(JsonReader reader = new JsonTextReader(r))
                     {
                         ReadToNamedPropertyValue(reader, "path");
                         reader.Read();
                         string path = reader.Value.ToString();
-                        _cache.Update(path, ReadToNamedPropertyValue(reader, "data"));
+
+                        if (eventName == "put")
+                        {
+                            _cache.Replace(path, ReadToNamedPropertyValue(reader, "data"));
+                        }
+                        else
+                        {
+                            _cache.Update(path, ReadToNamedPropertyValue(reader, "data"));
+                        }
 
                     }
                     break;
