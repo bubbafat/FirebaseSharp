@@ -178,3 +178,4 @@ FakesAssemblies/
 Web.Release.Config
 Web.Debug.Config
 Secrets.cs
+*.nupkg
