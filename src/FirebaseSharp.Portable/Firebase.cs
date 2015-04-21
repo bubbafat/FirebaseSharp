@@ -34,7 +34,7 @@ namespace FirebaseSharp.Portable
 
         public async Task<string> PostAsync(string path, string payload)
         {
-            return await _request.Post(path, payload);
+            return await _request.Post(path, payload).ConfigureAwait(false);
         }
 
         public string Put(string path, string payload)
@@ -44,7 +44,7 @@ namespace FirebaseSharp.Portable
 
         public async Task<string> PutAsync(string path, string payload)
         {
-            return await _request.Put(path, payload);
+            return await _request.Put(path, payload).ConfigureAwait(false);
         }
 
         public string Patch(string path, string payload)
@@ -54,7 +54,7 @@ namespace FirebaseSharp.Portable
 
         public async Task<string> PatchAsync(string path, string payload)
         {
-            return await _request.Patch(path, payload);
+            return await _request.Patch(path, payload).ConfigureAwait(false);
         }
 
         public void Delete(string path)
@@ -63,7 +63,7 @@ namespace FirebaseSharp.Portable
         }
         public async Task DeleteAsync(string path)
         {
-            await _request.Delete(path);
+            await _request.Delete(path).ConfigureAwait(false);
         }
 
         public string Get(string path)
@@ -73,7 +73,7 @@ namespace FirebaseSharp.Portable
 
         public async Task<string> GetAsync(string path)
         {
-            return await _request.GetSingle(path);
+            return await _request.GetSingle(path).ConfigureAwait(false);
         }
 
         public Response GetStreaming(string path, 
@@ -89,7 +89,7 @@ namespace FirebaseSharp.Portable
             ValueChangedEventHandler changed = null,
             ValueRemovedEventHandler removed = null)
         {
-            return await _request.GetStreaming(path, added, changed, removed);
+            return await _request.GetStreaming(path, added, changed, removed).ConfigureAwait(false);
         }
 
         public void Dispose()

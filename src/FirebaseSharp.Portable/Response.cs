@@ -48,7 +48,7 @@ namespace FirebaseSharp.Portable
                     cancellationToken.ThrowIfCancellationRequested();
 
                     // TODO: it really sucks that this does not take a cancellation token
-                    string read = await sr.ReadLineAsync();
+                    string read = await sr.ReadLineAsync().ConfigureAwait(false);
 
                     System.Diagnostics.Debug.WriteLine(read);
 

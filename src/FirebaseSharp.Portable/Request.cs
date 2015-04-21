@@ -15,6 +15,7 @@ namespace FirebaseSharp.Portable
             HttpClientHandler handler = new HttpClientHandler
             {
                 AllowAutoRedirect = true,
+                MaxAutomaticRedirections = 10,
             };
 
             _client = new HttpClient(handler, true)
@@ -41,7 +42,7 @@ namespace FirebaseSharp.Portable
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
-            HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
             return new Response(response, added, changed, removed);
@@ -49,44 +50,44 @@ namespace FirebaseSharp.Portable
 
         internal async Task<string> GetSingle(string path)
         {
-            HttpResponseMessage response = await Query(HttpMethod.Get, path);
+            HttpResponseMessage response = await Query(HttpMethod.Get, path).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync();
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         internal async Task Delete(string path)
         {
-            HttpResponseMessage response = await Query(HttpMethod.Delete, path);
+            HttpResponseMessage response = await Query(HttpMethod.Delete, path).ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();
         }
 
         internal async Task<string> Patch(string path, string payload)
         {
-            HttpResponseMessage response = await Query(new HttpMethod("PATCH"), path, payload);
+            HttpResponseMessage response = await Query(new HttpMethod("PATCH"), path, payload).ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync();
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         internal async Task<string> Put(string path, string payload)
         {
-            HttpResponseMessage response = await Query(HttpMethod.Put, path, payload);
+            HttpResponseMessage response = await Query(HttpMethod.Put, path, payload).ConfigureAwait(false);
             
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync();
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         internal async Task<string> Post(string path, string payload)
         {
-            HttpResponseMessage response = await Query(HttpMethod.Post, path, payload);
+            HttpResponseMessage response = await Query(HttpMethod.Post, path, payload).ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync();
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         private Task<HttpResponseMessage> Query(HttpMethod method, string path, string payload = null)

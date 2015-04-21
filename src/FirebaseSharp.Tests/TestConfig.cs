@@ -6,6 +6,6 @@ namespace FirebaseSharp.Tests
         public const string RootUrl = "https://dazzling-fire-1575.firebaseio.com/";
 
         // CHANGE TO YOUR SECRET!!!
-        public const string FirebaseSecret = "[YOUR FIREBASE SECRET]";
+        public const string FirebaseSecret = "[YOUR SECRET]";
     }
 }
