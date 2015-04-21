@@ -12,6 +12,8 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A portable .NET client library for Firebase.io.  Includes all the REST verbs, streaming GETs, and support for auth tokens.</description>
     <releaseNotes>
+      * 1.0.0.4 - Event streaming no longer blocks when running in UI or web synch contexts
+      * 1.0.0.2 - Events fired
       * 1.0.0.0 - Initial version
     </releaseNotes>
     <copyright>Copyright 2014</copyright>

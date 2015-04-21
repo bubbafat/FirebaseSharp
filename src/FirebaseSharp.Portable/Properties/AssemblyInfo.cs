@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("Firebase.Portable")]
 [assembly: AssemblyDescription(".NET client for Firebase.io (Portable library)")]
 [assembly: AssemblyProduct("Firebase.Portable")]
-[assembly: AssemblyVersion("1.0.0.3")]
-[assembly: AssemblyFileVersion("1.0.0.3")]
+[assembly: AssemblyVersion("1.0.0.4")]
+[assembly: AssemblyFileVersion("1.0.0.4")]
 
 [assembly: InternalsVisibleTo("FirebaseSharp.Tests")]
