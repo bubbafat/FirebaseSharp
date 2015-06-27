@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FirebaseSharp.Portable
@@ -27,69 +28,71 @@ namespace FirebaseSharp.Portable
             get { return _request.RootUri; }
         }
 
-        public string Post(string path, string payload)
-        {
-            return PostAsync(path, payload).Result;
-        }
-
         public async Task<string> PostAsync(string path, string payload)
         {
-            return await _request.Post(path, payload).ConfigureAwait(false);
+            return await PostAsync(path, payload, CancellationToken.None).ConfigureAwait(false);
         }
 
-        public string Put(string path, string payload)
+        public async Task<string> PostAsync(string path, string payload, CancellationToken cancellationToken)
         {
-            return PutAsync(path, payload).Result;
+            return await _request.Post(path, payload, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<string> PutAsync(string path, string payload)
         {
-            return await _request.Put(path, payload).ConfigureAwait(false);
+            return await PutAsync(path, payload, CancellationToken.None).ConfigureAwait(false);
         }
 
-        public string Patch(string path, string payload)
+        public async Task<string> PutAsync(string path, string payload, CancellationToken cancellationToken)
         {
-            return PatchAsync(path, payload).Result;
+            return await _request.Put(path, payload, cancellationToken).ConfigureAwait(false);
         }
+
 
         public async Task<string> PatchAsync(string path, string payload)
         {
-            return await _request.Patch(path, payload).ConfigureAwait(false);
+            return await PatchAsync(path, payload, CancellationToken.None).ConfigureAwait(false);
         }
 
-        public void Delete(string path)
+        public async Task<string> PatchAsync(string path, string payload, CancellationToken cancellationToken)
         {
-            DeleteAsync(path).Wait();
+            return await _request.Patch(path, payload, cancellationToken).ConfigureAwait(false);
         }
+
         public async Task DeleteAsync(string path)
         {
-            await _request.Delete(path).ConfigureAwait(false);
+            await DeleteAsync(path, CancellationToken.None).ConfigureAwait(false);
         }
 
-        public string Get(string path)
+        public async Task DeleteAsync(string path, CancellationToken cancellationToken)
         {
-            return GetAsync(path).Result;
+            await _request.Delete(path, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<string> GetAsync(string path)
         {
-            return await _request.GetSingle(path).ConfigureAwait(false);
+            return await GetAsync(path, CancellationToken.None).ConfigureAwait(false);
+        }
+        public async Task<string> GetAsync(string path, CancellationToken cancellationToken)
+        {
+            return await _request.GetSingle(path, cancellationToken).ConfigureAwait(false);
         }
 
-        public Response GetStreaming(string path, 
-            ValueAddedEventHandler added = null,
-            ValueChangedEventHandler changed = null,
-            ValueRemovedEventHandler removed = null)
+        public async Task<StreamingResponse> GetStreamingAsync(string path,
+            ValueAddedEventHandler added,
+            ValueChangedEventHandler changed,
+            ValueRemovedEventHandler removed)
         {
-            return GetStreamingAsync(path, added, changed, removed).Result;
+            return await GetStreamingAsync(path, added, changed, removed, CancellationToken.None).ConfigureAwait(false);
         }
 
-        public async Task<Response> GetStreamingAsync(string path,
-            ValueAddedEventHandler added = null,
-            ValueChangedEventHandler changed = null,
-            ValueRemovedEventHandler removed = null)
+        public async Task<StreamingResponse> GetStreamingAsync(string path,
+            ValueAddedEventHandler added,
+            ValueChangedEventHandler changed,
+            ValueRemovedEventHandler removed,
+            CancellationToken cancellationToken)
         {
-            return await _request.GetStreaming(path, added, changed, removed).ConfigureAwait(false);
+            return await _request.GetStreaming(path, added, changed, removed, cancellationToken).ConfigureAwait(false);
         }
 
         public void Dispose()

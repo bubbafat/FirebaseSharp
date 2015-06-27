@@ -1,5 +1,4 @@
 ﻿using FirebaseSharp.Portable;
-using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Collections.Concurrent;
@@ -60,32 +59,32 @@ namespace FirebaseWpfDraw
             }
 
             // this is the worker loop that does all the communication with Firebase
-            _firebaseWorker = new BackgroundWorker();
             _firebaseWorker.DoWork += _firebaseWorker_DoWork;
         }
 
-        void _firebaseWorker_DoWork(object sender, DoWorkEventArgs e)
+        async void _firebaseWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             // setup streaming
-            _firebase.GetStreaming(string.Empty, 
+            using (await _firebase.GetStreamingAsync(string.Empty,
                 added: (s, args) => PaintNewitem(args),
                 changed: (s, args) => UpdateExistingItem(args),
-                removed: (s, args) => RemovedItem(args));
-
-            // changes are queued so that the UI thread doesn't need
-            // to do anything expensive
-            while (true)
+                removed: (s, args) => RemovedItem(args)))
             {
-                PaintQueue queue = _queue.Take();
+                // changes are queued so that the UI thread doesn't need
+                // to do anything expensive
+                while (true)
+                {
+                    PaintQueue queue = _queue.Take();
 
-                try
-                {
-                    _firebase.PutAsync(FirebaseIdFromPoint(queue.Point), 
-                                       string.Format("\"{0}\"", queue.Color)).Wait();
-                }
-                catch (Exception)
-                {
-                    // This is really robust
+                    try
+                    {
+                        await _firebase.PutAsync(FirebaseIdFromPoint(queue.Point),
+                            string.Format("\"{0}\"", queue.Color));
+                    }
+                    catch (Exception)
+                    {
+                        // This is really robust
+                    }
                 }
             }
         }
@@ -158,18 +157,35 @@ namespace FirebaseWpfDraw
         // paint a point
         private void PaintCanvas_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            Point firebasePoint = FirebasePointFromCanvas(GetNormalizedPoint(e.GetPosition(PaintCanvas)));
-            _queue.Add(new PaintQueue
-            {
-                Point = firebasePoint,
-                Color = "000",
-            });
+            Point localPoint = GetNormalizedPoint(e.GetPosition(PaintCanvas));
+            HandlePoint(localPoint);
         }
 
         // this is where we'd paint lines if we wanted
         private void PaintCanvas_OnMouseMove(object sender, MouseEventArgs e)
         {
-            // paint a line
+            if (Mouse.LeftButton == MouseButtonState.Pressed)
+            {
+                Point localPoint = GetNormalizedPoint(e.GetPosition(PaintCanvas));
+                HandlePoint(localPoint);
+            }
+        }
+
+        void HandlePoint(Point localPoint)
+        {
+            Point firebasePoint = FirebasePointFromCanvas(localPoint);
+
+            if (!_queue.Any(p => p.Point.Equals(firebasePoint)))
+            {
+
+                _queue.Add(new PaintQueue
+                {
+                    Point = firebasePoint,
+                    Color = "000",
+                });
+
+                PaintPoint(localPoint, GetBrushFromFirebaseColor("000"));
+            }
         }
 
         // paint on the canvas

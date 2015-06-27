@@ -1,7 +1,7 @@
 ﻿
 namespace FirebaseSharp.Portable
 {
-    public class StreamingEvent
+    public sealed class StreamingEvent
     {
         public StreamingEvent(string eventName, string payload)
         {

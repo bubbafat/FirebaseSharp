@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace FirebaseSharp.Tests
@@ -12,7 +13,7 @@ namespace FirebaseSharp.Tests
     public class EndToEndLiveTest
     {
         [TestMethod]
-        public void EndToEnd()
+        public async Task EndToEnd()
         {
             Portable.Firebase fb = new Portable.Firebase(new Uri(TestConfig.RootUrl));
 
@@ -23,15 +24,18 @@ namespace FirebaseSharp.Tests
 
             ManualResetEvent received = new ManualResetEvent(false);
 
-            using (fb.GetStreaming(testRoot, added: (sender, args) =>
-            {
-                callbackResults.Add(args);
-                received.Set();
-            }))
+            using (await fb.GetStreamingAsync(testRoot, 
+                added: (sender, args) =>
+                {
+                    callbackResults.Add(args);
+                    received.Set();
+                },
+                changed: (s, a) => { },
+                removed: (s, a) => { }))
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    created.Add(fb.Post(testRoot, string.Format("{{\"value\": \"{0}\"}}", i)));
+                    created.Add(await fb.PostAsync(testRoot, string.Format("{{\"value\": \"{0}\"}}", i)));
                     received.WaitOne();
                     received.Reset();
                 }
@@ -53,19 +57,19 @@ namespace FirebaseSharp.Tests
 
                 string singlePath = testRoot + found.Path;
 
-                string single = fb.Get(singlePath);
+                string single = await fb.GetAsync(singlePath);
 
                 dynamic payloadSingle = JsonConvert.DeserializeObject(single);
 
                 Assert.AreEqual(found.Data, payloadSingle);
 
-                fb.Delete(singlePath);
+                await fb.DeleteAsync(singlePath);
 
-                string missing = fb.Get(singlePath);
+                string missing = await fb.GetAsync(singlePath);
                 Assert.AreEqual("null", missing);
             }
 
-            fb.Delete(testRoot);
+            await fb.DeleteAsync(testRoot);
 
         }
     }

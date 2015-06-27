@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FirebaseSharp.Tests
 {
@@ -96,7 +97,7 @@ namespace FirebaseSharp.Tests
     public class ComplexTypeTests
     {
         [TestMethod]
-        public void ComplexTypes()
+        public async Task ComplexTypes()
         {
             Person me = new Person
             {
@@ -143,9 +144,9 @@ namespace FirebaseSharp.Tests
 
             Portable.Firebase fb = new Portable.Firebase(TestConfig.RootUrl);
 
-            fb.Put("test/people/me", blob);
+            await fb.PutAsync("test/people/me", blob);
 
-            string gotBack = fb.Get("test/people/me");
+            string gotBack = await fb.GetAsync("test/people/me");
 
             Person meAgain = JsonConvert.DeserializeObject<Person>(gotBack);
 

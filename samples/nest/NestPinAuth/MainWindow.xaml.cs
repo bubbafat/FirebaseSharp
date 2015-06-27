@@ -13,8 +13,9 @@ namespace NestPinAuth
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Response _resp = null;
         private readonly object _displayLock = new object();
+        private StreamingResponse _resp;
+        private Firebase _fb;
 
         public MainWindow()
         {
@@ -67,15 +68,17 @@ namespace NestPinAuth
             }
         }
 
-        private void Authentiate_Click(object sender, RoutedEventArgs e)
+        private async void Authentiate_Click(object sender, RoutedEventArgs e)
         {
-            if (_resp != null)
-            {
-                _resp.Cancel();
-            }
+            // if there was a running response, dispose it so that
+            // any background tasks are cancelled.
+            using (_resp) { }
+            using (_fb) { }
 
-            Firebase nest = new Firebase(new Uri("https://developer-api.nest.com"), TextNestAccessToken.Text);
-            _resp = nest.GetStreaming("", Added, Changed, Removed);
+            TextStreamingResults.Text = string.Empty;
+
+            _fb = new Firebase(new Uri("https://developer-api.nest.com"), TextNestAccessToken.Text);
+            _resp = await _fb.GetStreamingAsync("", Added, Changed, Removed);
         }
 
         private void Removed(object sender, ValueRemovedEventArgs args)
@@ -98,6 +101,7 @@ namespace NestPinAuth
                 {
                     TextStreamingResults.Text += Environment.NewLine;
                     TextStreamingResults.Text += "CHANGED: " + args.Path;
+                    TextStreamingResults.Text += Environment.NewLine;
                     TextStreamingResults.Text += "DATA: " + args.Data;
                 }
             });
@@ -111,9 +115,16 @@ namespace NestPinAuth
                 {
                     TextStreamingResults.Text += Environment.NewLine;
                     TextStreamingResults.Text += "ADDED: " + args.Path;
+                    TextStreamingResults.Text += Environment.NewLine;
                     TextStreamingResults.Text += "DATA: " + args.Data;
                 }
             });
+        }
+
+        private void MainWindow_OnClosed(object sender, EventArgs e)
+        {
+            using (_resp) { }
+            using (_fb) { }
         }
     }
 }

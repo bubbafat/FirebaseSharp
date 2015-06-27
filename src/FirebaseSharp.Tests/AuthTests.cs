@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace FirebaseSharp.Tests
 {
@@ -9,12 +10,12 @@ namespace FirebaseSharp.Tests
     public class AuthTests
     {
         [TestMethod]
-        public void ReadAuthFails()
+        public async Task ReadAuthFails()
         {
             Portable.Firebase firebase = new Portable.Firebase(TestConfig.RootUrl);
             try
             {
-                firebase.Get("sec/no/shouldFail");
+                await firebase.GetAsync("sec/no/shouldFail");
                 Assert.Fail("Should have thrown HTTP 401 error");
             }
             catch (AggregateException ex)
@@ -33,15 +34,21 @@ namespace FirebaseSharp.Tests
 
                 throw;
             }
+            catch (HttpRequestException ex)
+            {
+                if (!ex.Message.Contains("401"))
+                {
+                    throw;
+                }
+            }
         }
 
         [TestMethod]
-        public void ReadAuthPasses()
+        public async Task ReadAuthPasses()
         {
             string authToken = getToken();
             Portable.Firebase firebase = new Portable.Firebase(TestConfig.RootUrl, authToken);
-
-            firebase.Get("sec/no/shouldPass");
+            await firebase.GetAsync("sec/no/shouldPass");
         }
 
         private string getToken()

@@ -1,8 +1,10 @@
 ﻿<Window x:Class="NestPinAuth.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="448" Width="525">
-    <Grid>
+        Title="MainWindow" Height="448" Width="525"
+        Closed="MainWindow_OnClosed"
+        >
+    <Grid x:Name="Close">
         <TextBox x:Name="TextNestClientId" HorizontalAlignment="Left" Height="23" Margin="130,63,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="350"/>
         <PasswordBox x:Name="PwNestSecret" HorizontalAlignment="Left" Margin="130,91,0,0" VerticalAlignment="Top" Width="350"/>
         <TextBlock HorizontalAlignment="Left" Margin="62,70,0,0" TextWrapping="Wrap" Text="Client ID" VerticalAlignment="Top"/>
