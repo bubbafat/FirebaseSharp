@@ -38,6 +38,10 @@
     <Compile Include="Cache\CacheItem.cs" />
     <Compile Include="Cache\EventArgs.cs" />
     <Compile Include="Firebase.cs" />
+    <Compile Include="Network\FirebaseFirebaseHttpResponseMessage.cs" />
+    <Compile Include="Network\IFirebaseHttpClient.cs" />
+    <Compile Include="Network\FirebaseHttpClient.cs" />
+    <Compile Include="Network\IFirebaseHttpResponseMessage.cs" />
     <Compile Include="Request\AsyncLock.cs" />
     <Compile Include="Response\AuthenticationRevokedEventArgs.cs" />
     <Compile Include="Cache\FirebaseCache.cs" />

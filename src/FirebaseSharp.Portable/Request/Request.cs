@@ -4,29 +4,19 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using FirebaseSharp.Portable.Network;
 
 namespace FirebaseSharp.Portable
 {
     internal sealed class Request : IDisposable
     {
-        private readonly HttpClient _client;
+        private readonly IFirebaseHttpClient _client;
         private readonly string _authToken;
         private readonly AsyncLock _sendMutex = new AsyncLock();
 
-        public Request(Uri rootUri, string authToken)
+        public Request(IFirebaseHttpClient client, string authToken)
         {
-            HttpClientHandler handler = new HttpClientHandler
-            {
-                AllowAutoRedirect = true,
-                MaxAutomaticRedirections = 10,
-            };
-
-            _client = new HttpClient(handler, true)
-            {
-                BaseAddress = rootUri,
-                Timeout = TimeSpan.FromMinutes(5),
-            };
-
+            _client = client;
             _authToken = authToken;
         }
 
@@ -46,7 +36,7 @@ namespace FirebaseSharp.Portable
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
-            HttpResponseMessage response;
+            IFirebaseHttpResponseMessage response;
 
             using (await _sendMutex.LockAsync())
             {
@@ -58,65 +48,65 @@ namespace FirebaseSharp.Portable
 
             response.EnsureSuccessStatusCode();
 
-            var eventStream = new StreamingResponse();
+            var eventStream = new StreamingResponse(response);
 
             eventStream.Added += added;
             eventStream.Changed += changed;
             eventStream.Removed += removed;
 
-            eventStream.Listen(response, cancellationToken);
+            eventStream.Listen(cancellationToken);
 
             return eventStream;
         }
 
         internal async Task<string> GetSingle(string path, CancellationToken cancellationToken)
         {
-            HttpResponseMessage response = await Query(HttpMethod.Get, path, cancellationToken).ConfigureAwait(false);
+            IFirebaseHttpResponseMessage response = await Query(HttpMethod.Get, path, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return await response.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         internal async Task Delete(string path, CancellationToken cancellationToken)
         {
-            HttpResponseMessage response = await Query(HttpMethod.Delete, path, cancellationToken).ConfigureAwait(false);
+            IFirebaseHttpResponseMessage response = await Query(HttpMethod.Delete, path, cancellationToken).ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();
         }
 
         internal async Task<string> Patch(string path, string payload, CancellationToken cancellationToken)
         {
-            HttpResponseMessage response = await Query(new HttpMethod("PATCH"), path, payload, cancellationToken).ConfigureAwait(false);
+            IFirebaseHttpResponseMessage response = await Query(new HttpMethod("PATCH"), path, payload, cancellationToken).ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return await response.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         internal async Task<string> Put(string path, string payload, CancellationToken cancellationToken)
         {
-            HttpResponseMessage response = await Query(HttpMethod.Put, path, payload, cancellationToken).ConfigureAwait(false);
+            IFirebaseHttpResponseMessage response = await Query(HttpMethod.Put, path, payload, cancellationToken).ConfigureAwait(false);
             
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return await response.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         internal async Task<string> Post(string path, string payload, CancellationToken cancellationToken)
         {
-            HttpResponseMessage response = await Query(HttpMethod.Post, path, payload, cancellationToken).ConfigureAwait(false);
+            IFirebaseHttpResponseMessage response = await Query(HttpMethod.Post, path, payload, cancellationToken).ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return await response.ReadAsStringAsync().ConfigureAwait(false);
         }
 
-        private async Task<HttpResponseMessage> Query(HttpMethod method, string path, CancellationToken cancellationToken)
+        private async Task<IFirebaseHttpResponseMessage> Query(HttpMethod method, string path, CancellationToken cancellationToken)
         {
             return await Query(method, path, null, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task<HttpResponseMessage> Query(HttpMethod method, string path, string payload, CancellationToken cancellationToken)
+        private async Task<IFirebaseHttpResponseMessage> Query(HttpMethod method, string path, string payload, CancellationToken cancellationToken)
         {
             Debug.WriteLine("SEND (path): {0}", path);
             Uri uri = BuildPath(path);
@@ -134,7 +124,7 @@ namespace FirebaseSharp.Portable
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
 
-                HttpResponseMessage response;
+                IFirebaseHttpResponseMessage response;
 
                 try
                 {

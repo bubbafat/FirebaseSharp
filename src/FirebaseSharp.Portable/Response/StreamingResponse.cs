@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FirebaseSharp.Portable.Network;
 using Newtonsoft.Json;
 
 namespace FirebaseSharp.Portable
@@ -14,21 +15,28 @@ namespace FirebaseSharp.Portable
         private readonly FirebaseCache _cache;
 
         private readonly CancellationTokenSource _localCancelSource = new CancellationTokenSource();
+        private readonly IFirebaseHttpResponseMessage _response;
         private CancellationTokenSource _mixedCancelSource;
 
-        internal StreamingResponse()
+        internal StreamingResponse(IFirebaseHttpResponseMessage response)
         {
             _cache = new FirebaseCache();
+            _response = response;
         }
 
-        public void Listen(HttpResponseMessage response, CancellationToken cancellationToken)
+        public void Listen(CancellationToken cancellationToken)
         {
             _mixedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                 _localCancelSource.Token);
 
             _pollingTask =
-                Task.Run(() => { ReadLoop(response, _mixedCancelSource.Token).Wait(_mixedCancelSource.Token); },
-                    _mixedCancelSource.Token);
+                Task.Run(() =>
+                {
+                    Task loop = ReadLoop(_response, _mixedCancelSource.Token);
+                    loop.ConfigureAwait(false);
+                    loop.Wait(_mixedCancelSource.Token);
+                },
+                _mixedCancelSource.Token);
         }
 
         public event ValueAddedEventHandler Added
@@ -69,10 +77,9 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        private async Task ReadLoop(HttpResponseMessage response, CancellationToken cancellationToken)
+        private async Task ReadLoop(IFirebaseHttpResponseMessage response, CancellationToken cancellationToken)
         {
-            using (response)
-            using (var content = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+            using (var content = await response.ReadAsStreamAsync().ConfigureAwait(false))
             using (StreamReader sr = new StreamReader(content))
             {
                 string eventName = null;
@@ -171,6 +178,7 @@ namespace FirebaseSharp.Portable
 
             using (_mixedCancelSource) { }
             using (_localCancelSource) { }
+            using (_response) { }
         }
     }
 }
