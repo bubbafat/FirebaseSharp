@@ -104,13 +104,13 @@ namespace FirebaseSharp.Portable
 
                     System.Diagnostics.Debug.WriteLine("RECV: {0}", read);
 
-                    if (read.StartsWith("event: "))
+                    if (read.StartsWith("event:"))
                     {
-                        eventName = read.Substring(7);
+                        eventName = read.Substring(6).Trim();
                         continue;
                     }
 
-                    if (read.StartsWith("data: "))
+                    if (read.StartsWith("data:"))
                     {
                         if (string.IsNullOrEmpty(eventName))
                         {
@@ -118,7 +118,7 @@ namespace FirebaseSharp.Portable
                                 "Payload data was received but an event did not preceed it.");
                         }
 
-                        Update(eventName, read.Substring(6));
+                        Update(eventName, read.Substring(5).Trim());
                     }
 
                     // start over
