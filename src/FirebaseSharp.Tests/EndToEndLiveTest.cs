@@ -24,15 +24,16 @@ namespace FirebaseSharp.Tests
 
             ManualResetEvent received = new ManualResetEvent(false);
 
-            using (await fb.GetStreamingAsync(testRoot, 
-                added: (sender, args) =>
+            using (IStreamingResponse response = await fb.GetStreamingAsync(testRoot))
+            {
+                response.Added += (sender, args) =>
                 {
                     callbackResults.Add(args);
                     received.Set();
-                },
-                changed: (s, a) => { },
-                removed: (s, a) => { }))
-            {
+                };
+
+                response.Listen();
+
                 for (int i = 0; i < 10; i++)
                 {
                     created.Add(await fb.PostAsync(testRoot, string.Format("{{\"value\": \"{0}\"}}", i)));

@@ -22,5 +22,15 @@ namespace FirebaseSharp.Tests
                    req.Method == method &&
                    req.Content.ReadAsStringAsync().Result == content;
         }
+
+        public static bool MatchStreaming(this HttpRequestMessage req, HttpMethod method, Uri uri, string headerAccept)
+        {
+            bool matched = req.RequestUri == uri &&
+                   req.Method == method &&
+                   req.Headers.Accept.Any(h => h.MediaType == "text/event-stream");
+
+            return matched;
+        }
+
     }
 }

@@ -25,11 +25,7 @@ namespace FirebaseSharp.Portable
             get { return _client.BaseAddress; }
         }
 
-        public async Task<StreamingResponse> GetStreaming(string path,
-            ValueAddedEventHandler added,
-            ValueChangedEventHandler changed,
-            ValueRemovedEventHandler removed,
-            CancellationToken cancellationToken)
+        public async Task<IStreamingResponse> GetStreaming(string path, CancellationToken cancellationToken)
         {
             Uri uri = BuildPath(path);
 
@@ -48,15 +44,7 @@ namespace FirebaseSharp.Portable
 
             response.EnsureSuccessStatusCode();
 
-            var eventStream = new StreamingResponse(response);
-
-            eventStream.Added += added;
-            eventStream.Changed += changed;
-            eventStream.Removed += removed;
-
-            eventStream.Listen(cancellationToken);
-
-            return eventStream;
+            return new StreamingResponse(response, cancellationToken);
         }
 
         internal async Task<string> GetSingle(string path, CancellationToken cancellationToken)

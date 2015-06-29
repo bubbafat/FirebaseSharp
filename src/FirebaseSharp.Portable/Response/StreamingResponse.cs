@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FirebaseSharp.Portable.Network;
@@ -8,25 +7,27 @@ using Newtonsoft.Json;
 
 namespace FirebaseSharp.Portable
 {
-    public sealed class StreamingResponse : IDisposable
+    internal class StreamingResponse : IStreamingResponse
     {
         // used to keep a reference to the task around
         private Task _pollingTask;
         private readonly FirebaseCache _cache;
 
         private readonly CancellationTokenSource _localCancelSource = new CancellationTokenSource();
+        private readonly CancellationToken _cancellationToken;
         private readonly IFirebaseHttpResponseMessage _response;
         private CancellationTokenSource _mixedCancelSource;
 
-        internal StreamingResponse(IFirebaseHttpResponseMessage response)
+        internal StreamingResponse(IFirebaseHttpResponseMessage response, CancellationToken cancellationToken)
         {
+            _cancellationToken = cancellationToken;
             _cache = new FirebaseCache();
             _response = response;
         }
 
-        public void Listen(CancellationToken cancellationToken)
+        public void Listen()
         {
-            _mixedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
+            _mixedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(_cancellationToken,
                 _localCancelSource.Token);
 
             _pollingTask =
@@ -100,7 +101,7 @@ namespace FirebaseSharp.Portable
                         OnClosed();
                         return;
                     }
-                    
+
                     System.Diagnostics.Debug.WriteLine("RECV: {0}", read);
 
                     if (read.StartsWith("event: "))
@@ -123,9 +124,10 @@ namespace FirebaseSharp.Portable
                     // start over
                     eventName = null;
                 }
+
+
             }
         }
-
         private void Update(string eventName, string p)
         {
             using (JsonReader reader = new JsonTextReader(new StringReader(p)))

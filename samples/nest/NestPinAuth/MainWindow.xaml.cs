@@ -14,7 +14,7 @@ namespace NestPinAuth
     public partial class MainWindow : Window
     {
         private readonly object _displayLock = new object();
-        private StreamingResponse _resp;
+        private IStreamingResponse _resp;
         private Firebase _fb;
 
         public MainWindow()
@@ -78,7 +78,13 @@ namespace NestPinAuth
             TextStreamingResults.Text = string.Empty;
 
             _fb = new Firebase(new Uri("https://developer-api.nest.com"), TextNestAccessToken.Text);
-            _resp = await _fb.GetStreamingAsync("", Added, Changed, Removed);
+            _resp = await _fb.GetStreamingAsync("");
+
+            _resp.Added += Added;
+            _resp.Changed += Changed;
+            _resp.Removed += Removed;
+
+            _resp.Listen();
         }
 
         private void Removed(object sender, ValueRemovedEventArgs args)

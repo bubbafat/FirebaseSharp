@@ -83,6 +83,7 @@
     <Compile Include="PatchTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ComplexTypeTests.cs" />
+    <Compile Include="StreamingTests.cs" />
     <Compile Include="TestConfig.cs" />
   </ItemGroup>
   <ItemGroup>

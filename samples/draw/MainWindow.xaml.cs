@@ -65,11 +65,14 @@ namespace FirebaseWpfDraw
         async void _firebaseWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             // setup streaming
-            using (await _firebase.GetStreamingAsync(string.Empty,
-                added: (s, args) => PaintNewitem(args),
-                changed: (s, args) => UpdateExistingItem(args),
-                removed: (s, args) => RemovedItem(args)))
+            using (var response = await _firebase.GetStreamingAsync(string.Empty))
             {
+                response.Added += PaintNewitem;
+                response.Changed += UpdateExistingItem;
+                response.Removed += RemovedItem;
+
+                response.Listen();
+
                 // changes are queued so that the UI thread doesn't need
                 // to do anything expensive
                 while (true)
@@ -94,7 +97,7 @@ namespace FirebaseWpfDraw
             return string.Format("{0}:{1}", p.X, p.Y);
         }
 
-        private void RemovedItem(ValueRemovedEventArgs args)
+        private void RemovedItem(object sender, ValueRemovedEventArgs args)
         {
             PaintCanvas.Dispatcher.Invoke(() =>
             {
@@ -120,7 +123,7 @@ namespace FirebaseWpfDraw
             });
         }
 
-        private void UpdateExistingItem(ValueChangedEventArgs args)
+        private void UpdateExistingItem(object sender, ValueChangedEventArgs args)
         {
             PaintCanvas.Dispatcher.Invoke(() =>
             {
@@ -139,7 +142,7 @@ namespace FirebaseWpfDraw
             });
         }
 
-        private void PaintNewitem(ValueAddedEventArgs args)
+        private void PaintNewitem(object sender, ValueAddedEventArgs args)
         {
             Point p = NormalizedPointFromFirebase(args.Path.Substring(1));
             Brush b = GetBrushFromFirebaseColor(args.Data);
