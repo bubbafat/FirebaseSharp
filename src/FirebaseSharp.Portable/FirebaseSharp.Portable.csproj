@@ -47,7 +47,7 @@
     <Compile Include="Request\AsyncLock.cs" />
     <Compile Include="Response\AuthenticationRevokedEventArgs.cs" />
     <Compile Include="Cache\FirebaseCache.cs" />
-    <Compile Include="Response\IdleTimeoutEventArgs.cs" />
+    <Compile Include="Response\StreamingResponseIdleTimeoutEventArgs.cs" />
     <Compile Include="Response\IStreamingResponse.cs" />
     <Compile Include="Response\PathCanceled.cs" />
     <Compile Include="Response\StreamingResponse.cs" />

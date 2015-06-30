@@ -49,7 +49,6 @@ namespace FirebaseSharp.Portable
             return await _request.Put(path, payload, cancellationToken).ConfigureAwait(false);
         }
 
-
         public async Task<string> PatchAsync(string path, string payload)
         {
             return await PatchAsync(path, payload, CancellationToken.None).ConfigureAwait(false);

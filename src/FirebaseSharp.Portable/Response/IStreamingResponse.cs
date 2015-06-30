@@ -10,7 +10,7 @@ namespace FirebaseSharp.Portable
         event AuthenticationRevokedHandler Revoked;
         event StreamingResponseClosedHandler Closed;
         event PathCanceledHandler Canceled;
-        event IdleTimeoutHandler Timeout;
+        event StreamingResponseIdleTimeoutHandler Timeout;
         event StreamResponseErrorHandler Error;
 
         void Listen();

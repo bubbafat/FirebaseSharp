@@ -55,7 +55,7 @@ namespace FirebaseSharp.Portable
         public event AuthenticationRevokedHandler Revoked;
         public event StreamingResponseClosedHandler Closed;
         public event PathCanceledHandler Canceled;
-        public event IdleTimeoutHandler Timeout;
+        public event StreamingResponseIdleTimeoutHandler Timeout;
         public event StreamResponseErrorHandler Error;
 
         private void OnIdleTimeout()
@@ -63,7 +63,7 @@ namespace FirebaseSharp.Portable
             var timeout = Timeout;
             if (timeout != null)
             {
-                timeout(this, new IdleTimeoutEventArgs());
+                timeout(this, new StreamingResponseIdleTimeoutEventArgs());
             }
         }
 
