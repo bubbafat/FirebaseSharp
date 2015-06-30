@@ -9,6 +9,7 @@ namespace FirebaseSharp.Portable
         event ValueRemovedEventHandler Removed;
         event AuthenticationRevokedHandler Revoked;
         event StreamingResponseClosedHandler Closed;
+        event PathCanceledHandler Canceled;
 
         void Listen();
     }

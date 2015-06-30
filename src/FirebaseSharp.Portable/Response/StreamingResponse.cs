@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FirebaseSharp.Portable.Network;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace FirebaseSharp.Portable
 {
@@ -13,10 +14,8 @@ namespace FirebaseSharp.Portable
         private Task _pollingTask;
         private readonly FirebaseCache _cache;
 
-        private readonly CancellationTokenSource _localCancelSource = new CancellationTokenSource();
         private readonly CancellationToken _cancellationToken;
         private readonly IFirebaseHttpResponseMessage _response;
-        private CancellationTokenSource _mixedCancelSource;
 
         internal StreamingResponse(IFirebaseHttpResponseMessage response, CancellationToken cancellationToken)
         {
@@ -27,17 +26,14 @@ namespace FirebaseSharp.Portable
 
         public void Listen()
         {
-            _mixedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(_cancellationToken,
-                _localCancelSource.Token);
-
             _pollingTask =
                 Task.Run(() =>
                 {
-                    Task loop = ReadLoop(_response, _mixedCancelSource.Token);
+                    Task loop = ReadLoop(_response, _cancellationToken);
                     loop.ConfigureAwait(false);
-                    loop.Wait(_mixedCancelSource.Token);
+                    loop.Wait(_cancellationToken);
                 },
-                _mixedCancelSource.Token);
+                _cancellationToken);
         }
 
         public event ValueAddedEventHandler Added
@@ -59,13 +55,23 @@ namespace FirebaseSharp.Portable
 
         public event AuthenticationRevokedHandler Revoked;
         public event StreamingResponseClosedHandler Closed;
+        public event PathCanceledHandler Canceled;
 
-        private void OnRevoked(string message)
+        private void OnCanceled()
+        {
+            var canceled = Canceled;
+            if (canceled != null)
+            {
+                canceled(this, new PathCanceledEventArgs());
+            }
+        }
+
+        private void OnRevoked()
         {
             var revoked = Revoked;
             if (revoked != null)
             {
-                revoked(this, new AuthenticationRevokedEventArgs(message));
+                revoked(this, new AuthenticationRevokedEventArgs());
             }
         }
 
@@ -97,7 +103,6 @@ namespace FirebaseSharp.Portable
                     if (read == null)
                     {
                         System.Diagnostics.Debug.WriteLine("RECV: <end of stream>");
-                        _mixedCancelSource.Cancel();
                         OnClosed();
                         return;
                     }
@@ -118,17 +123,18 @@ namespace FirebaseSharp.Portable
                                 "Payload data was received but an event did not preceed it.");
                         }
 
-                        Update(eventName, read.Substring(5).Trim());
+                        if (!Update(eventName, read.Substring(5).Trim()))
+                        {
+                            break;
+                        }
                     }
 
                     // start over
                     eventName = null;
                 }
-
-
             }
         }
-        private void Update(string eventName, string p)
+        private bool Update(string eventName, string p)
         {
             using (JsonReader reader = new JsonTextReader(new StringReader(p)))
             {
@@ -149,11 +155,22 @@ namespace FirebaseSharp.Portable
                             _cache.Update(path, ReadToNamedPropertyValue(reader, "data"));
                         }
 
-                        break;
+                        return true;
+                    case "cancel":
+                        OnCanceled();
+                        OnClosed();
+                        return false;
                     case "auth_revoked":
-                        _mixedCancelSource.Cancel();
-                        OnRevoked("revoked");
-                        break;
+                        OnRevoked();
+                        OnClosed();
+                        return false;
+                    case "keep-alive":
+                        return true;
+                    default:
+#if DEBUG
+                        throw new Exception("Unknown event: " + eventName);
+#endif
+                        return true;
                 }
             }
         }
@@ -176,10 +193,6 @@ namespace FirebaseSharp.Portable
 
         public void Dispose()
         {
-            _mixedCancelSource.Cancel();
-
-            using (_mixedCancelSource) { }
-            using (_localCancelSource) { }
             using (_response) { }
         }
     }

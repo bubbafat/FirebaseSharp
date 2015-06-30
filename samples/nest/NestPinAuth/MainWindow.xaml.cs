@@ -71,7 +71,7 @@ namespace NestPinAuth
         private async void Authentiate_Click(object sender, RoutedEventArgs e)
         {
             // if there was a running response, dispose it so that
-            // any background tasks are cancelled.
+            // any background tasks are canceled.
             using (_resp) { }
             using (_fb) { }
 

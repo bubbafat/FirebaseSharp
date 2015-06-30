@@ -46,6 +46,7 @@
     <Compile Include="Response\AuthenticationRevokedEventArgs.cs" />
     <Compile Include="Cache\FirebaseCache.cs" />
     <Compile Include="Response\IStreamingResponse.cs" />
+    <Compile Include="Response\PathCanceled.cs" />
     <Compile Include="Response\StreamingResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Request\Request.cs" />
