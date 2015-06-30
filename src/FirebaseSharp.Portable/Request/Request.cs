@@ -12,7 +12,6 @@ namespace FirebaseSharp.Portable
     {
         private readonly IFirebaseHttpClient _client;
         private readonly string _authToken;
-        private readonly AsyncLock _sendMutex = new AsyncLock();
 
         public Request(IFirebaseHttpClient client, string authToken)
         {
@@ -34,13 +33,10 @@ namespace FirebaseSharp.Portable
 
             IFirebaseHttpResponseMessage response;
 
-            using (await _sendMutex.LockAsync())
-            {
-                response = await _client.SendAsync(request,
-                    HttpCompletionOption.ResponseHeadersRead,
-                    cancellationToken)
-                    .ConfigureAwait(false);
-            }
+            response = await _client.SendAsync(request,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken)
+                .ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();
 
@@ -94,7 +90,8 @@ namespace FirebaseSharp.Portable
             return await Query(method, path, null, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task<IFirebaseHttpResponseMessage> Query(HttpMethod method, string path, string payload, CancellationToken cancellationToken)
+        private async Task<IFirebaseHttpResponseMessage> Query(HttpMethod method, string path, string payload,
+            CancellationToken cancellationToken)
         {
             Debug.WriteLine("SEND (path): {0}", path);
             Uri uri = BuildPath(path);
@@ -107,29 +104,26 @@ namespace FirebaseSharp.Portable
                 request.Content = new StringContent(payload);
             }
 
-            using(await _sendMutex.LockAsync())
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            IFirebaseHttpResponseMessage response;
+
+            try
             {
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-
-                IFirebaseHttpResponseMessage response;
-
-                try
-                {
-                    response = await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken)
-                                                .ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                    throw;
-                }
-
-                sw.Stop();
-                Debug.WriteLine("SEND (timing): {0} ms", sw.ElapsedMilliseconds);
-
-                return response;
+                response = await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken)
+                    .ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw;
+            }
+
+            sw.Stop();
+            Debug.WriteLine("SEND (timing): {0} ms", sw.ElapsedMilliseconds);
+
+            return response;
         }
 
         private Uri BuildPath(string path)

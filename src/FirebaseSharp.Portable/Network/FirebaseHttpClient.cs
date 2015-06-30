@@ -8,6 +8,7 @@ namespace FirebaseSharp.Portable.Network
     class FirebaseHttpClient : IFirebaseHttpClient
     {
         private readonly HttpClient _client;
+        private readonly AsyncLock _clientMutex = new AsyncLock();
 
         public FirebaseHttpClient(Uri rootUri)
         {
@@ -34,9 +35,13 @@ namespace FirebaseSharp.Portable.Network
             HttpCompletionOption httpCompletionOption,
             CancellationToken cancellationToken)
         {
-            var response = await _client.SendAsync(request, httpCompletionOption, cancellationToken)
-                                        .ConfigureAwait(false);
-            return new FirebaseHttpResponseMessage(response);
+            using (await _clientMutex.LockAsync())
+            {
+                var response = await _client.SendAsync(request, httpCompletionOption, cancellationToken)
+                    .ConfigureAwait(false);
+
+                return new FirebaseHttpResponseMessage(response);
+            }
         }
 
         public void Dispose()

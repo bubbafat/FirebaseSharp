@@ -39,27 +39,33 @@ namespace FirebaseWpfDraw
         private readonly BackgroundWorker _firebaseWorker = new BackgroundWorker();
         private readonly BlockingCollection<PaintQueue> _queue = new BlockingCollection<PaintQueue>();
 
+        private readonly Random _rng = new Random();
+        private readonly string[] _colors = new[]
+            {
+                "fff", "000", "f00", "0f0", "00f", "88f", "f8d", "f88", "f05", "f80", "0f8", "cf0", "08f",
+                "408", "ff8", "8ff"
+            };
+
+
         public MainWindow()
         {
             InitializeComponent();
 
             _brushMap = new Dictionary<string, SolidColorBrush>();
 
-            // the colors that the web demo uses
-            string[] colors =
-            {
-                "fff", "000", "f00", "0f0", "00f", "88f", "f8d", "f88", "f05", "f80", "0f8", "cf0", "08f",
-                "408", "ff8", "8ff"
-            };
-
             // cache the brushes for the known colors
-            foreach (string color in colors)
+            foreach (string color in _colors)
             {
                 GetBrushFromFirebaseColor(color);
             }
 
             // this is the worker loop that does all the communication with Firebase
             _firebaseWorker.DoWork += _firebaseWorker_DoWork;
+        }
+
+        private string PickRandomColor()
+        {
+            return _colors[_rng.Next(0, _colors.Length - 1)];
         }
 
         async void _firebaseWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -89,20 +95,32 @@ namespace FirebaseWpfDraw
 
                 response.Listen();
 
+                List<PaintQueue> items = new List<PaintQueue>();
+
+
                 // changes are queued so that the UI thread doesn't need
                 // to do anything expensive
                 while (!done)
                 {
-                    PaintQueue queue = _queue.Take();
+                    items.Clear();
+                    PaintQueue item = _queue.Take();
+                    items.Add(item);
+
+                    // now drain any more that are remaining
+                    while (_queue.TryTake(out item))
+                    {
+                        items.Add(item);
+                    }
 
                     try
                     {
-                        await _firebase.PutAsync(FirebaseIdFromPoint(queue.Point),
-                            string.Format("\"{0}\"", queue.Color));
+                        await _firebase.PatchAsync("/", 
+                            string.Format("{{ {0} }}", FirebaseIdFromPoints(items)));
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        // This is really robust
+                        MessageBox.Show(ex.Message);
+                        done = true;
                     }
                 }
             }
@@ -111,6 +129,12 @@ namespace FirebaseWpfDraw
         private string FirebaseIdFromPoint(Point p)
         {
             return string.Format("{0}:{1}", p.X, p.Y);
+        }
+
+        private string FirebaseIdFromPoints(List<PaintQueue> items)
+        {
+            return string.Join(",", items.Select(i => string.Format("\"{0}\" : \"{1}\"", 
+                FirebaseIdFromPoint(i.Point), i.Color)));
         }
 
         private void RemovedItem(object sender, ValueRemovedEventArgs args)
@@ -196,13 +220,15 @@ namespace FirebaseWpfDraw
 
             if (!_queue.Any(p => p.Point.Equals(firebasePoint)))
             {
+                string color = PickRandomColor();
+
                 _queue.Add(new PaintQueue
                 {
                     Point = firebasePoint,
-                    Color = "000",
+                    Color = color,
                 });
 
-                PaintPoint(localPoint, GetBrushFromFirebaseColor("000"));
+                PaintPoint(localPoint, GetBrushFromFirebaseColor(color));
             }
         }
 
