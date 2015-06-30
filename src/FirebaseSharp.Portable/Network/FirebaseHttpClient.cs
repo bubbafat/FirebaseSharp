@@ -20,7 +20,7 @@ namespace FirebaseSharp.Portable.Network
             _client = new HttpClient(handler, true)
             {
                 BaseAddress = rootUri,
-                Timeout = TimeSpan.FromMinutes(2),
+                Timeout = Timeout.InfiniteTimeSpan,
             };
 
         }
@@ -36,12 +36,12 @@ namespace FirebaseSharp.Portable.Network
         {
             var response = await _client.SendAsync(request, httpCompletionOption, cancellationToken)
                                         .ConfigureAwait(false);
-            return new FirebaseFirebaseHttpResponseMessage(response);
+            return new FirebaseHttpResponseMessage(response);
         }
 
         public void Dispose()
         {
-            using(_client) { };
+            using(_client) { }
         }
     }
 }

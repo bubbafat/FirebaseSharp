@@ -67,15 +67,31 @@ namespace FirebaseWpfDraw
             // setup streaming
             using (var response = await _firebase.GetStreamingAsync(string.Empty))
             {
+                bool done = false;
+
                 response.Added += PaintNewitem;
                 response.Changed += UpdateExistingItem;
                 response.Removed += RemovedItem;
+                response.Closed += (o, args) =>
+                {
+                    done = true;
+                };
+
+                response.Timeout += (o, args) =>
+                {
+                    MessageBox.Show("Operation timed out");
+                };
+
+                response.Error += (o, args) =>
+                {
+                    MessageBox.Show(args.Error.Message);
+                };
 
                 response.Listen();
 
                 // changes are queued so that the UI thread doesn't need
                 // to do anything expensive
-                while (true)
+                while (!done)
                 {
                     PaintQueue queue = _queue.Take();
 
@@ -180,7 +196,6 @@ namespace FirebaseWpfDraw
 
             if (!_queue.Any(p => p.Point.Equals(firebasePoint)))
             {
-
                 _queue.Add(new PaintQueue
                 {
                     Point = firebasePoint,

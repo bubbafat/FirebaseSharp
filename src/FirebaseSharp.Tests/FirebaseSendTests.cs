@@ -27,7 +27,7 @@ namespace FirebaseSharp.Tests
             A.CallTo(() => response.ReadAsStringAsync()).Returns(storedValue);
 
             var call = A.CallTo(() => client.SendAsync(
-                A<HttpRequestMessage>.That.Matches((req) => req.Matches(HttpMethod.Get, expectedUri)),
+                A<HttpRequestMessage>.That.Matches(req => req.Matches(HttpMethod.Get, expectedUri)),
                 A<HttpCompletionOption>.Ignored,
                 A<CancellationToken>.Ignored));
 
@@ -57,7 +57,7 @@ namespace FirebaseSharp.Tests
             var response = A.Fake<IFirebaseHttpResponseMessage>();
 
             A.CallTo(() => client.SendAsync(
-                A<HttpRequestMessage>.That.Matches((req) => req.Matches(HttpMethod.Delete, expectedUri)),
+                A<HttpRequestMessage>.That.Matches(req => req.Matches(HttpMethod.Delete, expectedUri)),
                 A<HttpCompletionOption>.Ignored,
                 A<CancellationToken>.Ignored)).Returns(response);
 
@@ -87,7 +87,7 @@ namespace FirebaseSharp.Tests
             A.CallTo(() => response.ReadAsStringAsync()).Returns(responsePayload);
 
             A.CallTo(() => client.SendAsync(
-                A<HttpRequestMessage>.That.Matches((req) => req.Matches(HttpMethod.Post, expectedUri, queryPayload)),
+                A<HttpRequestMessage>.That.Matches(req => req.Matches(HttpMethod.Post, expectedUri, queryPayload)),
                 A<HttpCompletionOption>.Ignored,
                 A<CancellationToken>.Ignored)).Returns(response);
 
@@ -119,7 +119,7 @@ namespace FirebaseSharp.Tests
             A.CallTo(() => response.ReadAsStringAsync()).Returns(responsePayload);
 
             A.CallTo(() => client.SendAsync(
-                A<HttpRequestMessage>.That.Matches((req) => req.Matches(HttpMethod.Put, expectedUri, queryPayload)),
+                A<HttpRequestMessage>.That.Matches(req => req.Matches(HttpMethod.Put, expectedUri, queryPayload)),
                 A<HttpCompletionOption>.Ignored,
                 A<CancellationToken>.Ignored)).Returns(response);
 
@@ -151,7 +151,7 @@ namespace FirebaseSharp.Tests
             A.CallTo(() => response.ReadAsStringAsync()).Returns(responsePayload);
 
             A.CallTo(() => client.SendAsync(
-                A<HttpRequestMessage>.That.Matches((req) => req.Matches(new HttpMethod("PATCH"), expectedUri, queryPayload)),
+                A<HttpRequestMessage>.That.Matches(req => req.Matches(new HttpMethod("PATCH"), expectedUri, queryPayload)),
                 A<HttpCompletionOption>.Ignored,
                 A<CancellationToken>.Ignored)).Returns(response);
 

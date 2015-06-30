@@ -42,7 +42,7 @@ namespace FirebaseSharp.Tests
 
                 A.CallTo(() => client.SendAsync(
                     A<HttpRequestMessage>.That.Matches(
-                        (req) => req.MatchStreaming(HttpMethod.Get, expectedUri, "text/event-stream")),
+                        req => req.MatchStreaming(HttpMethod.Get, expectedUri, "text/event-stream")),
                     A<HttpCompletionOption>.Ignored,
                     A<CancellationToken>.Ignored)).Returns(response);
 
@@ -96,7 +96,7 @@ namespace FirebaseSharp.Tests
 
                 A.CallTo(() => client.SendAsync(
                     A<HttpRequestMessage>.That.Matches(
-                        (req) => req.MatchStreaming(HttpMethod.Get, expectedUri, "text/event-stream")),
+                        req => req.MatchStreaming(HttpMethod.Get, expectedUri, "text/event-stream")),
                     A<HttpCompletionOption>.Ignored,
                     A<CancellationToken>.Ignored)).Returns(response);
 
@@ -153,7 +153,7 @@ namespace FirebaseSharp.Tests
 
                 A.CallTo(() => client.SendAsync(
                     A<HttpRequestMessage>.That.Matches(
-                        (req) => req.MatchStreaming(HttpMethod.Get, expectedUri, "text/event-stream")),
+                        req => req.MatchStreaming(HttpMethod.Get, expectedUri, "text/event-stream")),
                     A<HttpCompletionOption>.Ignored,
                     A<CancellationToken>.Ignored)).Returns(response);
 
@@ -220,7 +220,7 @@ namespace FirebaseSharp.Tests
 
                 A.CallTo(() => client.SendAsync(
                     A<HttpRequestMessage>.That.Matches(
-                        (req) => req.MatchStreaming(HttpMethod.Get, expectedUri, "text/event-stream")),
+                        req => req.MatchStreaming(HttpMethod.Get, expectedUri, "text/event-stream")),
                     A<HttpCompletionOption>.Ignored,
                     A<CancellationToken>.Ignored)).Returns(response);
 
@@ -258,6 +258,69 @@ namespace FirebaseSharp.Tests
                 A.CallTo(() => revokedCallback.Invoke(A<object>._, A<AuthenticationRevokedEventArgs>._)).MustNotHaveHappened();
             }
         }
+
+
+        [TestMethod]
+        public void IdleTimeoutFires()
+        {
+            Uri root = new Uri("http://example.com/root");
+            string childPath = "/item/path";
+            Uri expectedUri = new Uri("http://example.com/root/item/path.json");
+
+            var client = A.Fake<IFirebaseHttpClient>();
+            A.CallTo(() => client.BaseAddress).Returns(root);
+
+            var response = A.Fake<IFirebaseHttpResponseMessage>();
+
+            A.CallTo(() => response.ReadAsStreamAsync()).ReturnsLazily((stream) =>
+            {
+                // we'll pretend that the streaming response threw
+                // a timeout exception (we test that this happens later)
+                throw new TimeoutException();
+            });
+
+            A.CallTo(() => client.SendAsync(
+                A<HttpRequestMessage>.That.Matches(
+                    req => req.MatchStreaming(HttpMethod.Get, expectedUri, "text/event-stream")),
+                A<HttpCompletionOption>.Ignored,
+                A<CancellationToken>.Ignored)).Returns(response);
+
+            var addedCallback = A.Fake<ValueAddedEventHandler>();
+            var changedCallback = A.Fake<ValueChangedEventHandler>();
+            var revokedCallback = A.Fake<AuthenticationRevokedHandler>();
+            var removedCallback = A.Fake<ValueRemovedEventHandler>();
+
+            Request firebaseRequest = new Request(client, null);
+            var result = firebaseRequest.GetStreaming(
+                path: childPath,
+                cancellationToken: CancellationToken.None).Result;
+
+            result.Added += addedCallback;
+            result.Changed += changedCallback;
+            result.Revoked += revokedCallback;
+            result.Removed += removedCallback;
+
+            ManualResetEvent closed = new ManualResetEvent(false);
+            result.Closed += (sender, e) => { closed.Set(); };
+
+            bool timeoutCalled = false;
+
+            result.Timeout += (sender, e) =>
+            {
+                timeoutCalled = true;
+            };
+
+            result.Listen();
+
+            Assert.IsTrue(closed.WaitOne(TimeSpan.FromSeconds(5)));
+            Assert.IsTrue(timeoutCalled, "timeout event not fired");
+
+            A.CallTo(() => addedCallback.Invoke(A<object>._, A<ValueAddedEventArgs>._)).MustNotHaveHappened();
+            A.CallTo(() => changedCallback.Invoke(A<object>._, A<ValueChangedEventArgs>._)).MustNotHaveHappened();
+            A.CallTo(() => revokedCallback.Invoke(A<object>._, A<AuthenticationRevokedEventArgs>._)).MustNotHaveHappened();
+            A.CallTo(() => removedCallback.Invoke(A<object>._, A<ValueRemovedEventArgs>._)).MustNotHaveHappened();
+        }
+
         public static Stream BuildResponseStream(IEnumerable<string> input)
         {
             MemoryStream stream = new MemoryStream();
