@@ -40,22 +40,25 @@
     <Compile Include="Cache\EventArgs.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Firebase.cs" />
+    <Compile Include="Response\Events\StreamingDataReceivedEventArgs.cs" />
     <Compile Include="Response\FirebaseHttpResponseMessage.cs" />
     <Compile Include="Request\IFirebaseHttpClient.cs" />
     <Compile Include="Request\FirebaseHttpClient.cs" />
     <Compile Include="Response\IFirebaseHttpResponseMessage.cs" />
+    <Compile Include="Response\IStreamingResponse2.cs" />
+    <Compile Include="Response\StreamingResponse2.cs" />
     <Compile Include="Utilities\AsyncLock.cs" />
     <Compile Include="Response\Events\AuthenticationRevokedEventArgs.cs" />
     <Compile Include="Cache\FirebaseCache.cs" />
-    <Compile Include="Response\Events\StreamingResponseIdleTimeoutEventArgs.cs" />
+    <Compile Include="Response\Events\StreamingIdleTimeoutEventArgs.cs" />
     <Compile Include="Response\IStreamingResponse.cs" />
     <Compile Include="Response\Events\PathCanceledEventArgs.cs" />
     <Compile Include="Response\StreamingResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Request\FirebaseRequest.cs" />
     <Compile Include="Response\Events\StreamingEvent.cs" />
-    <Compile Include="Response\Events\StreamingResponseClosedEventArgs.cs" />
-    <Compile Include="Response\Events\StreamResponseErrorEventArgs.cs" />
+    <Compile Include="Response\Events\StreamingClosedEventArgs.cs" />
+    <Compile Include="Response\Events\StreamErrorEventArgs.cs" />
     <Compile Include="Utilities\TaskExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

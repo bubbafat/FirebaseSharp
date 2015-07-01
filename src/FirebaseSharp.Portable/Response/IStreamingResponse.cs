@@ -12,9 +12,9 @@ namespace FirebaseSharp.Portable.Response
         event AuthenticationRevokedHandler Revoked;
         event PathCanceledHandler Canceled;
 
-        event StreamingResponseClosedHandler Closed;
-        event StreamingResponseIdleTimeoutHandler Timeout;
-        event StreamingResponseErrorHandler Error;
+        event StreamingClosedHandler Closed;
+        event StreamingIdleTimeoutHandler Timeout;
+        event StreamingErrorHandler Error;
 
         void Listen();
     }

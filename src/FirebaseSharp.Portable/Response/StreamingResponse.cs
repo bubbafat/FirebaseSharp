@@ -55,17 +55,17 @@ namespace FirebaseSharp.Portable.Response
         }
 
         public event AuthenticationRevokedHandler Revoked;
-        public event StreamingResponseClosedHandler Closed;
+        public event StreamingClosedHandler Closed;
         public event PathCanceledHandler Canceled;
-        public event StreamingResponseIdleTimeoutHandler Timeout;
-        public event StreamingResponseErrorHandler Error;
+        public event StreamingIdleTimeoutHandler Timeout;
+        public event StreamingErrorHandler Error;
 
         private void OnIdleTimeout()
         {
             var timeout = Timeout;
             if (timeout != null)
             {
-                timeout(this, new StreamingResponseIdleTimeoutEventArgs());
+                timeout(this, new StreamingIdleTimeoutEventArgs());
             }
         }
 
@@ -92,7 +92,7 @@ namespace FirebaseSharp.Portable.Response
             var closed = Closed;
             if (closed != null)
             {
-                closed(this, new StreamingResponseClosedEventArgs());
+                closed(this, new StreamingClosedEventArgs());
             }
         }
 
@@ -101,7 +101,7 @@ namespace FirebaseSharp.Portable.Response
             var error = Error;
             if (error != null)
             {
-                error(this, new StreamResponseErrorEventArgs(ex));
+                error(this, new StreamErrorEventArgs(ex));
             }
         }
 
@@ -109,7 +109,7 @@ namespace FirebaseSharp.Portable.Response
         {
             try
             {
-                using (var content = await response.ReadAsStreamAsync().ConfigureAwait(false))
+                using (var content = await response.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false))
                 using (StreamReader sr = new StreamReader(content))
                 {
                     string eventName = null;
@@ -120,7 +120,7 @@ namespace FirebaseSharp.Portable.Response
 
                         // this can throw TimeoutException
                         string read = await sr.ReadLineAsync()
-                                              .WithTimeout(Config.NetworkReadTimeout)
+                                              .WithTimeout(Config.NetworkReadTimeout, cancellationToken)
                                               .ConfigureAwait(false);
 
                         // for whatever reason we're at the end of the stream

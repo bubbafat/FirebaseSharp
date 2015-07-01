@@ -41,7 +41,7 @@ namespace FirebaseSharp.Tests
 
             using (Stream stream = BuildResponseStream(responses))
             {
-                A.CallTo(() => response.ReadAsStreamAsync()).Returns(stream);
+                A.CallTo(() => response.ReadAsStreamAsync(A<CancellationToken>.Ignored)).Returns(stream);
 
                 A.CallTo(() => client.SendAsync(
                     A<HttpRequestMessage>.That.Matches(
@@ -95,7 +95,7 @@ namespace FirebaseSharp.Tests
 
             using (Stream stream = BuildResponseStream(responses))
             {
-                A.CallTo(() => response.ReadAsStreamAsync()).Returns(stream);
+                A.CallTo(() => response.ReadAsStreamAsync(A<CancellationToken>.Ignored)).Returns(stream);
 
                 A.CallTo(() => client.SendAsync(
                     A<HttpRequestMessage>.That.Matches(
@@ -106,7 +106,7 @@ namespace FirebaseSharp.Tests
                 var addedCallback = A.Fake<ValueAddedEventHandler>();
                 var changedCallback = A.Fake<ValueChangedEventHandler>();
                 var removedCallback = A.Fake<ValueRemovedEventHandler>();
-                var closedCallback = A.Fake<StreamingResponseClosedHandler>();
+                var closedCallback = A.Fake<StreamingClosedHandler>();
 
                 FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
                 var result = firebaseFirebaseRequest.GetStreaming(
@@ -128,7 +128,7 @@ namespace FirebaseSharp.Tests
                 A.CallTo(() => addedCallback.Invoke(A<object>._, A<ValueAddedEventArgs>._)).MustNotHaveHappened();
                 A.CallTo(() => changedCallback.Invoke(A<object>._, A<ValueChangedEventArgs>._)).MustNotHaveHappened();
                 A.CallTo(() => removedCallback.Invoke(A<object>._, A<ValueRemovedEventArgs>._)).MustNotHaveHappened();
-                A.CallTo(() => closedCallback.Invoke(A<object>._, A<StreamingResponseClosedEventArgs>._)).MustHaveHappened();
+                A.CallTo(() => closedCallback.Invoke(A<object>._, A<StreamingClosedEventArgs>._)).MustHaveHappened();
             }
         }
 
@@ -152,7 +152,7 @@ namespace FirebaseSharp.Tests
 
             using (Stream stream = BuildResponseStream(responses))
             {
-                A.CallTo(() => response.ReadAsStreamAsync()).Returns(stream);
+                A.CallTo(() => response.ReadAsStreamAsync(A<CancellationToken>.Ignored)).Returns(stream);
 
                 A.CallTo(() => client.SendAsync(
                     A<HttpRequestMessage>.That.Matches(
@@ -219,7 +219,7 @@ namespace FirebaseSharp.Tests
 
             using (Stream stream = BuildResponseStream(responses))
             {
-                A.CallTo(() => response.ReadAsStreamAsync()).Returns(stream);
+                A.CallTo(() => response.ReadAsStreamAsync(A<CancellationToken>.Ignored)).Returns(stream);
 
                 A.CallTo(() => client.SendAsync(
                     A<HttpRequestMessage>.That.Matches(
@@ -275,7 +275,7 @@ namespace FirebaseSharp.Tests
 
             var response = A.Fake<IFirebaseHttpResponseMessage>();
 
-            A.CallTo(() => response.ReadAsStreamAsync()).ReturnsLazily((stream) =>
+            A.CallTo(() => response.ReadAsStreamAsync(A<CancellationToken>.Ignored)).ReturnsLazily((stream) =>
             {
                 // we'll pretend that the streaming response threw
                 // a timeout exception (we test that this happens later)
@@ -338,7 +338,7 @@ namespace FirebaseSharp.Tests
 
             string expectedMessage = Guid.NewGuid().ToString();
 
-            A.CallTo(() => response.ReadAsStreamAsync()).ReturnsLazily((stream) =>
+            A.CallTo(() => response.ReadAsStreamAsync(A<CancellationToken>.Ignored)).ReturnsLazily((stream) =>
             {
                 // we'll pretend that the streaming response threw
                 // a timeout exception (we test that this happens later)
@@ -355,7 +355,7 @@ namespace FirebaseSharp.Tests
             var changedCallback = A.Fake<ValueChangedEventHandler>();
             var revokedCallback = A.Fake<AuthenticationRevokedHandler>();
             var removedCallback = A.Fake<ValueRemovedEventHandler>();
-            var timeoutCallack = A.Fake<StreamingResponseIdleTimeoutHandler>();
+            var timeoutCallack = A.Fake<StreamingIdleTimeoutHandler>();
 
             FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
             var result = firebaseFirebaseRequest.GetStreaming(
@@ -387,7 +387,7 @@ namespace FirebaseSharp.Tests
             A.CallTo(() => changedCallback.Invoke(A<object>._, A<ValueChangedEventArgs>._)).MustNotHaveHappened();
             A.CallTo(() => revokedCallback.Invoke(A<object>._, A<AuthenticationRevokedEventArgs>._)).MustNotHaveHappened();
             A.CallTo(() => removedCallback.Invoke(A<object>._, A<ValueRemovedEventArgs>._)).MustNotHaveHappened();
-            A.CallTo(() => timeoutCallack.Invoke(A<object>._, A<StreamingResponseIdleTimeoutEventArgs>._)).MustNotHaveHappened();
+            A.CallTo(() => timeoutCallack.Invoke(A<object>._, A<StreamingIdleTimeoutEventArgs>._)).MustNotHaveHappened();
         }
 
         public static Stream BuildResponseStream(IEnumerable<string> input)

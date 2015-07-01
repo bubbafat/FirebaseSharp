@@ -25,7 +25,7 @@ namespace FirebaseSharp.Tests
             A.CallTo(() => client.BaseAddress).Returns(root);
 
             var response = A.Fake<IFirebaseHttpResponseMessage>();
-            A.CallTo(() => response.ReadAsStringAsync()).Returns(storedValue);
+            A.CallTo(() => response.ReadAsStringAsync(A<CancellationToken>.Ignored)).Returns(storedValue);
 
             var call = A.CallTo(() => client.SendAsync(
                 A<HttpRequestMessage>.That.Matches(req => req.Matches(HttpMethod.Get, expectedUri)),
@@ -66,8 +66,8 @@ namespace FirebaseSharp.Tests
             firebaseFirebaseRequest.Delete(childPath, CancellationToken.None).Wait();
 
             A.CallTo(() => response.EnsureSuccessStatusCode()).MustHaveHappened();
-            A.CallTo(() => response.ReadAsStringAsync()).MustNotHaveHappened();
-            A.CallTo(() => response.ReadAsStreamAsync()).MustNotHaveHappened();
+            A.CallTo(() => response.ReadAsStringAsync(A<CancellationToken>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => response.ReadAsStreamAsync(A<CancellationToken>.Ignored)).MustNotHaveHappened();
         }
 
         [TestMethod]
@@ -85,7 +85,7 @@ namespace FirebaseSharp.Tests
 
             var response = A.Fake<IFirebaseHttpResponseMessage>();
 
-            A.CallTo(() => response.ReadAsStringAsync()).Returns(responsePayload);
+            A.CallTo(() => response.ReadAsStringAsync(A<CancellationToken>.Ignored)).Returns(responsePayload);
 
             A.CallTo(() => client.SendAsync(
                 A<HttpRequestMessage>.That.Matches(req => req.Matches(HttpMethod.Post, expectedUri, queryPayload)),
@@ -98,8 +98,8 @@ namespace FirebaseSharp.Tests
             Assert.AreEqual(responsePayload, result);
 
             A.CallTo(() => response.EnsureSuccessStatusCode()).MustHaveHappened();
-            A.CallTo(() => response.ReadAsStringAsync()).MustHaveHappened();
-            A.CallTo(() => response.ReadAsStreamAsync()).MustNotHaveHappened();
+            A.CallTo(() => response.ReadAsStringAsync(A<CancellationToken>.Ignored)).MustHaveHappened();
+            A.CallTo(() => response.ReadAsStreamAsync(A<CancellationToken>.Ignored)).MustNotHaveHappened();
         }
 
         [TestMethod]
@@ -117,7 +117,7 @@ namespace FirebaseSharp.Tests
 
             var response = A.Fake<IFirebaseHttpResponseMessage>();
 
-            A.CallTo(() => response.ReadAsStringAsync()).Returns(responsePayload);
+            A.CallTo(() => response.ReadAsStringAsync(A<CancellationToken>.Ignored)).Returns(responsePayload);
 
             A.CallTo(() => client.SendAsync(
                 A<HttpRequestMessage>.That.Matches(req => req.Matches(HttpMethod.Put, expectedUri, queryPayload)),
@@ -130,8 +130,8 @@ namespace FirebaseSharp.Tests
             Assert.AreEqual(responsePayload, result);
 
             A.CallTo(() => response.EnsureSuccessStatusCode()).MustHaveHappened();
-            A.CallTo(() => response.ReadAsStringAsync()).MustHaveHappened();
-            A.CallTo(() => response.ReadAsStreamAsync()).MustNotHaveHappened();
+            A.CallTo(() => response.ReadAsStringAsync(A<CancellationToken>.Ignored)).MustHaveHappened();
+            A.CallTo(() => response.ReadAsStreamAsync(A<CancellationToken>.Ignored)).MustNotHaveHappened();
         }
 
         [TestMethod]
@@ -149,7 +149,7 @@ namespace FirebaseSharp.Tests
 
             var response = A.Fake<IFirebaseHttpResponseMessage>();
 
-            A.CallTo(() => response.ReadAsStringAsync()).Returns(responsePayload);
+            A.CallTo(() => response.ReadAsStringAsync(A<CancellationToken>.Ignored)).Returns(responsePayload);
 
             A.CallTo(() => client.SendAsync(
                 A<HttpRequestMessage>.That.Matches(req => req.Matches(new HttpMethod("PATCH"), expectedUri, queryPayload)),
@@ -162,8 +162,8 @@ namespace FirebaseSharp.Tests
             Assert.AreEqual(responsePayload, result);
 
             A.CallTo(() => response.EnsureSuccessStatusCode()).MustHaveHappened();
-            A.CallTo(() => response.ReadAsStringAsync()).MustHaveHappened();
-            A.CallTo(() => response.ReadAsStreamAsync()).MustNotHaveHappened();
+            A.CallTo(() => response.ReadAsStringAsync(A<CancellationToken>.Ignored)).MustHaveHappened();
+            A.CallTo(() => response.ReadAsStreamAsync(A<CancellationToken>.Ignored)).MustNotHaveHappened();
         }
 
     }

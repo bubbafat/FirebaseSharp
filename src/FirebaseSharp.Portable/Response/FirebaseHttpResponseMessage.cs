@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using FirebaseSharp.Portable.Utilities;
 
@@ -19,19 +20,19 @@ namespace FirebaseSharp.Portable.Response
             _response.EnsureSuccessStatusCode();
         }
 
-        public async Task<Stream> ReadAsStreamAsync()
+        public async Task<Stream> ReadAsStreamAsync(CancellationToken cancellationToken)
         {
             return await _response.Content
                                 .ReadAsStreamAsync()
-                                .WithTimeout(Config.NetworkReadTimeout)
+                                .WithTimeout(Config.NetworkReadTimeout, cancellationToken)
                                 .ConfigureAwait(false);
         }
 
-        public async Task<string> ReadAsStringAsync()
+        public async Task<string> ReadAsStringAsync(CancellationToken cancellationToken)
         {
             return await _response.Content
                                 .ReadAsStringAsync()
-                                .WithTimeout(Config.NetworkReadTimeout)
+                                .WithTimeout(Config.NetworkReadTimeout, cancellationToken)
                                 .ConfigureAwait(false);
         }
 

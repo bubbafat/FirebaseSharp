@@ -48,7 +48,7 @@ namespace FirebaseSharp.Portable.Request
             IFirebaseHttpResponseMessage response = await Query(HttpMethod.Get, path, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            return await response.ReadAsStringAsync().ConfigureAwait(false);
+            return await response.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         }
 
         internal async Task Delete(string path, CancellationToken cancellationToken)
@@ -64,7 +64,7 @@ namespace FirebaseSharp.Portable.Request
 
             response.EnsureSuccessStatusCode();
 
-            return await response.ReadAsStringAsync().ConfigureAwait(false);
+            return await response.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         }
 
         internal async Task<string> Put(string path, string payload, CancellationToken cancellationToken)
@@ -73,7 +73,7 @@ namespace FirebaseSharp.Portable.Request
             
             response.EnsureSuccessStatusCode();
 
-            return await response.ReadAsStringAsync().ConfigureAwait(false);
+            return await response.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         }
 
         internal async Task<string> Post(string path, string payload, CancellationToken cancellationToken)
@@ -82,7 +82,7 @@ namespace FirebaseSharp.Portable.Request
 
             response.EnsureSuccessStatusCode();
 
-            return await response.ReadAsStringAsync().ConfigureAwait(false);
+            return await response.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<IFirebaseHttpResponseMessage> Query(HttpMethod method, string path, CancellationToken cancellationToken)
