@@ -1,5 +1,5 @@
 ﻿
-namespace FirebaseSharp.Portable
+namespace FirebaseSharp.Portable.Response.Events
 {
     public sealed class StreamingEvent
     {

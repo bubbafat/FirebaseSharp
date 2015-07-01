@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using FirebaseSharp.Portable;
+using FirebaseSharp.Portable.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 

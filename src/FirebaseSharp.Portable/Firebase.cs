@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using FirebaseSharp.Portable.Network;
+using FirebaseSharp.Portable.Request;
+using FirebaseSharp.Portable.Response;
 
 namespace FirebaseSharp.Portable
 {
     public sealed class Firebase : IDisposable
     {
-        private readonly Request _request;
+        private readonly FirebaseRequest _request;
 
         public Firebase(string rootUri, string authToken = null)
             : this(new Uri(rootUri), authToken)
@@ -21,7 +22,7 @@ namespace FirebaseSharp.Portable
                 throw new ArgumentNullException("rootUri");
             }
 
-            _request = new Request(new FirebaseHttpClient(rootUri), authToken);
+            _request = new FirebaseRequest(new FirebaseHttpClient(rootUri), authToken);
         }
 
         public Uri RootUri

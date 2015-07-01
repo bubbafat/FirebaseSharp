@@ -2,8 +2,9 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FirebaseSharp.Portable.Response;
 
-namespace FirebaseSharp.Portable.Network
+namespace FirebaseSharp.Portable.Request
 {
     interface IFirebaseHttpClient : IDisposable
     {

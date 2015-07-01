@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace FirebaseSharp.Portable.Network
+namespace FirebaseSharp.Portable.Response
 {
     interface IFirebaseHttpResponseMessage : IDisposable
     {

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FirebaseSharp.Portable.Cache;
+using FirebaseSharp.Portable.Response;
 using Newtonsoft.Json;
 
 namespace FirebaseSharp.Tests

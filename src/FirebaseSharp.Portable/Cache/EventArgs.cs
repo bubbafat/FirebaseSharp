@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FirebaseSharp.Portable
+namespace FirebaseSharp.Portable.Cache
 {
     public class ValueAddedEventArgs : EventArgs
     {

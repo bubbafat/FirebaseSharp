@@ -2,9 +2,10 @@
 using System.Net.Http;
 using System.Threading;
 using FirebaseSharp.Portable;
-using FirebaseSharp.Portable.Network;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using FakeItEasy;
+using FirebaseSharp.Portable.Request;
+using FirebaseSharp.Portable.Response;
 
 namespace FirebaseSharp.Tests
 {
@@ -33,9 +34,9 @@ namespace FirebaseSharp.Tests
 
             call.Returns(response);
 
-            using (Request firebaseRequest = new Request(client, null))
+            using (FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null))
             {
-                string result = firebaseRequest.GetSingle(childPath, CancellationToken.None).Result;
+                string result = firebaseFirebaseRequest.GetSingle(childPath, CancellationToken.None).Result;
                 Assert.AreEqual(storedValue, result);
             }
 
@@ -61,8 +62,8 @@ namespace FirebaseSharp.Tests
                 A<HttpCompletionOption>.Ignored,
                 A<CancellationToken>.Ignored)).Returns(response);
 
-            Request firebaseRequest = new Request(client, null);
-            firebaseRequest.Delete(childPath, CancellationToken.None).Wait();
+            FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
+            firebaseFirebaseRequest.Delete(childPath, CancellationToken.None).Wait();
 
             A.CallTo(() => response.EnsureSuccessStatusCode()).MustHaveHappened();
             A.CallTo(() => response.ReadAsStringAsync()).MustNotHaveHappened();
@@ -91,8 +92,8 @@ namespace FirebaseSharp.Tests
                 A<HttpCompletionOption>.Ignored,
                 A<CancellationToken>.Ignored)).Returns(response);
 
-            Request firebaseRequest = new Request(client, null);
-            var result = firebaseRequest.Post(childPath, queryPayload, CancellationToken.None).Result;
+            FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
+            var result = firebaseFirebaseRequest.Post(childPath, queryPayload, CancellationToken.None).Result;
 
             Assert.AreEqual(responsePayload, result);
 
@@ -123,8 +124,8 @@ namespace FirebaseSharp.Tests
                 A<HttpCompletionOption>.Ignored,
                 A<CancellationToken>.Ignored)).Returns(response);
 
-            Request firebaseRequest = new Request(client, null);
-            var result = firebaseRequest.Put(childPath, queryPayload, CancellationToken.None).Result;
+            FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
+            var result = firebaseFirebaseRequest.Put(childPath, queryPayload, CancellationToken.None).Result;
 
             Assert.AreEqual(responsePayload, result);
 
@@ -155,8 +156,8 @@ namespace FirebaseSharp.Tests
                 A<HttpCompletionOption>.Ignored,
                 A<CancellationToken>.Ignored)).Returns(response);
 
-            Request firebaseRequest = new Request(client, null);
-            var result = firebaseRequest.Patch(childPath, queryPayload, CancellationToken.None).Result;
+            FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
+            var result = firebaseFirebaseRequest.Patch(childPath, queryPayload, CancellationToken.None).Result;
 
             Assert.AreEqual(responsePayload, result);
 

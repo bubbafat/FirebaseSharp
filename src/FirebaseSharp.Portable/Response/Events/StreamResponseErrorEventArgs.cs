@@ -12,5 +12,5 @@ namespace FirebaseSharp.Portable
         public Exception Error { get; private set; }
     }
 
-    public delegate void StreamResponseErrorHandler(object sender, StreamResponseErrorEventArgs e);
+    public delegate void StreamingResponseErrorHandler(object sender, StreamResponseErrorEventArgs e);
 }

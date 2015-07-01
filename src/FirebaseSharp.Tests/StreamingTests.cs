@@ -6,7 +6,10 @@ using System.Text;
 using System.Threading;
 using FakeItEasy;
 using FirebaseSharp.Portable;
-using FirebaseSharp.Portable.Network;
+using FirebaseSharp.Portable.Cache;
+using FirebaseSharp.Portable.Request;
+using FirebaseSharp.Portable.Response;
+using FirebaseSharp.Portable.Response.Events;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FirebaseSharp.Tests
@@ -46,8 +49,8 @@ namespace FirebaseSharp.Tests
                     A<HttpCompletionOption>.Ignored,
                     A<CancellationToken>.Ignored)).Returns(response);
 
-                Request firebaseRequest = new Request(client, null);
-                var result = firebaseRequest.GetStreaming(
+                FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
+                var result = firebaseFirebaseRequest.GetStreaming(
                     path: childPath,
                     cancellationToken: CancellationToken.None).Result;
 
@@ -105,8 +108,8 @@ namespace FirebaseSharp.Tests
                 var removedCallback = A.Fake<ValueRemovedEventHandler>();
                 var closedCallback = A.Fake<StreamingResponseClosedHandler>();
 
-                Request firebaseRequest = new Request(client, null);
-                var result = firebaseRequest.GetStreaming(
+                FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
+                var result = firebaseFirebaseRequest.GetStreaming(
                     path: childPath,
                     cancellationToken: CancellationToken.None).Result;
 
@@ -162,8 +165,8 @@ namespace FirebaseSharp.Tests
                 var removedCallback = A.Fake<ValueRemovedEventHandler>();
                 var revokedCallback = A.Fake<AuthenticationRevokedHandler>();
 
-                Request firebaseRequest = new Request(client, null);
-                var result = firebaseRequest.GetStreaming(
+                FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
+                var result = firebaseFirebaseRequest.GetStreaming(
                     path: childPath,
                     cancellationToken: CancellationToken.None).Result;
 
@@ -228,8 +231,8 @@ namespace FirebaseSharp.Tests
                 var changedCallback = A.Fake<ValueChangedEventHandler>();
                 var revokedCallback = A.Fake<AuthenticationRevokedHandler>();
 
-                Request firebaseRequest = new Request(client, null);
-                var result = firebaseRequest.GetStreaming(
+                FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
+                var result = firebaseFirebaseRequest.GetStreaming(
                     path: childPath,
                     cancellationToken: CancellationToken.None).Result;
 
@@ -290,8 +293,8 @@ namespace FirebaseSharp.Tests
             var revokedCallback = A.Fake<AuthenticationRevokedHandler>();
             var removedCallback = A.Fake<ValueRemovedEventHandler>();
 
-            Request firebaseRequest = new Request(client, null);
-            var result = firebaseRequest.GetStreaming(
+            FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
+            var result = firebaseFirebaseRequest.GetStreaming(
                 path: childPath,
                 cancellationToken: CancellationToken.None).Result;
 
@@ -354,8 +357,8 @@ namespace FirebaseSharp.Tests
             var removedCallback = A.Fake<ValueRemovedEventHandler>();
             var timeoutCallack = A.Fake<StreamingResponseIdleTimeoutHandler>();
 
-            Request firebaseRequest = new Request(client, null);
-            var result = firebaseRequest.GetStreaming(
+            FirebaseRequest firebaseFirebaseRequest = new FirebaseRequest(client, null);
+            var result = firebaseFirebaseRequest.GetStreaming(
                 path: childPath,
                 cancellationToken: CancellationToken.None).Result;
 

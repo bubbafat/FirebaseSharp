@@ -1,8 +1,9 @@
 ﻿using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using FirebaseSharp.Portable.Utilities;
 
-namespace FirebaseSharp.Portable.Network
+namespace FirebaseSharp.Portable.Response
 {
     class FirebaseHttpResponseMessage : IFirebaseHttpResponseMessage
     {

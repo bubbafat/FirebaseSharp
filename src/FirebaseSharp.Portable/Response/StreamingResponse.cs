@@ -2,10 +2,12 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using FirebaseSharp.Portable.Network;
+using FirebaseSharp.Portable.Cache;
+using FirebaseSharp.Portable.Response.Events;
+using FirebaseSharp.Portable.Utilities;
 using Newtonsoft.Json;
 
-namespace FirebaseSharp.Portable
+namespace FirebaseSharp.Portable.Response
 {
     internal class StreamingResponse : IStreamingResponse
     {
@@ -56,7 +58,7 @@ namespace FirebaseSharp.Portable
         public event StreamingResponseClosedHandler Closed;
         public event PathCanceledHandler Canceled;
         public event StreamingResponseIdleTimeoutHandler Timeout;
-        public event StreamResponseErrorHandler Error;
+        public event StreamingResponseErrorHandler Error;
 
         private void OnIdleTimeout()
         {

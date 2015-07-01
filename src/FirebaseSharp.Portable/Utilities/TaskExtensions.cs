@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace FirebaseSharp.Portable
+namespace FirebaseSharp.Portable.Utilities
 {
     internal static class TaskExtensions
     {

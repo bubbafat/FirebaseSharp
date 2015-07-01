@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace FirebaseSharp.Portable
+namespace FirebaseSharp.Portable.Cache
 {
     internal class CacheItem
     {

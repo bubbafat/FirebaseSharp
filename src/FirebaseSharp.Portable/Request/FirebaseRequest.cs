@@ -4,16 +4,16 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using FirebaseSharp.Portable.Network;
+using FirebaseSharp.Portable.Response;
 
-namespace FirebaseSharp.Portable
+namespace FirebaseSharp.Portable.Request
 {
-    internal sealed class Request : IDisposable
+    internal sealed class FirebaseRequest : IDisposable
     {
         private readonly IFirebaseHttpClient _client;
         private readonly string _authToken;
 
-        public Request(IFirebaseHttpClient client, string authToken)
+        public FirebaseRequest(IFirebaseHttpClient client, string authToken)
         {
             _client = client;
             _authToken = authToken;

@@ -1,6 +1,8 @@
 ﻿using System;
+using FirebaseSharp.Portable.Cache;
+using FirebaseSharp.Portable.Response.Events;
 
-namespace FirebaseSharp.Portable
+namespace FirebaseSharp.Portable.Response
 {
     public interface IStreamingResponse : IDisposable
     {
@@ -8,10 +10,11 @@ namespace FirebaseSharp.Portable
         event ValueChangedEventHandler Changed;
         event ValueRemovedEventHandler Removed;
         event AuthenticationRevokedHandler Revoked;
-        event StreamingResponseClosedHandler Closed;
         event PathCanceledHandler Canceled;
+
+        event StreamingResponseClosedHandler Closed;
         event StreamingResponseIdleTimeoutHandler Timeout;
-        event StreamResponseErrorHandler Error;
+        event StreamingResponseErrorHandler Error;
 
         void Listen();
     }

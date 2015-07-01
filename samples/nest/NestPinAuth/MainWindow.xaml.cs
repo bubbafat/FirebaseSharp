@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
 using FirebaseSharp.Portable;
+using FirebaseSharp.Portable.Cache;
+using FirebaseSharp.Portable.Response;
 using RestSharp;
 using RestSharp.Deserializers;
 
