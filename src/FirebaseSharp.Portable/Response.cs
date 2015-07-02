@@ -38,7 +38,7 @@ namespace FirebaseSharp.Portable
         private async Task ReadLoop(HttpResponseMessage response, CancellationToken cancellationToken)
         {
             using (response)
-            using (var content = await response.Content.ReadAsStreamAsync())
+            using (var content = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
             using (StreamReader sr = new StreamReader(content))
             {
                 string eventName = null;

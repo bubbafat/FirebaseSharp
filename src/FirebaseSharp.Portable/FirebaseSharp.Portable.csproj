@@ -40,7 +40,6 @@
     <Compile Include="Response.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Request.cs" />
-    <Compile Include="StreamingEvent.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

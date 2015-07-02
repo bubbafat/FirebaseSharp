@@ -90,7 +90,7 @@ namespace FirebaseSharp.Portable
             return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
-        private Task<HttpResponseMessage> Query(HttpMethod method, string path, string payload = null)
+        private async Task<HttpResponseMessage> Query(HttpMethod method, string path, string payload = null)
         {
             Uri uri = BuildPath(path);
 
@@ -101,7 +101,7 @@ namespace FirebaseSharp.Portable
                 request.Content = new StringContent(payload);
             }
 
-            return _client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+            return await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead).ConfigureAwait(false);
         }
 
         private Uri BuildPath(string path)
