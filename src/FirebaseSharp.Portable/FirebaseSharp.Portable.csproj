@@ -36,6 +36,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BlockingQueue.cs" />
     <Compile Include="Firebase.cs" />
     <Compile Include="FirebaseCache.cs" />
     <Compile Include="JsonCache.cs" />

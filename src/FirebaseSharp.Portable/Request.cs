@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -9,6 +11,8 @@ namespace FirebaseSharp.Portable
     {
         private readonly HttpClient _client;
         private readonly string _authToken;
+        private readonly JsonCache _cache = new JsonCache();
+        private readonly Task _sendTask;
 
         public Request(Uri rootUri, string authToken)
         {
@@ -24,7 +28,48 @@ namespace FirebaseSharp.Portable
                 Timeout = TimeSpan.FromMinutes(120),
             };
 
+            _cache.Changed += CacheOnChanged;
+
             _authToken = authToken;
+
+            _sendTask = Task.Run(() =>
+            {
+                DrainQueue().Wait();
+            });
+        }
+
+        readonly BlockingQueue<DataChangedEventArgs> _unsentLocals = new BlockingQueue<DataChangedEventArgs>();
+
+        private async Task DrainQueue()
+        {
+            int waitMs = 10;
+            TimeSpan maxWait = TimeSpan.FromMinutes(1);
+
+            while (true)
+            {
+                var next = _unsentLocals.Dequeue();
+                try
+                {
+                    var response = await Query(new HttpMethod(next.HttpMethod.ToString()), next.Path, next.Data).ConfigureAwait(false);
+                    response.EnsureSuccessStatusCode();
+                    waitMs = 10;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("ERROR: {0}", ex.Message);
+                    _unsentLocals.Reque(next);
+                    Task.Delay(waitMs).Wait();
+                    waitMs = Math.Min(waitMs * 2, (int)maxWait.TotalMilliseconds);
+                }
+            }
+        }
+
+        private async void CacheOnChanged(object sender, DataChangedEventArgs e)
+        {
+            if (e.Source == ChangeSource.Local)
+            {
+                _unsentLocals.Enqueue(e);
+            }
         }
 
         public Uri RootUri
@@ -45,7 +90,7 @@ namespace FirebaseSharp.Portable
             HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            return new Response(response, added, changed, removed);
+            return new Response(response, _cache, added, changed, removed);
         }
 
         internal async Task<string> GetSingle(string path)
@@ -56,29 +101,19 @@ namespace FirebaseSharp.Portable
             return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
-        internal async Task Delete(string path)
+        internal void Delete(string path)
         {
-            HttpResponseMessage response = await Query(HttpMethod.Delete, path).ConfigureAwait(false);
-
-            response.EnsureSuccessStatusCode();
+            _cache.Put(ChangeSource.Local, path, null);
         }
 
-        internal async Task<string> Patch(string path, string payload)
+        internal void Patch(string path, string payload)
         {
-            HttpResponseMessage response = await Query(new HttpMethod("PATCH"), path, payload).ConfigureAwait(false);
-
-            response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            _cache.Patch(ChangeSource.Local, path, payload);
         }
 
-        internal async Task<string> Put(string path, string payload)
+        internal void Put(string path, string payload)
         {
-            HttpResponseMessage response = await Query(HttpMethod.Put, path, payload).ConfigureAwait(false);
-            
-            response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            _cache.Put(ChangeSource.Local, path, payload);
         }
 
         internal async Task<string> Post(string path, string payload)
@@ -100,6 +135,12 @@ namespace FirebaseSharp.Portable
             {
                 request.Content = new StringContent(payload);
             }
+
+            Debug.WriteLineIf(request.Content == null, 
+                string.Format("{0} {1}", method.Method, path));
+
+            Debug.WriteLineIf(request.Content != null,
+                string.Format("{0} {1}: {2}", method.Method, path, payload));
 
             return await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead).ConfigureAwait(false);
         }

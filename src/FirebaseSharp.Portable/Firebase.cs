@@ -38,36 +38,19 @@ namespace FirebaseSharp.Portable
             return await _request.Post(path, payload).ConfigureAwait(false);
         }
 
-        [Obsolete("Use PutAsync instead.  This method will be removed in the next version.")]
-        public string Put(string path, string payload)
+        public void Put(string path, string payload)
         {
-            return PutAsync(path, payload).Result;
+            _request.Put(path, payload);
         }
 
-        public async Task<string> PutAsync(string path, string payload)
+        public void Patch(string path, string payload)
         {
-            return await _request.Put(path, payload).ConfigureAwait(false);
+            _request.Patch(path, payload);
         }
 
-        [Obsolete("Use PatchAsync instead.  This method will be removed in the next version.")]
-        public string Patch(string path, string payload)
-        {
-            return PatchAsync(path, payload).Result;
-        }
-
-        public async Task<string> PatchAsync(string path, string payload)
-        {
-            return await _request.Patch(path, payload).ConfigureAwait(false);
-        }
-
-        [Obsolete("Use DeleteAsync instead.  This method will be removed in the next version.")]
         public void Delete(string path)
         {
-            DeleteAsync(path).Wait();
-        }
-        public async Task DeleteAsync(string path)
-        {
-            await _request.Delete(path).ConfigureAwait(false);
+            _request.Delete(path);
         }
 
         [Obsolete("Use GetAsync instead.  This method will be removed in the next version.")]

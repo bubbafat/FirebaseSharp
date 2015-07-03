@@ -79,8 +79,8 @@ namespace FirebaseWpfDraw
 
                 try
                 {
-                    _firebase.PutAsync(FirebaseIdFromPoint(queue.Point), 
-                                       string.Format("\"{0}\"", queue.Color)).Wait();
+                    _firebase.Put(FirebaseIdFromPoint(queue.Point), 
+                                       string.Format("\"{0}\"", queue.Color));
                 }
                 catch (Exception)
                 {
@@ -141,31 +141,34 @@ namespace FirebaseWpfDraw
 
         private void PaintNewitem(ValueAddedEventArgs args)
         {
-            if (string.IsNullOrEmpty(args.Data))
+            PaintCanvas.Dispatcher.Invoke(() =>
             {
-                return;
-            }
-
-            JToken data = JToken.Parse(args.Data);
-            if (data is JValue)
-            {
-                Point p = NormalizedPointFromFirebase(args.Path.Substring(1));
-                Brush b = GetBrushFromFirebaseColor(args.Data.ToString());
-
-                PaintPoint(p, b);   
-            }
-            else
-            {
-                JObject directions = (JObject) data;
-                foreach (var direction in directions.Properties())
+                if (string.IsNullOrEmpty(args.Data))
                 {
-                    Point p = NormalizedPointFromFirebase(direction.Name);
-                    Brush b = GetBrushFromFirebaseColor(direction.Value.ToString());
+                    return;
+                }
+
+                JToken data = JToken.Parse(args.Data);
+                if (data is JValue)
+                {
+                    Point p = NormalizedPointFromFirebase(args.Path);
+                    Brush b = GetBrushFromFirebaseColor(args.Data.ToString());
 
                     PaintPoint(p, b);
+                }
+                else
+                {
+                    JObject directions = (JObject) data;
+                    foreach (var direction in directions.Properties())
+                    {
+                        Point p = NormalizedPointFromFirebase(direction.Name);
+                        Brush b = GetBrushFromFirebaseColor(direction.Value.ToString());
 
-                }                
-            }
+                        PaintPoint(p, b);
+
+                    }
+                }
+            });
         }
 
 
@@ -196,7 +199,7 @@ namespace FirebaseWpfDraw
         void PaintPoint(Point point, Brush brush)
         {
             Point normalized = GetNormalizedPoint(point);
-            PaintCanvas.Dispatcher.BeginInvoke((Action)(() => PaintCanvas.Children.Add(RectangleFromPoint(normalized, brush))));
+            PaintCanvas.Children.Add(RectangleFromPoint(normalized, brush));
         }
 
 
@@ -206,7 +209,7 @@ namespace FirebaseWpfDraw
             SolidColorBrush brush;
             if (!_brushMap.TryGetValue(color, out brush))
             {
-                Color c = (Color)ColorConverter.ConvertFromString(ThreeDigitToSixDigitHex(color));
+                Color c = (Color)ColorConverter.ConvertFromString(ThreeDigitToSixDigitHex(color.Trim(new []{'\"'})));
                 brush = new SolidColorBrush(c);
                 _brushMap.Add(color, brush);
             }

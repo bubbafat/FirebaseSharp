@@ -14,13 +14,14 @@ namespace FirebaseSharp.Portable
 
     internal class DataChangedEventArgs : EventArgs
     {
-        public DataChangedEventArgs(ChangeSource source, EventType eventType, string path, string data, string oldData = null)
+        public DataChangedEventArgs(ChangeSource source, EventType eventType, OriginalEvent httpMethod, string path, string data, string oldData = null)
         {
             Source = source;
             Path = path;
             Data = data;
             Event = eventType;
             OldData = oldData;
+            HttpMethod = httpMethod;
         }
 
         public ChangeSource Source { get; private set; }
@@ -29,6 +30,14 @@ namespace FirebaseSharp.Portable
         public string Path { get; private set; }
         public string Data { get; private set; }
         public string OldData { get; private set; }
+        public OriginalEvent HttpMethod { get; private set; }
+    }
+
+    enum OriginalEvent
+    {
+        Put,
+        Patch,
+        Delete
     }
 
     enum EventType
@@ -87,12 +96,12 @@ namespace FirebaseSharp.Portable
                         }
                     }
 
-                    eventArgs = new DataChangedEventArgs(source, EventType.Changed, path, newData.ToString(), old.ToString());
+                    eventArgs = new DataChangedEventArgs(source, EventType.Changed, OriginalEvent.Put, path, newData.ToString(), old.ToString());
                 }
                 else
                 {
                     var inserted = InsertAt(path, newData);
-                    eventArgs = new DataChangedEventArgs(source, EventType.Added, path, inserted.ToString());
+                    eventArgs = new DataChangedEventArgs(source, EventType.Added, OriginalEvent.Put, path, inserted.ToString());
                 }
             }
 
@@ -139,18 +148,18 @@ namespace FirebaseSharp.Portable
                         }
                     }
 
-                    eventArgs = new DataChangedEventArgs(source, EventType.Changed, path, found.ToString(), old.ToString());
+                    eventArgs = new DataChangedEventArgs(source, EventType.Changed, OriginalEvent.Patch, path, found.ToString(), old.ToString());
                 }
                 else
                 {
                     var inserted = InsertAt(path, newData);
-                    eventArgs = new DataChangedEventArgs(source, EventType.Added, path, inserted.ToString());
+                    eventArgs = new DataChangedEventArgs(source, EventType.Added, OriginalEvent.Patch, path, inserted.ToString());
                 }
             }
             OnChanged(eventArgs);
         }
 
-        public void Delete(ChangeSource source, string path)
+        private void Delete(ChangeSource source, string path)
         {
             DataChangedEventArgs eventArgs;
 
@@ -168,7 +177,7 @@ namespace FirebaseSharp.Portable
                         _root = new JObject();
                     }
 
-                    eventArgs = new DataChangedEventArgs(source, EventType.Removed, path, null);
+                    eventArgs = new DataChangedEventArgs(source, EventType.Removed, OriginalEvent.Put, path, null);
                 }
                 else
                 {

@@ -16,13 +16,14 @@ namespace FirebaseSharp.Portable
         private readonly JsonCache _cache;
 
         internal Response(HttpResponseMessage response,
+            JsonCache cache,
             ValueAddedEventHandler added = null,
             ValueChangedEventHandler changed = null,
             ValueRemovedEventHandler removed = null)
         {
             _cancel = new CancellationTokenSource();
 
-            _cache = new JsonCache();
+            _cache = cache;
             _cache.Changed += OnCacheChanged;
 
             _pollingTask = ReadLoop(response, _cancel.Token);
