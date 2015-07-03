@@ -38,6 +38,15 @@ namespace FirebaseSharp.Portable
         Removed
     }
 
+    /// <summary>
+    /// The JsonCache is a single JSON object that represents the state of the 
+    /// data as we know it.  As changes come in the object is updated 
+    /// and the update communicated via an event.
+    /// 
+    /// PUT changes the path exactly as directed
+    /// PATCH merges the changes (over-writing specifically named children, leaving the rest untouched)
+    /// DELETE deletes at the path
+    /// </summary>
     class JsonCache
     {
         private JToken _root = null;
@@ -97,7 +106,7 @@ namespace FirebaseSharp.Portable
 
             if (data == null)
             {
-                Delete(source, path);
+                // PATCH of null is skipped
                 return;
             }
 
@@ -236,21 +245,25 @@ namespace FirebaseSharp.Portable
                 var existingTarget = target[newChildPath.Path];
                 var newChild = newData[newChildPath.Path];
 
-                if (existingTarget != null)
+                // a PATCH of a null object is skipped
+                // use PUT to delete
+                if (newChild.Type == JTokenType.Null)
                 {
-                    JValue existingValue = existingTarget as JValue;
-
-                    if (existingValue != null)
-                    {
-                        JValue newValue = newChild as JValue;
-                        if (newValue != null)
-                        {
-                            existingValue.Replace(newValue);
-                            continue;
-                        }
-                    }
+                    continue;
                 }
 
+                JValue existingValue = existingTarget as JValue;
+
+                if (existingValue != null)
+                {
+                    JValue newValue = newChild as JValue;
+                    if (newValue != null)
+                    {
+                        existingValue.Replace(newValue);
+                        continue;
+                    }
+                }
+                
                 target[newChild.Path] = newChild;
             }
         }
