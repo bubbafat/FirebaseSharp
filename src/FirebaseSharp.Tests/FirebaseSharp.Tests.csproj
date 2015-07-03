@@ -75,6 +75,7 @@
   <ItemGroup>
     <Compile Include="AuthTests.cs" />
     <Compile Include="EndToEndLiveTest.cs" />
+    <Compile Include="JsonCache\IntegrityTests.cs" />
     <Compile Include="PatchTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestConfig.cs" />
@@ -88,8 +89,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <EmbeddedResource Include="JsonCache\Data\weather.json" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

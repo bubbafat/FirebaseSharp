@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
@@ -40,11 +41,14 @@ namespace FirebaseSharp.Portable
     class JsonCache
     {
         private JToken _root = null;
+        private readonly object _lock = new object();
 
         public event DataChangedHandler Changed;
 
         public void Put(ChangeSource source, string path, string data)
         {
+            DataChangedEventArgs eventArgs;
+
             if (data == null)
             {
                 Delete(source, path);
@@ -55,53 +59,13 @@ namespace FirebaseSharp.Portable
                 ? JToken.Parse(data)
                 : new JValue(data);
 
-            JToken found;
-            if (TryGetChild(path, out found))
+            lock (_lock)
             {
-                JToken old = found.DeepClone();
-                if (!UpdateValues(found, newData))
+
+                JToken found;
+                if (TryGetChild(path, out found))
                 {
-                    if (found.Parent != null)
-                    {
-                        found.Replace(newData);
-                    }
-                    else
-                    {
-                        _root = newData;
-                    }
-                }
-
-                OnChanged(new DataChangedEventArgs(source, EventType.Changed, path, newData.ToString(), old.ToString()));
-            }
-            else
-            {
-                var inserted = InsertAt(path, newData);
-                OnChanged(new DataChangedEventArgs(source, EventType.Added, path, inserted.ToString()));
-            }
-        }
-
-        public void Patch(ChangeSource source, string path, string data)
-        {
-            if (data == null)
-            {
-                Delete(source, path);
-                return;
-            }
-
-            JToken newData = data.Trim().StartsWith("{")
-                ? JToken.Parse(data)
-                : new JValue(data);
-
-            JToken found;
-            if (TryGetChild(path, out found))
-            {
-                JToken old = found.DeepClone();
-                if (data.Trim().StartsWith("{"))
-                {
-                    Merge(found, newData);
-                }
-                else
-                {
+                    JToken old = found.DeepClone();
                     if (!UpdateValues(found, newData))
                     {
                         if (found.Parent != null)
@@ -113,14 +77,104 @@ namespace FirebaseSharp.Portable
                             _root = newData;
                         }
                     }
-                }
 
-                OnChanged(new DataChangedEventArgs(source, EventType.Changed, path, found.ToString(), old.ToString()));
+                    eventArgs = new DataChangedEventArgs(source, EventType.Changed, path, newData.ToString(), old.ToString());
+                }
+                else
+                {
+                    var inserted = InsertAt(path, newData);
+                    eventArgs = new DataChangedEventArgs(source, EventType.Added, path, inserted.ToString());
+                }
             }
-            else
+
+            // fire event outside of the lock to avoid re-entrency issues
+            OnChanged(eventArgs);
+        }
+
+        public void Patch(ChangeSource source, string path, string data)
+        {
+            DataChangedEventArgs eventArgs;
+
+            if (data == null)
             {
-                var inserted = InsertAt(path, newData);
-                OnChanged(new DataChangedEventArgs(source, EventType.Added, path, inserted.ToString()));
+                Delete(source, path);
+                return;
+            }
+
+            JToken newData = data.Trim().StartsWith("{")
+                ? JToken.Parse(data)
+                : new JValue(data);
+
+            lock (_lock)
+            {
+                JToken found;
+                if (TryGetChild(path, out found))
+                {
+                    JToken old = found.DeepClone();
+                    if (data.Trim().StartsWith("{"))
+                    {
+                        Merge(found, newData);
+                    }
+                    else
+                    {
+                        if (!UpdateValues(found, newData))
+                        {
+                            if (found.Parent != null)
+                            {
+                                found.Replace(newData);
+                            }
+                            else
+                            {
+                                _root = newData;
+                            }
+                        }
+                    }
+
+                    eventArgs = new DataChangedEventArgs(source, EventType.Changed, path, found.ToString(), old.ToString());
+                }
+                else
+                {
+                    var inserted = InsertAt(path, newData);
+                    eventArgs = new DataChangedEventArgs(source, EventType.Added, path, inserted.ToString());
+                }
+            }
+            OnChanged(eventArgs);
+        }
+
+        public void Delete(ChangeSource source, string path)
+        {
+            DataChangedEventArgs eventArgs;
+
+            lock (_lock)
+            {
+                JToken node;
+                if (TryGetChild(path, out node))
+                {
+                    if (node.Parent != null)
+                    {
+                        node.Parent.Remove();
+                    }
+                    else
+                    {
+                        _root = new JObject();
+                    }
+
+                    eventArgs = new DataChangedEventArgs(source, EventType.Removed, path, null);
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            OnChanged(eventArgs);
+        }
+
+        internal string Dump()
+        {
+            lock (_lock)
+            {
+                return _root.ToString(Formatting.None);
             }
         }
 
@@ -157,6 +211,11 @@ namespace FirebaseSharp.Portable
                     if (child == null)
                     {
                         node[segment] = new JObject();
+                        node = node[segment];
+                    }
+                    else
+                    {
+                        node = child;
                     }
                 }
 
@@ -193,24 +252,6 @@ namespace FirebaseSharp.Portable
                 }
 
                 target[newChild.Path] = newChild;
-            }
-        }
-
-        public void Delete(ChangeSource source, string path)
-        {
-            JToken node;
-            if (TryGetChild(path, out node))
-            {
-                if (node.Parent != null)
-                {
-                    node.Parent.Remove();
-                }
-                else
-                {
-                    _root = new JObject();
-                }
-
-                OnChanged(new DataChangedEventArgs(source, EventType.Removed, path, null));
             }
         }
 
