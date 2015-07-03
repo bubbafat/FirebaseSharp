@@ -72,14 +72,14 @@ namespace FirebaseSharp.Portable
     public delegate void ValueRemovedEventHandler(object sender, ValueRemovedEventArgs args);
 
 
-    internal sealed class FirebaseCache
+    internal sealed class FirebaseCache2
     {
         private readonly CacheItem _tree = new CacheItem();
         private readonly object _treeLock = new object();
 
         private readonly char[] _seperator = {'/'};
 
-        public FirebaseCache()
+        public FirebaseCache2()
         {
             _tree.Name = string.Empty;
             _tree.Created = false;

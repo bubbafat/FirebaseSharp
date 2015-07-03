@@ -21,7 +21,7 @@ namespace FirebaseSharp.Portable
             _client = new HttpClient(handler, true)
             {
                 BaseAddress = rootUri,
-                Timeout = TimeSpan.FromMinutes(1),
+                Timeout = TimeSpan.FromMinutes(120),
             };
 
             _authToken = authToken;

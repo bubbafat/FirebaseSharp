@@ -55,7 +55,7 @@ namespace FirebaseSharp.Tests
 
                 string single = fb.Get(singlePath);
 
-                dynamic payloadSingle = JsonConvert.DeserializeObject(single);
+                string payloadSingle = JsonConvert.DeserializeObject(single).ToString();
 
                 Assert.AreEqual(found.Data, payloadSingle);
 

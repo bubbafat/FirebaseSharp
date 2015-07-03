@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
 {
@@ -12,22 +13,64 @@ namespace FirebaseSharp.Portable
     {
         private readonly CancellationTokenSource _cancel;
         private readonly Task _pollingTask;
-        private readonly FirebaseCache _cache;
+        private readonly JsonCache _cache;
 
-        internal Response(HttpResponseMessage response, 
+        internal Response(HttpResponseMessage response,
             ValueAddedEventHandler added = null,
             ValueChangedEventHandler changed = null,
             ValueRemovedEventHandler removed = null)
         {
             _cancel = new CancellationTokenSource();
 
-            _cache = new FirebaseCache();
-
-            if(added != null) { _cache.Added += added; }
-            if (changed != null) { _cache.Changed += changed; }
-            if (removed != null) { _cache.Removed += removed; }
+            _cache = new JsonCache();
+            _cache.Changed += OnCacheChanged;
 
             _pollingTask = ReadLoop(response, _cancel.Token);
+
+            if (added != null)
+            {
+                Added += added;
+            }
+            if (changed != null)
+            {
+                Changed += changed;
+            }
+            if (removed != null)
+            {
+                Removed += removed;
+            }
+        }
+
+        public event ValueAddedEventHandler Added;
+        public event ValueChangedEventHandler Changed;
+        public event ValueRemovedEventHandler Removed;
+
+        private void OnCacheChanged(object sender, DataChangedEventArgs e)
+        {
+            switch (e.Event)
+            {
+                case EventType.Added:
+                    var added = Added;
+                    if (added != null)
+                    {
+                        added(this, new ValueAddedEventArgs(e.Path, e.Data));
+                    }
+                    break;
+                case EventType.Changed:
+                    var changed = Changed;
+                    if (changed != null)
+                    {
+                        changed(this, new ValueChangedEventArgs(e.Path, e.Data, e.OldData));
+                    }
+                    break;
+                case EventType.Removed:
+                    var removed = Removed;
+                    if (removed != null)
+                    {
+                        removed(this, new ValueRemovedEventArgs(e.Path));
+                    }
+                    break;
+            }
         }
 
         public void Cancel()
@@ -81,23 +124,21 @@ namespace FirebaseSharp.Portable
             {
                 case "put":
                 case "patch":
-                    using (StringReader r = new StringReader(p))
-                    using(JsonReader reader = new JsonTextReader(r))
+                    JObject jo = JObject.Parse(p);
+                    string path = jo["path"].ToString();
+
+                    var dataObj = jo["data"];
+                    string data = (dataObj.Type == JTokenType.Null) ? null : dataObj.ToString();
+                    
+                    if (eventName == "put")
                     {
-                        ReadToNamedPropertyValue(reader, "path");
-                        reader.Read();
-                        string path = reader.Value.ToString();
-
-                        if (eventName == "put")
-                        {
-                            _cache.Replace(path, ReadToNamedPropertyValue(reader, "data"));
-                        }
-                        else
-                        {
-                            _cache.Update(path, ReadToNamedPropertyValue(reader, "data"));
-                        }
-
+                        _cache.Put(ChangeSource.Remote, path, data);
                     }
+                    else
+                    {
+                        _cache.Patch(ChangeSource.Remote, path, data);
+                    }
+
                     break;
             }
         }

@@ -16,7 +16,7 @@ namespace FirebaseSharp.Tests
         [TestMethod]
         public void PatchPatches()
         {
-            FirebaseCache cache = new FirebaseCache();
+            FirebaseCache2 cache = new FirebaseCache2();
 
             using (StringReader r = new StringReader("{\"a\": 1, \"b\": 2, \"c\": {\"foo\": true, \"bar\": false}}"))
             using (JsonReader reader = new JsonTextReader(r))
