@@ -1,7 +1,5 @@
 ﻿using FirebaseSharp.Portable;
-using Newtonsoft.Json;
 using System;
-using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Newtonsoft.Json.Linq;
 
 namespace FirebaseWpfDraw
 {
@@ -142,10 +141,31 @@ namespace FirebaseWpfDraw
 
         private void PaintNewitem(ValueAddedEventArgs args)
         {
-            Point p = NormalizedPointFromFirebase(args.Path.Substring(1));
-            Brush b = GetBrushFromFirebaseColor(args.Data);
+            if (string.IsNullOrEmpty(args.Data))
+            {
+                return;
+            }
 
-            PaintPoint(p, b);
+            JToken data = JToken.Parse(args.Data);
+            if (data is JValue)
+            {
+                Point p = NormalizedPointFromFirebase(args.Path.Substring(1));
+                Brush b = GetBrushFromFirebaseColor(args.Data.ToString());
+
+                PaintPoint(p, b);   
+            }
+            else
+            {
+                JObject directions = (JObject) data;
+                foreach (var direction in directions.Properties())
+                {
+                    Point p = NormalizedPointFromFirebase(direction.Name);
+                    Brush b = GetBrushFromFirebaseColor(direction.Value.ToString());
+
+                    PaintPoint(p, b);
+
+                }                
+            }
         }
 
 
