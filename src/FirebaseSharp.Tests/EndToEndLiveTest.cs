@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace FirebaseSharp.Tests
@@ -12,18 +13,18 @@ namespace FirebaseSharp.Tests
     public class EndToEndLiveTest
     {
         [TestMethod]
-        public void EndToEnd()
+        public async Task EndToEnd()
         {
             Portable.Firebase fb = new Portable.Firebase(new Uri(TestConfig.RootUrl));
 
             string testRoot = string.Format("/test/{0}", DateTime.UtcNow.Ticks);
 
-            List<ValueAddedEventArgs> callbackResults = new List<ValueAddedEventArgs>();
+            List<DataChangedEventArgs> callbackResults = new List<DataChangedEventArgs>();
             List<string> created = new List<string>();
 
             ManualResetEvent received = new ManualResetEvent(false);
 
-            using (fb.GetStreaming(testRoot, added: (sender, args) =>
+            using (await fb.GetStreamingAsync(testRoot, (sender, args) =>
             {
                 callbackResults.Add(args);
                 received.Set();

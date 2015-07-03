@@ -4,15 +4,15 @@ using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
 {
-    internal delegate void DataChangedHandler(object sender, DataChangedEventArgs e);
+    public delegate void DataChangedHandler(object sender, DataChangedEventArgs e);
 
-    enum ChangeSource
+    public enum ChangeSource
     {
         Local,
         Remote
     }
 
-    internal class DataChangedEventArgs : EventArgs
+    public class DataChangedEventArgs : EventArgs
     {
         public DataChangedEventArgs(ChangeSource source, EventType eventType, OriginalEvent httpMethod, string path, string data, string oldData = null)
         {
@@ -33,14 +33,14 @@ namespace FirebaseSharp.Portable
         public OriginalEvent HttpMethod { get; private set; }
     }
 
-    enum OriginalEvent
+    public enum OriginalEvent
     {
         Put,
         Patch,
         Delete
     }
 
-    enum EventType
+    public enum EventType
     {
         Added,
         Changed,

@@ -16,62 +16,18 @@ namespace FirebaseSharp.Portable
         private readonly JsonCache _cache;
 
         internal Response(HttpResponseMessage response,
-            JsonCache cache,
-            ValueAddedEventHandler added = null,
-            ValueChangedEventHandler changed = null,
-            ValueRemovedEventHandler removed = null)
+            JsonCache cache, DataChangedHandler handler)
         {
             _cancel = new CancellationTokenSource();
 
             _cache = cache;
-            _cache.Changed += OnCacheChanged;
+
+            if (handler != null)
+            {
+                _cache.Changed += handler;
+            }
 
             _pollingTask = ReadLoop(response, _cancel.Token);
-
-            if (added != null)
-            {
-                Added += added;
-            }
-            if (changed != null)
-            {
-                Changed += changed;
-            }
-            if (removed != null)
-            {
-                Removed += removed;
-            }
-        }
-
-        public event ValueAddedEventHandler Added;
-        public event ValueChangedEventHandler Changed;
-        public event ValueRemovedEventHandler Removed;
-
-        private void OnCacheChanged(object sender, DataChangedEventArgs e)
-        {
-            switch (e.Event)
-            {
-                case EventType.Added:
-                    var added = Added;
-                    if (added != null)
-                    {
-                        added(this, new ValueAddedEventArgs(e.Path, e.Data));
-                    }
-                    break;
-                case EventType.Changed:
-                    var changed = Changed;
-                    if (changed != null)
-                    {
-                        changed(this, new ValueChangedEventArgs(e.Path, e.Data, e.OldData));
-                    }
-                    break;
-                case EventType.Removed:
-                    var removed = Removed;
-                    if (removed != null)
-                    {
-                        removed(this, new ValueRemovedEventArgs(e.Path));
-                    }
-                    break;
-            }
         }
 
         public void Cancel()

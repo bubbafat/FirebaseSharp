@@ -66,19 +66,15 @@ namespace FirebaseSharp.Portable
 
         [Obsolete("Use GetStreamingAsync instead.  This method will be removed in the next version.")]
         public Response GetStreaming(string path, 
-            ValueAddedEventHandler added = null,
-            ValueChangedEventHandler changed = null,
-            ValueRemovedEventHandler removed = null)
+            DataChangedHandler handler)
         {
-            return GetStreamingAsync(path, added, changed, removed).Result;
+            return GetStreamingAsync(path, handler).Result;
         }
 
         public async Task<Response> GetStreamingAsync(string path,
-            ValueAddedEventHandler added = null,
-            ValueChangedEventHandler changed = null,
-            ValueRemovedEventHandler removed = null)
+            DataChangedHandler handler)
         {
-            return await _request.GetStreaming(path, added, changed, removed).ConfigureAwait(false);
+            return await _request.GetStreaming(path, handler).ConfigureAwait(false);
         }
 
         public void Dispose()

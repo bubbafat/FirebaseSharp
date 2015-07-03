@@ -64,7 +64,7 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        private async void CacheOnChanged(object sender, DataChangedEventArgs e)
+        private void CacheOnChanged(object sender, DataChangedEventArgs e)
         {
             if (e.Source == ChangeSource.Local)
             {
@@ -77,10 +77,7 @@ namespace FirebaseSharp.Portable
             get { return _client.BaseAddress; }
         }
 
-        public async Task<Response> GetStreaming(string path, 
-            ValueAddedEventHandler added = null,
-            ValueChangedEventHandler changed = null,
-            ValueRemovedEventHandler removed = null)
+        public async Task<Response> GetStreaming(string path, DataChangedHandler handler)
         {
             Uri uri = BuildPath(path);
 
@@ -90,7 +87,7 @@ namespace FirebaseSharp.Portable
             HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            return new Response(response, _cache, added, changed, removed);
+            return new Response(response, _cache, handler);
         }
 
         internal async Task<string> GetSingle(string path)

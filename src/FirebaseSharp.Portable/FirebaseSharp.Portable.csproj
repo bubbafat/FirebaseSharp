@@ -38,7 +38,6 @@
   <ItemGroup>
     <Compile Include="BlockingQueue.cs" />
     <Compile Include="Firebase.cs" />
-    <Compile Include="FirebaseCache.cs" />
     <Compile Include="JsonCache.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -75,43 +75,19 @@ namespace NestPinAuth
             }
 
             Firebase nest = new Firebase(new Uri("https://developer-api.nest.com"), TextNestAccessToken.Text);
-            _resp = nest.GetStreaming("", Added, Changed, Removed);
+            _resp = nest.GetStreaming("", Handler);
         }
 
-        private void Removed(object sender, ValueRemovedEventArgs args)
+        private void Handler(object sender, DataChangedEventArgs args)
         {
             Dispatcher.Invoke(() =>
             {
                 lock (_displayLock)
                 {
                     TextStreamingResults.Text += Environment.NewLine;
-                    TextStreamingResults.Text += "REMOVED: " + args.Path;
-                }
-            });
-        }
+                    TextStreamingResults.Text += string.Format("{0} {1}: {2}", args.Event, args.Path,
+                        args.Data ?? "<null>");
 
-        private void Changed(object sender, ValueChangedEventArgs args)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                lock (_displayLock)
-                {
-                    TextStreamingResults.Text += Environment.NewLine;
-                    TextStreamingResults.Text += "CHANGED: " + args.Path;
-                    TextStreamingResults.Text += "DATA: " + args.Data;
-                }
-            });
-        }
-
-        private void Added(object sender, ValueAddedEventArgs args)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                lock (_displayLock)
-                {
-                    TextStreamingResults.Text += Environment.NewLine;
-                    TextStreamingResults.Text += "ADDED: " + args.Path;
-                    TextStreamingResults.Text += "DATA: " + args.Data;
                 }
             });
         }
