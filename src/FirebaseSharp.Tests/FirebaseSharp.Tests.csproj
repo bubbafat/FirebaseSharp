@@ -38,6 +38,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FakeItEasy, Version=1.25.2.0, Culture=neutral, PublicKeyToken=eff28e2146d5fd2c, processorArchitecture=MSIL">
+      <HintPath>..\packages\FakeItEasy.1.25.2\lib\net40\FakeItEasy.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FirebaseTokenGenerator">
       <HintPath>..\packages\FirebaseTokenGenerator.2.0.0.0\lib\net35\FirebaseTokenGenerator.dll</HintPath>
     </Reference>
@@ -73,12 +77,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="AuthTests.cs" />
-    <Compile Include="EndToEndLiveTest.cs" />
+    <Compile Include="Firebase\Query.cs" />
     <Compile Include="JsonCache\IntegrityTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PushIdTests.cs" />
     <Compile Include="TestConfig.cs" />
-    <Compile Include="ComplexTypeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FirebaseSharp.Portable\FirebaseSharp.Portable.csproj">

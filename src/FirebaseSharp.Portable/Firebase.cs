@@ -1,85 +1,181 @@
 ﻿using System;
 using System.Threading.Tasks;
+using FirebaseSharp.Portable.Interfaces;
 
 namespace FirebaseSharp.Portable
 {
-    public sealed class Firebase : IDisposable
+    internal sealed class Firebase : IFirebase
     {
-        private readonly Request _request;
+        private readonly FirebaseApp _app;
+        private readonly string _path;
 
-        public Firebase(string rootUri, string authToken = null)
-            : this(new Uri(rootUri), authToken)
-        {            
+        public Firebase(FirebaseApp app, string path)
+        {
+            _app = app;
+            _path = path;
+            AbsoluteUri = new Uri(_app.RootUri, path);
         }
 
-        public Firebase(Uri rootUri, string authToken = null)
+        public void On(string eventName, SnapshotCallback callback)
         {
-            if (rootUri == null)
-            {
-                throw new ArgumentNullException("rootUri");
-            }
-
-            _request = new Request(rootUri, authToken);
+            throw new NotImplementedException();
         }
 
-        public Uri RootUri
+        public void On(string eventName, object context, SnapshotCallback callback)
         {
-            get { return _request.RootUri; }
+            throw new NotImplementedException();
         }
 
-        [Obsolete("Use PostAsync instead.  This method will be removed in the next version.")]
-        public string Post(string path, string payload)
+        public void Off(string eventName, SnapshotCallback callback)
         {
-            return PostAsync(path, payload).Result;
+            throw new NotImplementedException();
         }
 
-        public async Task<string> PostAsync(string path, string payload)
+        public void Off(string eventName, object context, SnapshotCallback callback)
         {
-            return await _request.Post(path, payload).ConfigureAwait(false);
+            throw new NotImplementedException();
         }
 
-        public void Put(string path, string payload)
+        public void Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null)
         {
-            _request.Put(path, payload);
+            throw new NotImplementedException();
         }
 
-        public void Patch(string path, string payload)
+        public void Once(string eventName, object context, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null)
         {
-            _request.Patch(path, payload);
+            throw new NotImplementedException();
         }
 
-        public void Delete(string path)
+        public IFirebase OrderByChild(string key)
         {
-            _request.Delete(path);
+            throw new NotImplementedException();
         }
 
-        [Obsolete("Use GetAsync instead.  This method will be removed in the next version.")]
-        public string Get(string path)
+        public IFirebase OrderByKey()
         {
-            return GetAsync(path).Result;
+            throw new NotImplementedException();
         }
 
-        public async Task<string> GetAsync(string path)
+        public IFirebase OrderByValue()
         {
-            return await _request.GetSingle(path).ConfigureAwait(false);
+            throw new NotImplementedException();
         }
 
-        [Obsolete("Use GetStreamingAsync instead.  This method will be removed in the next version.")]
-        public Response GetStreaming(string path, 
-            DataChangedHandler handler)
+        public IFirebase OrderByPriority()
         {
-            return GetStreamingAsync(path, handler).Result;
+            throw new NotImplementedException();
         }
 
-        public async Task<Response> GetStreamingAsync(string path,
-            DataChangedHandler handler)
+        public IFirebase StartAt(object startingValue)
         {
-            return await _request.GetStreaming(path, handler).ConfigureAwait(false);
+            throw new NotImplementedException();
         }
 
-        public void Dispose()
+        public IFirebase EndAt(object startingValue)
         {
-            using (_request) { }
+            throw new NotImplementedException();
+        }
+
+        public IFirebase equalTo(object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IFirebase limitToFirst(int limit)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IFirebase limitToLast(int limit)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IFirebase Ref()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IFirebase Child(string childPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IFirebase Parent()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IFirebase Root()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Key { get; private set; }
+        public Uri AbsoluteUri { get; private set; }
+        public void Set(string value, FirebaseStatusCallback callback = null)
+        {
+            _app.Set(_path, value, callback);
+        }
+
+        public void Update(string value, FirebaseStatusCallback callback = null)
+        {
+            _app.Update(_path, value, callback);
+        }
+
+        public void Remove(FirebaseStatusCallback callback = null)
+        {
+            _app.Set(_path, null, callback);
+        }
+
+        public IFirebase Push(string value, FirebaseStatusCallback callback = null)
+        {
+            return Child(_app.Push(_path, value, callback));
+        }
+
+        public void SetWithPriority(string value, IFirebasePriority priority, FirebaseStatusCallback callback = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetPriority(IFirebasePriority priority, FirebaseStatusCallback callback = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Transaction(TransactionUpdate updateCallback, TransactionComplete completeCallback = null, bool applyLocally = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CreateUser(string email, string password, FirebaseStatusCallback callback = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ChangeEmail(string oldEmail, string newEmail, string password, FirebaseStatusCallback callback = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ChangePassword(string email, string oldPassword, string newPassword, FirebaseStatusCallback callback = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RemoveUser(string email, string password, FirebaseStatusCallback callback = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ResetPassword(string email, FirebaseStatusCallback callback = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IFirebaseApp GetApp()
+        {
+            return _app;
         }
     }
 }

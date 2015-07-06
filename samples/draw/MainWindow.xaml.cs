@@ -199,7 +199,7 @@ namespace FirebaseWpfDraw
             if (firebasePoint != _lastPoint)
             {
                 string color = _colors[_rng.Next(0, _colors.Length)];
-                _firebase.Put(FirebaseIdFromPoint(firebasePoint), string.Format("\"{0}\"", color));
+                _firebase.Set(FirebaseIdFromPoint(firebasePoint), string.Format("\"{0}\"", color));
                 _lastPoint = firebasePoint;
             }
         }

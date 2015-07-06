@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Resources;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FakeItEasy;
 using FirebaseSharp.Portable;
+using FirebaseSharp.Portable.Interfaces;
+using FirebaseSharp.Portable.Messages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Tests.JsonCache 
@@ -33,54 +33,82 @@ namespace FirebaseSharp.Tests.JsonCache
             {
                 return reader.ReadToEnd();
             }
-
-            Assert.Fail("Resource not found: {0}", fileName);
-            throw new Exception("Resource not found: " + fileName);
         }
 
-
         [TestMethod]
-        public void PutMatchesInput()
+        public void SetRootMatchesInput()
         {
-            JToken expected = JToken.Parse(_weather);
-            var jc = new Portable.JsonCache();
+            var expected = JToken.Parse(_weather);
+            var client = A.Fake<IFirebaseNetworkConnection>();
 
-            bool called = false;
-
-            jc.Changed += (sender, args) =>
+            A.CallTo(() => client.Send(A<FirebaseMessage>._)).ReturnsLazily((FirebaseMessage message) =>
             {
-                JToken actual = JToken.Parse(args.Data);
-                Assert.IsTrue(JToken.DeepEquals(expected, actual));
-                called = true;
-            };
+                Assert.AreEqual(WriteBehavior.Replace, message.Behavior);
+                Assert.AreEqual("/", message.Path);
+                Assert.IsTrue(JToken.DeepEquals(expected, JToken.Parse(message.Value)),
+                    "The contents being written did not match the provided contents");
 
-            jc.Put(ChangeSource.Local, "/", _weather);
+                // needed for the continuation task
+                return Task.Run(() => Task.Delay(5));
+            });
 
-            Assert.IsTrue(called, "Changed event never fired");
+            var jc = new SyncDatabase(client);
+
+            using (var mre = new ManualResetEvent(false))
+            {
+                jc.Set("/", _weather, (error) =>
+                {
+                    Assert.IsNull(error);
+                    mre.Set();
+                });
+
+                Assert.IsTrue(mre.WaitOne(TimeSpan.FromSeconds(5)),
+                    "Time out waiting for cache callback");
+            }
+
+            Assert.IsTrue(JToken.DeepEquals(expected, JToken.Parse(jc.Dump())),
+                "The cache contents did not match the expected structure");
         }
 
         [TestMethod]
-        public void PatchMatchesInput()
+        public void UpdateRootMatchesInput()
         {
-            JToken expected = JToken.Parse(_weather);
-            var jc = new Portable.JsonCache();
+            var expected = JToken.Parse(_weather);
+            var client = A.Fake<IFirebaseNetworkConnection>();
 
-            bool called = false;
-
-            jc.Changed += (sender, args) =>
+            A.CallTo(() => client.Send(A<FirebaseMessage>._)).ReturnsLazily((FirebaseMessage message) =>
             {
-                JToken actual = JToken.Parse(args.Data);
-                Assert.IsTrue(JToken.DeepEquals(expected, actual));
-                called = true;
-            };
+                Assert.AreEqual(WriteBehavior.Merge, message.Behavior);
+                Assert.AreEqual("/", message.Path);
+                Assert.IsTrue(JToken.DeepEquals(expected, JToken.Parse(message.Value)),
+                    "The contents being written did not match the provided contents");
 
-            jc.Patch(ChangeSource.Local, "/", _weather);
+                // needed for the continuation task
+                return Task.Run(() => Task.Delay(5));
+            });
 
-            Assert.IsTrue(called, "Changed event never fired");
+            var jc = new SyncDatabase(client);
+
+            using (var mre = new ManualResetEvent(false))
+            {
+                jc.Update("/", _weather, (error) =>
+                {
+                    Assert.IsNull(error);
+                    mre.Set();
+                });
+
+                Assert.IsTrue(mre.WaitOne(TimeSpan.FromSeconds(5)),
+                    "Time out waiting for cache callback");
+            }
+
+            Assert.IsTrue(JToken.DeepEquals(expected, JToken.Parse(jc.Dump())),
+                "The cache contents did not match the expected structure");
         }
 
+
+
         [TestMethod]
-        public void MultiPatchMatchesOutput()
+        public void MultiUpdateMatchesOutput()
         {
             var data = new List<Tuple<Tuple<string, string>, string>>()
             {
@@ -128,33 +156,37 @@ namespace FirebaseSharp.Tests.JsonCache
                     "{\"people\": { \"me\": {\"name\": \"Bobert\" }, \"you\": {\"name\": \"Susan\"}}}"),
 
             };
-            
-            var jc = new Portable.JsonCache();
 
-            int[] current = new[]{0};
-            bool[] called = new bool[data.Count];
+            var client = A.Fake<IFirebaseNetworkConnection>();
 
-            jc.Changed += (sender, args) =>
+            A.CallTo(() => client.Send(A<FirebaseMessage>._)).ReturnsLazily((FirebaseMessage message) =>
             {
-                JToken actual = JToken.Parse(jc.Dump());
-                JToken expected = JToken.Parse(data[current[0]].Item2);
-                Assert.IsTrue(JToken.DeepEquals(expected, actual));
-                called[current[0]] = true;
-            };
+                return Task.Run(() => Task.Delay(5));
+            });
 
-            for (current[0] = 0; current[0] < data.Count; current[0]++)
-            {
-                jc.Patch(ChangeSource.Local, data[current[0]].Item1.Item1, data[current[0]].Item1.Item2);
-            }
+            var jc = new SyncDatabase(client);
+            ManualResetEvent called = new ManualResetEvent(false);
 
-            foreach (bool did in called)
+            foreach(var item in data)
             {
-                Assert.IsTrue(did, "At least one of the Changed events never fired");
+                called.Reset();
+                string path = item.Item1.Item1;
+                string value = item.Item1.Item2;
+                var expected = JToken.Parse(item.Item2);
+                jc.Update(path, value, error =>
+                {
+                    JToken actual = JToken.Parse(jc.Dump());
+                    Assert.IsTrue(JToken.DeepEquals(expected, actual),
+                        "The cache state did not match the expected cache state");
+                    called.Set();
+                });
+
+                Assert.IsTrue(called.WaitOne(), "The callback never fired");
             }
         }
 
         [TestMethod]
-        public void MultiPutMatchesOutput()
+        public void MultiSetMatchesOutput()
         {
             var data = new List<Tuple<Tuple<string, string>, string>>()
             {
@@ -202,29 +234,32 @@ namespace FirebaseSharp.Tests.JsonCache
 
             };
 
-            var jc = new Portable.JsonCache();
+            var client = A.Fake<IFirebaseNetworkConnection>();
 
-            int[] current = new[] { 0 };
-            bool[] called = new bool[data.Count];
-
-            jc.Changed += (sender, args) =>
+            A.CallTo(() => client.Send(A<FirebaseMessage>._)).ReturnsLazily((FirebaseMessage message) =>
             {
-                JToken actual = JToken.Parse(jc.Dump());
-                JToken expected = JToken.Parse(data[current[0]].Item2);
-                Assert.IsTrue(JToken.DeepEquals(expected, actual));
-                called[current[0]] = true;
-            };
+                return Task.Run(() => Task.Delay(5));
+            });
 
-            for (current[0] = 0; current[0] < data.Count; current[0]++)
-            {
-                jc.Put(ChangeSource.Local, data[current[0]].Item1.Item1, data[current[0]].Item1.Item2);
-            }
+            var jc = new SyncDatabase(client);
+            ManualResetEvent called = new ManualResetEvent(false);
 
-            foreach (bool did in called)
+            foreach (var item in data)
             {
-                Assert.IsTrue(did, "At least one of the Changed events never fired");
+                called.Reset();
+                string path = item.Item1.Item1;
+                string value = item.Item1.Item2;
+                var expected = JToken.Parse(item.Item2);
+                jc.Set(path, value, error =>
+                {
+                    JToken actual = JToken.Parse(jc.Dump());
+                    Assert.IsTrue(JToken.DeepEquals(expected, actual),
+                        "The cache state did not match the expected cache state");
+                    called.Set();
+                });
+
+                Assert.IsTrue(called.WaitOne(), "The callback never fired");
             }
         }
-
     }
 }
