@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FirebaseSharp.Portable.Interfaces;
 
@@ -9,91 +10,111 @@ namespace FirebaseSharp.Portable
         private readonly FirebaseApp _app;
         private readonly string _path;
 
-        public Firebase(FirebaseApp app, string path)
+        private Firebase(FirebaseApp app, string path)
         {
             _app = app;
             _path = path;
-            AbsoluteUri = new Uri(_app.RootUri, path);
         }
 
         public void On(string eventName, SnapshotCallback callback)
         {
-            throw new NotImplementedException();
+            On(eventName, callback, null);
         }
 
-        public void On(string eventName, object context, SnapshotCallback callback)
+        public void On(string eventName, SnapshotCallback callback, object context)
         {
-            throw new NotImplementedException();
+            _app.Subscribe(eventName, _path, callback, context);
         }
 
         public void Off(string eventName, SnapshotCallback callback)
         {
-            throw new NotImplementedException();
+            Off(eventName, callback, null);
         }
 
-        public void Off(string eventName, object context, SnapshotCallback callback)
+        public void Off(string eventName, SnapshotCallback callback, object context)
         {
-            throw new NotImplementedException();
+            _app.Unsubscribe(eventName, _path, callback, context);
         }
 
         public void Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null)
         {
-            throw new NotImplementedException();
+            Once(eventName, callback, null, cancelledCallback);
         }
 
-        public void Once(string eventName, object context, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null)
+        public void Once(string eventName, SnapshotCallback callback, object context,
+            FirebaseStatusCallback cancelledCallback = null)
         {
-            throw new NotImplementedException();
+            _app.SubscribeOnce(eventName, _path, callback, context, cancelledCallback);
+        }
+
+        private Firebase Clone()
+        {
+            return (Firebase) Ref();
         }
 
         public IFirebase OrderByChild(string key)
         {
-            throw new NotImplementedException();
+            return Clone().Decorate("orderBy", new QuotedParameter(key));
         }
 
         public IFirebase OrderByKey()
         {
-            throw new NotImplementedException();
+            return Clone().Decorate("orderBy", new QuotedParameter("$key"));
         }
 
         public IFirebase OrderByValue()
         {
-            throw new NotImplementedException();
+            return Clone().Decorate("orderBy", new QuotedParameter("$value"));
         }
 
         public IFirebase OrderByPriority()
         {
-            throw new NotImplementedException();
+            return Clone().Decorate("orderBy", new QuotedParameter("$priority"));
         }
 
-        public IFirebase StartAt(object startingValue)
+        public IFirebase StartAt(string startingValue)
         {
-            throw new NotImplementedException();
+            return Clone().Decorate("startAt", new QuotedParameter(startingValue));
         }
 
-        public IFirebase EndAt(object startingValue)
+        public IFirebase StartAt(long startingValue)
         {
-            throw new NotImplementedException();
+            return Clone().Decorate("startAt", new IntegerParameter(startingValue));
         }
 
-        public IFirebase equalTo(object value)
+        public IFirebase EndAt(string endingValue)
         {
-            throw new NotImplementedException();
+            return Clone().Decorate("endAt", new QuotedParameter(endingValue));
         }
 
-        public IFirebase limitToFirst(int limit)
+        public IFirebase EndAt(long endingValue)
         {
-            throw new NotImplementedException();
+            return Clone().Decorate("endAt", new IntegerParameter(endingValue));
         }
 
-        public IFirebase limitToLast(int limit)
+        public IFirebase EqualTo(string value)
         {
-            throw new NotImplementedException();
+            return Clone().Decorate("equalTo", new QuotedParameter(value));
+        }
+
+        public IFirebase EqualTo(long value)
+        {
+            return Clone().Decorate("equalTo", new IntegerParameter(value));
+        }
+
+        public IFirebase LimitToFirst(int limit)
+        {
+            return Clone().Decorate("LimitToFirst", new IntegerParameter(limit));
+        }
+
+        public IFirebase LimitToLast(int limit)
+        {
+            return Clone().Decorate("LimitToLast", new IntegerParameter(limit));
         }
 
         public IFirebase Ref()
         {
-            throw new NotImplementedException();
+            return new Firebase(_app, _path, _decorations);
         }
 
         public IFirebase Child(string childPath)
@@ -111,8 +132,17 @@ namespace FirebaseSharp.Portable
             throw new NotImplementedException();
         }
 
-        public string Key { get; private set; }
-        public Uri AbsoluteUri { get; private set; }
+        public string Key
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public Uri AbsoluteUri
+        {
+            get { return new Uri(_app.RootUri, _path); }
+
+        }
+
         public void Set(string value, FirebaseStatusCallback callback = null)
         {
             _app.Set(_path, value, callback);
@@ -143,7 +173,8 @@ namespace FirebaseSharp.Portable
             throw new NotImplementedException();
         }
 
-        public void Transaction(TransactionUpdate updateCallback, TransactionComplete completeCallback = null, bool applyLocally = true)
+        public void Transaction(TransactionUpdate updateCallback, TransactionComplete completeCallback = null,
+            bool applyLocally = true)
         {
             throw new NotImplementedException();
         }
@@ -153,12 +184,14 @@ namespace FirebaseSharp.Portable
             throw new NotImplementedException();
         }
 
-        public void ChangeEmail(string oldEmail, string newEmail, string password, FirebaseStatusCallback callback = null)
+        public void ChangeEmail(string oldEmail, string newEmail, string password,
+            FirebaseStatusCallback callback = null)
         {
             throw new NotImplementedException();
         }
 
-        public void ChangePassword(string email, string oldPassword, string newPassword, FirebaseStatusCallback callback = null)
+        public void ChangePassword(string email, string oldPassword, string newPassword,
+            FirebaseStatusCallback callback = null)
         {
             throw new NotImplementedException();
         }

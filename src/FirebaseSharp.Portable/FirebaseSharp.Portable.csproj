@@ -45,6 +45,8 @@
     <Compile Include="Interfaces\IFirebaseApp.cs" />
     <Compile Include="Interfaces\IFirebaseAuth.cs" />
     <Compile Include="Interfaces\IFirebaseConnection.cs" />
+    <Compile Include="Interfaces\IFirebaseHttpClient.cs" />
+    <Compile Include="Interfaces\IFirebaseHttpResponseMessage.cs" />
     <Compile Include="Interfaces\IFirebaseNetworkConnection.cs" />
     <Compile Include="Interfaces\IFirebaseOnDisconnect.cs" />
     <Compile Include="Interfaces\IFirebasePriority.cs" />
@@ -54,6 +56,10 @@
     <Compile Include="Interfaces\IFirebaseUserManager.cs" />
     <Compile Include="Interfaces\IDataSnapshot.cs" />
     <Compile Include="Messages\FirebaseMessage.cs" />
+    <Compile Include="Subscriptions\ISubscriptionFilter.cs" />
+    <Compile Include="Subscriptions\SubscriptionDatabase.cs" />
+    <Compile Include="Subscriptions\TakeFirst.cs" />
+    <Compile Include="Subscriptions\TakeLast.cs" />
     <Compile Include="SyncDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DataSnapshot.cs" />

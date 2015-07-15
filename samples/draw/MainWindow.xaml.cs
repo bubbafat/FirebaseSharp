@@ -17,11 +17,10 @@ namespace FirebaseWpfDraw
 
     public class PaintQueue
     {
-        public PaintQueue(Point point, string color, ChangeSource source)
+        public PaintQueue(Point point, string color)
         {
             Point = point;
             Color = color;
-            Source = source;
         }
 
         public readonly Point Point;

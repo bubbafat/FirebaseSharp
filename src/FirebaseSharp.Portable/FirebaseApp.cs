@@ -13,11 +13,13 @@ namespace FirebaseSharp.Portable
         private AuthenticationState _authState;
         private readonly Uri _rootUri;
         private readonly SyncDatabase _cache;
+        private readonly SubscriptionDatabase _subscriptions;
 
         public FirebaseApp(Uri root)
         {
             _rootUri = root;
             _cache = new SyncDatabase(new FirebaseNetworkConnection(root));
+            _subscriptions = new SubscriptionDatabase();
         }
 
         internal Uri RootUri
@@ -41,6 +43,11 @@ namespace FirebaseSharp.Portable
         internal string Push(string path, string value, FirebaseStatusCallback callback)
         {
             return _cache.Push(path, value, callback);
+        }
+
+        public IFirebase Child(string path)
+        {
+            return new Firebase(this, path);
         }
 
         public void GoOnline()
@@ -84,5 +91,20 @@ namespace FirebaseSharp.Portable
         }
 
         public event AuthChangedEvent AuthChanged;
+
+        internal void Subscribe(string eventName, string path, SnapshotCallback callback, object context)
+        {
+            _subscriptions.Subscribe(path, eventName, callback, context, false);
+        }
+
+        internal void Unsubscribe(string eventName, string path, SnapshotCallback callback, object context)
+        {
+            _subscriptions.Unsubscribe(path, eventName, callback, context);
+        }
+
+        internal void SubscribeOnce(string eventName, string path, SnapshotCallback callback, object context, FirebaseStatusCallback cancelledCallback)
+        {
+            _subscriptions.Subscribe(path, eventName, callback, context, true);
+        }
     }
 }

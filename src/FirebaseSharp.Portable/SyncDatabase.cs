@@ -13,9 +13,18 @@ namespace FirebaseSharp.Portable
     /// data as we know it.  As changes come in the object is updated 
     /// and the update communicated via an event.
     /// 
-    /// PUT changes the path exactly as directed
-    /// PATCH merges the changes (over-writing specifically named children, leaving the rest untouched)
-    /// DELETE deletes at the path
+    /// Set changes the path exactly as directed
+    /// Update merges the changes (over-writing specifically named children, leaving the rest untouched)
+    /// Delete by Set or Update with a NULL data member.
+    /// 
+    /// Thoughts on the future...
+    /// 
+    /// What's the deal with syncing the tree.  Should we just apply deltas as they come in,
+    /// in the order they arrive, or should we look at the tree as a whole and perform diffing
+    /// against another tree?  This would require things like dirty flags, etc - but would make synching
+    /// from a saved state possible (but is it a good idea?)
+    /// Would JSON Patch make sense?  It's basically what the REST APIs are sending anyway.
+    /// How should conflicts be handled?
     /// </summary>
     class SyncDatabase
     {
