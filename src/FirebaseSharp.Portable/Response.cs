@@ -51,6 +51,11 @@ namespace FirebaseSharp.Portable
                     // TODO: it really sucks that this does not take a cancellation token
                     string read = await sr.ReadLineAsync().ConfigureAwait(false);
 
+                    if (read == null)
+                    {
+                        break;
+                    }
+
                     System.Diagnostics.Debug.WriteLine(read);
 
                     if (read.StartsWith("event: "))
