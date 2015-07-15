@@ -72,6 +72,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ArrayTest.cs" />
     <Compile Include="AuthTests.cs" />
     <Compile Include="EndToEndLiveTest.cs" />
     <Compile Include="PatchTests.cs" />

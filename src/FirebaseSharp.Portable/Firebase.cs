@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using FirebaseSharp.Portable.Network;
 
 namespace FirebaseSharp.Portable
 {
@@ -19,7 +20,7 @@ namespace FirebaseSharp.Portable
                 throw new ArgumentNullException("rootUri");
             }
 
-            _request = new Request(rootUri, authToken);
+            _request = new Request(new FirebaseHttpClient(rootUri), authToken);
         }
 
         public Uri RootUri

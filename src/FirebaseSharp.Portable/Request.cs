@@ -2,28 +2,18 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using FirebaseSharp.Portable.Network;
 
 namespace FirebaseSharp.Portable
 {
     internal sealed class Request : IDisposable
     {
-        private readonly HttpClient _client;
+        private readonly IFirebaseHttpClient _client;
         private readonly string _authToken;
 
-        public Request(Uri rootUri, string authToken)
+        public Request(IFirebaseHttpClient client, string authToken)
         {
-            HttpClientHandler handler = new HttpClientHandler
-            {
-                AllowAutoRedirect = true,
-                MaxAutomaticRedirections = 10,
-            };
-
-            _client = new HttpClient(handler, true)
-            {
-                BaseAddress = rootUri,
-                Timeout = TimeSpan.FromMinutes(1),
-            };
-
+            _client = client;
             _authToken = authToken;
         }
 

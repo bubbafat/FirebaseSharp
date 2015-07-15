@@ -37,6 +37,8 @@
   <ItemGroup>
     <Compile Include="Firebase.cs" />
     <Compile Include="FirebaseCache.cs" />
+    <Compile Include="Network\FirebaseHttpClient.cs" />
+    <Compile Include="Network\IFirebaseHttpClient.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Request.cs" />
