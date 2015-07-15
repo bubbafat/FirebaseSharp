@@ -102,7 +102,7 @@ namespace FirebaseSharp.Portable
                 uri += string.Format("?auth={0}", _authToken);
             }
 
-            return new Uri(uri);
+            return new Uri(uri, UriKind.Absolute);
         }
 
 

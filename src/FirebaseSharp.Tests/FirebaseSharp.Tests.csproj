@@ -83,6 +83,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestConfig.cs" />
     <Compile Include="ComplexTypeTests.cs" />
+    <Compile Include="FirebaseTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FirebaseSharp.Portable\FirebaseSharp.Portable.csproj">

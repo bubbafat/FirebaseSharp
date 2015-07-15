@@ -9,7 +9,7 @@ namespace FirebaseSharp.Portable
         private readonly Request _request;
 
         public Firebase(string rootUri, string authToken = null)
-            : this(new Uri(rootUri), authToken)
+            : this(new Uri(rootUri, UriKind.Absolute), authToken)
         {            
         }
 
@@ -18,6 +18,11 @@ namespace FirebaseSharp.Portable
             if (rootUri == null)
             {
                 throw new ArgumentNullException("rootUri");
+            }
+
+            if (!rootUri.IsAbsoluteUri)
+            {
+                throw new ArgumentException("The root URI must be an absolute URI", "rootUri");
             }
 
             _request = new Request(new FirebaseHttpClient(rootUri), authToken);
