@@ -27,9 +27,10 @@ namespace FirebaseSharp.Portable.Network
         {
             get { return _client.BaseAddress; }
         }
-        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage message, HttpCompletionOption options)
+        public async Task<IFirebaseResponseMessage> SendAsync(HttpRequestMessage message, HttpCompletionOption options)
         {
-            return _client.SendAsync(message, options);
+            var response = await _client.SendAsync(message, options);
+            return new FirebaseResponseMessage(response);
         }
 
         public void Dispose()

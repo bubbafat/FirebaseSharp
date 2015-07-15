@@ -13,3 +13,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyFileVersion("1.0.0.5")]
 
 [assembly: InternalsVisibleTo("FirebaseSharp.Tests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

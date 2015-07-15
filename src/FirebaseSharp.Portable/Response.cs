@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FirebaseSharp.Portable.Network;
 using Newtonsoft.Json;
 
 namespace FirebaseSharp.Portable
@@ -14,7 +15,7 @@ namespace FirebaseSharp.Portable
         private readonly Task _pollingTask;
         private readonly FirebaseCache _cache;
 
-        internal Response(HttpResponseMessage response, 
+        internal Response(IFirebaseResponseMessage response, 
             ValueAddedEventHandler added = null,
             ValueChangedEventHandler changed = null,
             ValueRemovedEventHandler removed = null)
@@ -35,10 +36,10 @@ namespace FirebaseSharp.Portable
             _cancel.Cancel();
         }
 
-        private async Task ReadLoop(HttpResponseMessage response, CancellationToken cancellationToken)
+        private async Task ReadLoop(IFirebaseResponseMessage response, CancellationToken cancellationToken)
         {
             using (response)
-            using (var content = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+            using (var content = await response.ReadAsStreamAsync().ConfigureAwait(false))
             using (StreamReader sr = new StreamReader(content))
             {
                 string eventName = null;

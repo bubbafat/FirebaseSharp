@@ -10,6 +10,6 @@ namespace FirebaseSharp.Portable.Network
     interface IFirebaseHttpClient : IDisposable
     {
         Uri BaseAddress { get; }
-        Task<HttpResponseMessage> SendAsync(HttpRequestMessage message, HttpCompletionOption options);
+        Task<IFirebaseResponseMessage> SendAsync(HttpRequestMessage message, HttpCompletionOption options);
     }
 }
