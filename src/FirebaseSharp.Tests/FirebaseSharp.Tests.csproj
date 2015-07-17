@@ -77,6 +77,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Filter\TakeFirst.cs" />
     <Compile Include="Firebase\Query.cs" />
     <Compile Include="Firebase\PushTests.cs" />
     <Compile Include="JsonCache\IntegrityTests.cs" />

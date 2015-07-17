@@ -9,6 +9,7 @@ namespace FirebaseSharp.Portable.Messages
 {
     enum WriteBehavior
     {
+        None,
         Replace,
         Merge,
         Push,

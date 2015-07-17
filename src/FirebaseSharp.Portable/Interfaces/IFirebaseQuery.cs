@@ -9,12 +9,12 @@ namespace FirebaseSharp.Portable.Interfaces
 
     public interface IFirebaseQuery
     {
-        void On(string eventName, SnapshotCallback callback);
-        void On(string eventName, SnapshotCallback callback, object context);
+        IFirebase On(string eventName, SnapshotCallback callback);
+        IFirebase On(string eventName, SnapshotCallback callback, object context);
         void Off(string eventName, SnapshotCallback callback);
         void Off(string eventName, SnapshotCallback callback, object context);
-        void Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null);
-        void Once(string eventName, SnapshotCallback callback, object context, FirebaseStatusCallback cancelledCallback = null);
+        IFirebase Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null);
+        IFirebase Once(string eventName, SnapshotCallback callback, object context, FirebaseStatusCallback cancelledCallback = null);
         IFirebase OrderByChild(string key);
         IFirebase OrderByKey();
         IFirebase OrderByValue();

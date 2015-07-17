@@ -14,12 +14,14 @@ namespace FirebaseSharp.Portable
         private readonly Uri _rootUri;
         private readonly SyncDatabase _cache;
         private readonly SubscriptionDatabase _subscriptions;
+        private readonly DeltaCache _deltas;
 
         public FirebaseApp(Uri root)
         {
             _rootUri = root;
             _cache = new SyncDatabase(new FirebaseNetworkConnection(root));
             _subscriptions = new SubscriptionDatabase();
+            _deltas = new DeltaCache(_cache, _subscriptions);
         }
 
         internal Uri RootUri

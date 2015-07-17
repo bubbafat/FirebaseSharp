@@ -9,8 +9,6 @@ namespace FirebaseSharp.Portable.Subscriptions
 {
     interface ISubscriptionFilter
     {
-        void Begin();
-        void Take(IDataSnapshot snap);
         IEnumerable<IDataSnapshot> Filter(IEnumerable<IDataSnapshot> snapshots);
     }
 }

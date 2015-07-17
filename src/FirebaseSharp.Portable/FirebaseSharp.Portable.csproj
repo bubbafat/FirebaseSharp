@@ -37,6 +37,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BlockingQueue.cs" />
+    <Compile Include="DeltaCache.cs" />
+    <Compile Include="Filters\EndAtNumericFilter.cs" />
+    <Compile Include="Filters\EndAtStringFilter.cs" />
+    <Compile Include="Filters\EqualToNumericFilter.cs" />
+    <Compile Include="Filters\EqualToStringFilter.cs" />
     <Compile Include="FirebasePushIdGenerator.cs" />
     <Compile Include="Firebase.cs" />
     <Compile Include="FirebaseApp.cs" />
@@ -55,11 +60,19 @@
     <Compile Include="Interfaces\IFirebaseUpdate.cs" />
     <Compile Include="Interfaces\IFirebaseUserManager.cs" />
     <Compile Include="Interfaces\IDataSnapshot.cs" />
+    <Compile Include="Filters\LimitToFirstFilter.cs" />
+    <Compile Include="Filters\LimitToLastFilter.cs" />
     <Compile Include="Messages\FirebaseMessage.cs" />
+    <Compile Include="Filters\OrderByChildFilter.cs" />
+    <Compile Include="Filters\OrderByKeyFilter.cs" />
+    <Compile Include="Filters\OrderByKeyValueFilter.cs" />
+    <Compile Include="Filters\OrderByPriorityFilter.cs" />
+    <Compile Include="Filters\StartAtNumericFilter.cs" />
+    <Compile Include="Filters\StartAtStringFilter.cs" />
     <Compile Include="Subscriptions\ISubscriptionFilter.cs" />
     <Compile Include="Subscriptions\SubscriptionDatabase.cs" />
-    <Compile Include="Subscriptions\TakeFirst.cs" />
-    <Compile Include="Subscriptions\TakeLast.cs" />
+    <Compile Include="Subscriptions\TakeFirstFilter.cs" />
+    <Compile Include="Subscriptions\TakeLastFilter.cs" />
     <Compile Include="SyncDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DataSnapshot.cs" />

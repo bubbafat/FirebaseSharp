@@ -22,7 +22,7 @@ namespace FirebaseSharp.Portable.Interfaces
 
     internal interface IFirebaseNetworkConnection
     {
-        Task Send(FirebaseMessage message);
+        void Send(FirebaseMessage message);
 
         event FirebaseEventReceived Received;
 

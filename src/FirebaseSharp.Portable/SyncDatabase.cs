@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Messages;
@@ -8,6 +9,15 @@ using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
 {
+    class JsonCacheUpdateEventArgs : EventArgs
+    {
+        public JsonCacheUpdateEventArgs(string path)
+        {
+            Path = path;
+        }
+
+        public string Path { get; private set; }
+    }
     /// <summary>
     /// The SyncDatabase is a single JSON object that represents the state of the 
     /// data as we know it.  As changes come in the object is updated 
@@ -41,6 +51,20 @@ namespace FirebaseSharp.Portable
             _connection.Received += ConnectionOnReceived;
         }
 
+        public EventHandler<JsonCacheUpdateEventArgs> Changed;
+
+        public DataSnapshot SnapFor(string path)
+        {
+            JToken token;
+
+            if (TryGetChild(path, out token))
+            {
+                return new DataSnapshot(token);
+            }
+
+            return new DataSnapshot(null);
+        }
+
         private void ConnectionOnReceived(object sender, FirebaseEventReceivedEventArgs e)
         {
             switch (e.Message.Behavior)
@@ -53,7 +77,6 @@ namespace FirebaseSharp.Portable
                     break;
             }
         }
-
 
         private JToken CreateToken(string value)
         {
@@ -91,24 +114,13 @@ namespace FirebaseSharp.Portable
                     }
                 }
             }
-            
+
+            OnChanged(message);
         }
 
-        private async void QueueUpdate(FirebaseMessage firebaseMessage)
+        private void QueueUpdate(FirebaseMessage firebaseMessage)
         {
-            await _connection.Send(firebaseMessage).ContinueWith((t) =>
-            {
-                if (firebaseMessage.Callback != null)
-                {
-                    FirebaseError error = null;
-                    if (t.Exception != null)
-                    {
-                        error = new FirebaseError(t.Exception.Message);
-                    }
-
-                    firebaseMessage.Callback(error);
-                }
-            });
+            _connection.Send(firebaseMessage);
         }
 
         private void Replace(JToken found, JToken newData)
@@ -169,9 +181,19 @@ namespace FirebaseSharp.Portable
                         InsertAt(message.Path, newData);
                     }
                 }
-            }            
+            }
+
+            OnChanged(message);
         }
 
+        public void OnChanged(FirebaseMessage message)
+        {
+            var callback = Changed;
+            if (callback != null)
+            {
+                callback(this, new JsonCacheUpdateEventArgs(message.Path));
+            }
+        }
         private void Delete(string path)
         {
             lock (_lock)

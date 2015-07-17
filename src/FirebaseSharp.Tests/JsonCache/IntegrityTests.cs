@@ -41,15 +41,12 @@ namespace FirebaseSharp.Tests.JsonCache
             var expected = JToken.Parse(_weather);
             var client = A.Fake<IFirebaseNetworkConnection>();
 
-            A.CallTo(() => client.Send(A<FirebaseMessage>._)).ReturnsLazily((FirebaseMessage message) =>
+            A.CallTo(() => client.Send(A<FirebaseMessage>._)).Invokes((FirebaseMessage message) =>
             {
                 Assert.AreEqual(WriteBehavior.Replace, message.Behavior);
                 Assert.AreEqual("/", message.Path);
                 Assert.IsTrue(JToken.DeepEquals(expected, JToken.Parse(message.Value)),
                     "The contents being written did not match the provided contents");
-
-                // needed for the continuation task
-                return Task.Run(() => Task.Delay(5));
             });
 
             var jc = new SyncDatabase(client);
@@ -76,15 +73,12 @@ namespace FirebaseSharp.Tests.JsonCache
             var expected = JToken.Parse(_weather);
             var client = A.Fake<IFirebaseNetworkConnection>();
 
-            A.CallTo(() => client.Send(A<FirebaseMessage>._)).ReturnsLazily((FirebaseMessage message) =>
+            A.CallTo(() => client.Send(A<FirebaseMessage>._)).Invokes((FirebaseMessage message) =>
             {
                 Assert.AreEqual(WriteBehavior.Merge, message.Behavior);
                 Assert.AreEqual("/", message.Path);
                 Assert.IsTrue(JToken.DeepEquals(expected, JToken.Parse(message.Value)),
                     "The contents being written did not match the provided contents");
-
-                // needed for the continuation task
-                return Task.Run(() => Task.Delay(5));
             });
 
             var jc = new SyncDatabase(client);
@@ -159,11 +153,6 @@ namespace FirebaseSharp.Tests.JsonCache
 
             var client = A.Fake<IFirebaseNetworkConnection>();
 
-            A.CallTo(() => client.Send(A<FirebaseMessage>._)).ReturnsLazily((FirebaseMessage message) =>
-            {
-                return Task.Run(() => Task.Delay(5));
-            });
-
             var jc = new SyncDatabase(client);
             ManualResetEvent called = new ManualResetEvent(false);
 
@@ -235,11 +224,6 @@ namespace FirebaseSharp.Tests.JsonCache
             };
 
             var client = A.Fake<IFirebaseNetworkConnection>();
-
-            A.CallTo(() => client.Send(A<FirebaseMessage>._)).ReturnsLazily((FirebaseMessage message) =>
-            {
-                return Task.Run(() => Task.Delay(5));
-            });
 
             var jc = new SyncDatabase(client);
             ManualResetEvent called = new ManualResetEvent(false);
