@@ -47,6 +47,8 @@ namespace FirebaseSharp.Tests.JsonCache
                 Assert.AreEqual("/", message.Path);
                 Assert.IsTrue(JToken.DeepEquals(expected, JToken.Parse(message.Value)),
                     "The contents being written did not match the provided contents");
+
+                message.Callback(null);
             });
 
             var jc = new SyncDatabase(client);
@@ -55,7 +57,6 @@ namespace FirebaseSharp.Tests.JsonCache
             {
                 jc.Set("/", _weather, (error) =>
                 {
-                    Assert.IsNull(error);
                     mre.Set();
                 });
 
@@ -79,6 +80,8 @@ namespace FirebaseSharp.Tests.JsonCache
                 Assert.AreEqual("/", message.Path);
                 Assert.IsTrue(JToken.DeepEquals(expected, JToken.Parse(message.Value)),
                     "The contents being written did not match the provided contents");
+
+                message.Callback(null);
             });
 
             var jc = new SyncDatabase(client);
@@ -87,7 +90,6 @@ namespace FirebaseSharp.Tests.JsonCache
             {
                 jc.Update("/", _weather, (error) =>
                 {
-                    Assert.IsNull(error);
                     mre.Set();
                 });
 
@@ -152,6 +154,10 @@ namespace FirebaseSharp.Tests.JsonCache
             };
 
             var client = A.Fake<IFirebaseNetworkConnection>();
+            A.CallTo(() => client.Send(A<FirebaseMessage>._)).Invokes((FirebaseMessage message) =>
+            {
+                message.Callback(null);
+            });
 
             var jc = new SyncDatabase(client);
             ManualResetEvent called = new ManualResetEvent(false);
@@ -170,7 +176,7 @@ namespace FirebaseSharp.Tests.JsonCache
                     called.Set();
                 });
 
-                Assert.IsTrue(called.WaitOne(), "The callback never fired");
+                Assert.IsTrue(called.WaitOne(TimeSpan.FromSeconds(2)), "The callback never fired");
             }
         }
 
@@ -224,6 +230,11 @@ namespace FirebaseSharp.Tests.JsonCache
             };
 
             var client = A.Fake<IFirebaseNetworkConnection>();
+            A.CallTo(() => client.Send(A<FirebaseMessage>._)).Invokes((FirebaseMessage message) =>
+            {
+                message.Callback(null);
+            });
+
 
             var jc = new SyncDatabase(client);
             ManualResetEvent called = new ManualResetEvent(false);
@@ -242,7 +253,7 @@ namespace FirebaseSharp.Tests.JsonCache
                     called.Set();
                 });
 
-                Assert.IsTrue(called.WaitOne(), "The callback never fired");
+                Assert.IsTrue(called.WaitOne(TimeSpan.FromSeconds(2)), "The callback never fired");
             }
         }
     }

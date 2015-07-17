@@ -327,5 +327,15 @@ namespace FirebaseSharp.Portable
         {
             return path.TrimStart(new char[] { '/' }).Trim().Replace('/', '.');
         }
+
+        internal void GoOnline()
+        {
+            _connection.Connect();
+        }
+
+        internal void GoOffline()
+        {
+            _connection.Disconnect();
+        }
     }
 }

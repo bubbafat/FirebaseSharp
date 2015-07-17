@@ -1,40 +1,50 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace FirebaseSharp.Portable
 {
     internal class BlockingQueue<T>
     {
-        private readonly LinkedList<T> _queue = new LinkedList<T>();
+        private readonly Queue<T> _queue = new Queue<T>();
+        private readonly SemaphoreSlim _semaphone = new SemaphoreSlim(1, 1);
+        ManualResetEvent _available = new ManualResetEvent(false);
 
-        public void Enqueue(T item)
+        public void Enqueue(CancellationToken cancel, T item)
         {
-            lock (_queue)
+            _semaphone.Wait(cancel);
+            try
             {
-                _queue.AddFirst(item);
-                Monitor.Pulse(_queue);
+                _queue.Enqueue(item);
+                _available.Set();
+            }
+            finally
+            {
+                _semaphone.Release();
             }
         }
 
-        public void Reque(T item)
+        public T Dequeue(CancellationToken cancel)
         {
-            lock (_queue)
+            while (true)
             {
-                _queue.AddLast(item);
-                Monitor.Pulse(_queue);
-            }
-        }
+                _semaphone.Wait(cancel);
+                try
+                {
+                    if (_queue.Any())
+                    {
+                        return _queue.Dequeue();
+                    }
 
-        public T Dequeue()
-        {
-            lock (_queue)
-            {
-                while (_queue.Count == 0)
-                    Monitor.Wait(_queue);
-                var toReturn = _queue.Last.Value;
-                _queue.RemoveLast();
+                    _available.Reset();
+                }
+                finally
+                {
+                    _semaphone.Release();
+                }
 
-                return toReturn;
+                _available.WaitOne(TimeSpan.FromSeconds(1));
             }
         }
     }

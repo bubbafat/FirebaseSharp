@@ -29,7 +29,7 @@ namespace FirebaseSharp.Portable
 
         public IFirebase On(string eventName, SnapshotCallback callback, object context)
         {
-            _app.Subscribe(eventName, _path, callback, context);
+            _app.Subscribe(eventName, _path, callback, context, _filters);
             return this;
         }
 
@@ -51,7 +51,7 @@ namespace FirebaseSharp.Portable
         public IFirebase Once(string eventName, SnapshotCallback callback, object context,
             FirebaseStatusCallback cancelledCallback = null)
         {
-            _app.SubscribeOnce(eventName, _path, callback, context, cancelledCallback);
+            _app.SubscribeOnce(eventName, _path, callback, context, _filters, cancelledCallback);
             return this;
         }
 

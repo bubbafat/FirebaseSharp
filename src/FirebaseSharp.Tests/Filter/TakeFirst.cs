@@ -13,19 +13,25 @@ namespace FirebaseSharp.Tests.Filter
         [TestMethod]
         public void TakesTwoDinosaurs()
         {
-            FirebaseApp app = new FirebaseApp(new Uri("https://dinosaur-facts.firebaseio.com/"));            
-
-            ManualResetEvent fired = new ManualResetEvent(false);
-            IFirebase limited = app.Child("/dinosaurs").LimitToFirst(2).Once("child_added", (snap, previous, context) =>
+            using (FirebaseApp app = new FirebaseApp(new Uri("https://dinosaur-facts.firebaseio.com/")))
             {
-                foreach (var dino in snap.Children)
-                {
-                    Debug.WriteLine(dino.Value);                    
-                }
-                fired.Set();
-            });
+                int limit = 2;
+                int current = 0;
 
-            fired.WaitOne();
+                ManualResetEvent fired = new ManualResetEvent(false);
+                IFirebase limited = app.Child("/dinosaurs")
+                    .LimitToFirst(limit)
+                    .On("child_added", (snap, previous, context) =>
+                    {
+                        Debug.WriteLine(snap.Value);
+                        if (++current == limit)
+                        {
+                            fired.Set();
+                        }
+                    });
+
+                fired.WaitOne();
+            }
         }
     }
 }

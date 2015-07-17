@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FirebaseSharp.Portable.Interfaces;
+using FirebaseSharp.Portable.Subscriptions;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
@@ -14,14 +15,21 @@ namespace FirebaseSharp.Portable
         private readonly Uri _rootUri;
         private readonly SyncDatabase _cache;
         private readonly SubscriptionDatabase _subscriptions;
-        private readonly DeltaCache _deltas;
 
         public FirebaseApp(Uri root)
         {
             _rootUri = root;
             _cache = new SyncDatabase(new FirebaseNetworkConnection(root));
             _subscriptions = new SubscriptionDatabase();
-            _deltas = new DeltaCache(_cache, _subscriptions);
+            _cache.Changed += FireChangeEvents;
+        }
+
+        private void FireChangeEvents(object sender, JsonCacheUpdateEventArgs args)
+        {
+            foreach (var sub in _subscriptions.Subscriptions)
+            {
+                sub.Process(_cache);
+            }
         }
 
         internal Uri RootUri
@@ -54,12 +62,12 @@ namespace FirebaseSharp.Portable
 
         public void GoOnline()
         {
-            throw new NotImplementedException();
+            _cache.GoOnline();
         }
 
         public void GoOffline()
         {
-            throw new NotImplementedException();
+            _cache.GoOffline();
         }
 
         public void AuthWithCustomToken(string authToken)
@@ -94,9 +102,9 @@ namespace FirebaseSharp.Portable
 
         public event AuthChangedEvent AuthChanged;
 
-        internal void Subscribe(string eventName, string path, SnapshotCallback callback, object context)
+        internal void Subscribe(string eventName, string path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters)
         {
-            _subscriptions.Subscribe(path, eventName, callback, context, false);
+            _subscriptions.Subscribe(path, eventName, callback, context, false, filters);
         }
 
         internal void Unsubscribe(string eventName, string path, SnapshotCallback callback, object context)
@@ -104,9 +112,14 @@ namespace FirebaseSharp.Portable
             _subscriptions.Unsubscribe(path, eventName, callback, context);
         }
 
-        internal void SubscribeOnce(string eventName, string path, SnapshotCallback callback, object context, FirebaseStatusCallback cancelledCallback)
+        internal void SubscribeOnce(string eventName, string path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters, FirebaseStatusCallback cancelledCallback)
         {
-            _subscriptions.Subscribe(path, eventName, callback, context, true);
+            _subscriptions.Subscribe(path, eventName, callback, context, true, filters);
+        }
+
+        public void Dispose()
+        {
+            GoOffline();
         }
     }
 }

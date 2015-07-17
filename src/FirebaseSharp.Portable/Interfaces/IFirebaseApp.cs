@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FirebaseSharp.Portable.Interfaces
 {
-    public interface IFirebaseApp : IFirebaseConnection, IFirebaseAuth
+    public interface IFirebaseApp : IFirebaseConnection, IFirebaseAuth, IDisposable
     {
 
     }

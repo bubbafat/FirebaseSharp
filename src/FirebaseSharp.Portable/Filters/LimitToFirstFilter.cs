@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Subscriptions;
+using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable.Filters
 {
@@ -15,9 +16,14 @@ namespace FirebaseSharp.Portable.Filters
             _limit = limit;
         }
 
-        public IEnumerable<IDataSnapshot> Filter(IEnumerable<IDataSnapshot> snapshots)
+        public JToken Apply(JToken filtered)
         {
-            return snapshots.Take(_limit);
+            foreach (var child in filtered.Children().Skip(_limit).ToList())
+            {
+                child.Remove();
+            }
+
+            return filtered;
         }
     }
 }

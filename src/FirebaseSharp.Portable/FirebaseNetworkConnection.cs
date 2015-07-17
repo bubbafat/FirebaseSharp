@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Messages;
@@ -17,41 +18,53 @@ namespace FirebaseSharp.Portable
 {
     class FirebaseNetworkConnection : IFirebaseNetworkConnection
     {
+        private readonly object _lock = new object();
         private bool _connected = false;
         private HttpClient _client;
         private readonly Uri _root;
         private readonly BlockingQueue<FirebaseMessage> _sendQueue = new BlockingQueue<FirebaseMessage>();
-        private readonly Task _sendTask;
-        private readonly Task _receiveTask;
+        private CancellationTokenSource _cancelSource;
+        private Task _sendTask;
+        private Task _receiveTask;
         public FirebaseNetworkConnection(Uri root)
         {
             _root = root;
 
-            _sendTask = Task.Run(() => SendThread());
-            _receiveTask = Task.Run(() => ReceiveThread());
-
             Connect();
         }
 
-        private async void SendThread()
+        private async void SendThread(CancellationToken cancel)
         {
-            while (true)
+            try
             {
-                var message = _sendQueue.Dequeue();
-                HttpRequestMessage request = new HttpRequestMessage(GetMethod(message), GetUri(message.Path));
-                if (!string.IsNullOrEmpty(message.Value))
+                while (true)
                 {
-                    request.Content = new StringContent(message.Value);
-                } 
+                    cancel.ThrowIfCancellationRequested();
 
-                await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead).ContinueWith(
-                    (rsp) =>
+                    var message = _sendQueue.Dequeue(cancel);
+                    HttpRequestMessage request = new HttpRequestMessage(GetMethod(message), GetUri(message.Path));
+                    if (!string.IsNullOrEmpty(message.Value))
                     {
-                        if (rsp.IsFaulted)
+                        request.Content = new StringContent(message.Value);
+                    }
+
+                    await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancel).ContinueWith(
+                        (rsp) =>
                         {
-                            message.Callback(new FirebaseError(rsp.Exception.Message));
-                        }
-                    }, TaskContinuationOptions.NotOnRanToCompletion);
+                            if (rsp.Exception != null)
+                            {
+                                message.Callback(new FirebaseError(rsp.Exception.Message));
+                            }
+                            else
+                            {
+                                message.Callback(null);
+                            }
+
+                        }, TaskContinuationOptions.NotOnCanceled).ConfigureAwait(false);
+                }
+            }
+            catch (OperationCanceledException)
+            {
             }
         }
 
@@ -82,65 +95,76 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        private async void ReceiveThread()
+        private async void ReceiveThread(CancellationToken cancel)
         {
-            while (true)
+            try
             {
-                var uri = GetUri("/");
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-
-                var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-                response.EnsureSuccessStatusCode();
-
-                using (var stream = await response.Content.ReadAsStreamAsync())
-                using (var reader = new StreamReader(stream))
+                while (true)
                 {
-                    WriteBehavior behavior = WriteBehavior.None;
-                    string data = null;
+                    cancel.ThrowIfCancellationRequested();
 
-                    while (true)
+                    var uri = GetUri("/");
+                    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
+                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+
+                    var response =
+                        await
+                            _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancel)
+                                .ConfigureAwait(false);
+                    response.EnsureSuccessStatusCode();
+
+                    using (
+                        var stream =
+                            await response.Content.ReadAsStreamAsync().WithCancellation(cancel).ConfigureAwait(false))
+                    using (var reader = new StreamReader(stream))
                     {
+                        WriteBehavior behavior = WriteBehavior.None;
 
-                        var line = reader.ReadLine();
-                        if (line == null)
+                        while (true)
                         {
-                            continue;
-                        }
+                            cancel.ThrowIfCancellationRequested();
 
-                        Debug.WriteLine("RECV: {0}", line);
-
-                        if (line.StartsWith("event:"))
-                        {
-                            string eventName = line.Substring(6).Trim();
-                            switch (eventName)
+                            var line = await reader.ReadLineAsync().WithCancellation(cancel).ConfigureAwait(false);
+                            if (line == null)
                             {
-                                case "cancel":
-                                case "auth_revoked":
-                                case "keep-alive":
-                                    OnReceived(WriteBehavior.None, null);
-                                    behavior = WriteBehavior.None;
-                                    data = null;
-                                    break;
-                                case "put":
-                                    behavior = WriteBehavior.Replace;
-                                    break;
-                                case "patch":
-                                    behavior = WriteBehavior.Merge;
-                                    break;
+                                continue;
+                            }
+
+                            Debug.WriteLine("RECV: {0}", line);
+
+                            if (line.StartsWith("event:"))
+                            {
+                                string eventName = line.Substring(6).Trim();
+                                switch (eventName)
+                                {
+                                    case "cancel":
+                                    case "auth_revoked":
+                                    case "keep-alive":
+                                        OnReceived(WriteBehavior.None, null);
+                                        behavior = WriteBehavior.None;
+                                        break;
+                                    case "put":
+                                        behavior = WriteBehavior.Replace;
+                                        break;
+                                    case "patch":
+                                        behavior = WriteBehavior.Merge;
+                                        break;
+                                }
+                            }
+
+                            if (line.StartsWith("data:"))
+                            {
+                                OnReceived(behavior, line.Substring(5).Trim());
+
+                                behavior = WriteBehavior.None;
                             }
                         }
-
-                        if (line.StartsWith("data:"))
-                        {
-                            data = line.Substring(5).Trim();
-                            OnReceived(behavior, data);
-
-                            behavior = WriteBehavior.None;
-                            data = null;
-                        }
                     }
-                }   
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                
             }
         }
 
@@ -161,47 +185,49 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        private JsonReader ReadToNamedPropertyValue(JsonReader reader, string property)
-        {
-            while (reader.Read() && reader.TokenType != JsonToken.PropertyName)
-            {
-                // skip the property
-            }
-
-            string prop = reader.Value.ToString();
-            if (property != prop)
-            {
-                throw new InvalidOperationException("Error parsing response.  Expected json property named: " + property);
-            }
-
-            return reader;
-        }
-
         public void Send(FirebaseMessage message)
         {
-            _sendQueue.Enqueue(message);
+            _sendQueue.Enqueue(_cancelSource.Token, message);
         }
 
         public event FirebaseEventReceived Received;
         public void Disconnect()
         {
-            _connected = false;
+            lock (_lock)
+            {
+                if (_connected)
+                {
+                    _cancelSource.Cancel();
+                    _connected = false;
+                    _cancelSource = null;
+                }
+            }
         }
 
         public void Connect()
         {
-            _connected = true;
-            HttpClientHandler handler = new HttpClientHandler
+            lock (_lock)
             {
-                AllowAutoRedirect = true,
-                MaxAutomaticRedirections = 10,
-            };
+                if (!_connected)
+                {
+                    HttpClientHandler handler = new HttpClientHandler
+                    {
+                        AllowAutoRedirect = true,
+                        MaxAutomaticRedirections = 10,
+                    };
 
-            _client = new HttpClient(handler, true)
-            {
-                BaseAddress = _root,
-                Timeout = TimeSpan.FromMinutes(15),
-            };
+                    _client = new HttpClient(handler, true)
+                    {
+                        BaseAddress = _root,
+                        Timeout = TimeSpan.FromMilliseconds(Timeout.Infinite),
+                    };
+
+                    _cancelSource = new CancellationTokenSource();
+                    _sendTask = Task.Run(() => SendThread(_cancelSource.Token));
+                    _receiveTask = Task.Run(() => ReceiveThread(_cancelSource.Token));
+                    _connected = true;
+                }
+            }
         }
     }
 }

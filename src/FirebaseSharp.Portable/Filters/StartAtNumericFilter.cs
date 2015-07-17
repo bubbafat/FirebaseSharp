@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Subscriptions;
+using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable.Filters
 {
@@ -16,7 +17,7 @@ namespace FirebaseSharp.Portable.Filters
             _startingValue = startingValue;
         }
 
-        public IEnumerable<IDataSnapshot> Filter(IEnumerable<IDataSnapshot> snapshots)
+        public JToken Apply(JToken filtered)
         {
             throw new NotImplementedException();
         }

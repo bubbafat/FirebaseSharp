@@ -6,74 +6,16 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FirebaseSharp.Portable.Interfaces;
-using Newtonsoft.Json.Linq;
+using FirebaseSharp.Portable.Subscriptions;
 
 namespace FirebaseSharp.Portable
 {
-    internal class Subscription
-    {
-        private JToken _lastRead = null;
-
-        private readonly object _lock = new object();
-        public string Event { get; internal set; }
-        public object Context { get; internal set; }
-        public SnapshotCallback Callback { get; internal set; }
-        public bool Once { get; internal set; }
-        public string Path { get; internal set; }
-
-        public bool Matches(SyncDatabase root)
-        {
-            JToken last = _lastRead;
-            JToken snap = root.SnapFor(Path).Token;
-
-            if (snap != null)
-            {
-                _lastRead = snap.DeepClone();
-            }
-            else
-            {
-                _lastRead = null;
-            }
-
-            if (last == null && snap == null)
-            {
-                return true;
-            }
-
-            if (last == null || snap == null)
-            {
-                return false;
-            }
-
-            return JToken.DeepEquals(last, snap);
-        }
-
-        public void Fire()
-        {
-            SnapshotCallback callback;
-            
-            lock (_lock)
-            {
-                callback = Callback;
-                if (Once)
-                {
-                    Callback = null;
-                }
-            }
-
-            if (callback != null)
-            {
-                callback(new DataSnapshot(_lastRead), null, Context);
-            }
-        }
-    }
-
     internal class SubscriptionDatabase
     {
         private readonly List<Subscription> _subscriptions = new List<Subscription>();
         private readonly object _lock = new object();
 
-        public void Subscribe(string path, string eventName, SnapshotCallback callback, object context, bool once)
+        public void Subscribe(string path, string eventName, SnapshotCallback callback, object context, bool once, IEnumerable<ISubscriptionFilter> filters)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -82,7 +24,7 @@ namespace FirebaseSharp.Portable
 
             lock (_lock)
             {
-                _subscriptions.Add(new Subscription
+                _subscriptions.Add(new Subscription(filters)
                 {
                     Event = eventName,
                     Callback = callback,
@@ -93,11 +35,11 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        internal IEnumerable<Subscription> Changed(SyncDatabase root)
+        internal IEnumerable<Subscription> Subscriptions
         {
-            lock (_lock)
+            get
             {
-                return _subscriptions.Where(s => !s.Matches(root));
+                return _subscriptions;                
             }
         }
 
