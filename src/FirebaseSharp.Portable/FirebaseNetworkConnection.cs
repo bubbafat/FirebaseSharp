@@ -229,5 +229,11 @@ namespace FirebaseSharp.Portable
                 }
             }
         }
+
+        public void Dispose()
+        {
+            Disconnect();
+            using (_client) {  }
+        }
     }
 }

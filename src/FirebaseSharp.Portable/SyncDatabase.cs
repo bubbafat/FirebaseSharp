@@ -36,7 +36,7 @@ namespace FirebaseSharp.Portable
     /// Would JSON Patch make sense?  It's basically what the REST APIs are sending anyway.
     /// How should conflicts be handled?
     /// </summary>
-    class SyncDatabase
+    class SyncDatabase : IDisposable
     {
         private JToken _root;
         private readonly object _lock = new object();
@@ -336,6 +336,11 @@ namespace FirebaseSharp.Portable
         internal void GoOffline()
         {
             _connection.Disconnect();
+        }
+
+        public void Dispose()
+        {
+            using (_connection) { }
         }
     }
 }

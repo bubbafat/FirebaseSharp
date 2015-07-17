@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
 {
-    public class FirebaseApp : IFirebaseApp
+    public sealed class FirebaseApp : IFirebaseApp
     {
         private AuthenticationState _authState;
         private readonly Uri _rootUri;
@@ -119,7 +119,7 @@ namespace FirebaseSharp.Portable
 
         public void Dispose()
         {
-            GoOffline();
+            using (_cache) { }
         }
     }
 }

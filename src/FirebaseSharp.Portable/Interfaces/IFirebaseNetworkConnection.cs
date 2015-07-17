@@ -20,7 +20,7 @@ namespace FirebaseSharp.Portable.Interfaces
 
     internal delegate void FirebaseEventReceived(object sender, FirebaseEventReceivedEventArgs e);
 
-    internal interface IFirebaseNetworkConnection
+    internal interface IFirebaseNetworkConnection : IDisposable
     {
         void Send(FirebaseMessage message);
 
