@@ -27,7 +27,7 @@ namespace FirebaseSharp.Tests.Filter
 
                 ManualResetEvent loaded = new ManualResetEvent(false);
 
-                app.Child("/scores")
+                var fbRef = app.Child("/scores")
                     .OrderByValue<int>()
                     .LimitToLast(expected.Count)
                     .On("value", (snap, childPath, context) =>
