@@ -18,7 +18,10 @@ namespace FirebaseSharp.Tests.Filter
             ManualResetEvent fired = new ManualResetEvent(false);
             IFirebase limited = app.Child("/dinosaurs").LimitToFirst(2).Once("child_added", (snap, previous, context) =>
             {
-                Debug.WriteLine(snap.Value);
+                foreach (var dino in snap.Children)
+                {
+                    Debug.WriteLine(dino.Value);                    
+                }
                 fired.Set();
             });
 

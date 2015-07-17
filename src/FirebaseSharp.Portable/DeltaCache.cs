@@ -20,10 +20,9 @@ namespace FirebaseSharp.Portable
 
         private void FireChangeEvents(object sender, JsonCacheUpdateEventArgs args)
         {
-            var snap = _syncDb.SnapFor(args.Path);
-            foreach (var sub in _subscriptions.Changed(snap))
+            foreach (var sub in _subscriptions.Changed(_syncDb))
             {
-                sub.Fire(snap);
+                sub.Fire();
             }
         }
     }

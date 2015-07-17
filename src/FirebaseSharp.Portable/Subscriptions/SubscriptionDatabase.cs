@@ -21,10 +21,10 @@ namespace FirebaseSharp.Portable
         public bool Once { get; internal set; }
         public string Path { get; internal set; }
 
-        public bool Matches(DataSnapshot snapshot)
+        public bool Matches(SyncDatabase root)
         {
             JToken last = _lastRead;
-            JToken snap = snapshot.Token;
+            JToken snap = root.SnapFor(Path).Token;
 
             if (snap != null)
             {
@@ -48,7 +48,7 @@ namespace FirebaseSharp.Portable
             return JToken.DeepEquals(last, snap);
         }
 
-        public void Fire(IDataSnapshot snapshot)
+        public void Fire()
         {
             SnapshotCallback callback;
             
@@ -63,7 +63,7 @@ namespace FirebaseSharp.Portable
 
             if (callback != null)
             {
-                callback(snapshot, null, Context);
+                callback(new DataSnapshot(_lastRead), null, Context);
             }
         }
     }
@@ -93,11 +93,11 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        internal IEnumerable<Subscription> Changed(DataSnapshot snapshot)
+        internal IEnumerable<Subscription> Changed(SyncDatabase root)
         {
             lock (_lock)
             {
-                return _subscriptions.Where(s => !s.Matches(snapshot));
+                return _subscriptions.Where(s => !s.Matches(root));
             }
         }
 
