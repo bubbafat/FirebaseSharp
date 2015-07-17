@@ -80,7 +80,7 @@ namespace FirebaseSharp.Portable
                 var previous = last[child.Path];
                 if (!JToken.DeepEquals(child, previous))
                 {
-                    Fire(child);
+                    Fire(child.Path, child);
                 }
             }
         }
@@ -96,13 +96,13 @@ namespace FirebaseSharp.Portable
             {
                 if (snap == null)
                 {
-                    Fire(child);
+                    Fire(child.Path, child);
                 }
                 else
                 {
                     if (snap[child.Path] == null)
                     {
-                        Fire(child);
+                        Fire(child.Path, child);
                     }
                 }
             }
@@ -119,13 +119,13 @@ namespace FirebaseSharp.Portable
             {
                 if (last == null)
                 {
-                    Fire(child);
+                    Fire(child.Path, child);
                 }
                 else
                 {
                     if (last[child.Path] == null)
                     {
-                        Fire(child);
+                        Fire(child.Path, child);
                     }
                 }
             }
@@ -138,21 +138,25 @@ namespace FirebaseSharp.Portable
                 return;
             }
 
-            Fire(snap);
+            Fire(Path, snap);
         }
 
         private JToken ApplyFilters(JToken jToken)
         {
             JToken filtered = jToken;
-            foreach (var filter in _filters)
+
+            if (filtered != null)
             {
-                filtered = filter.Apply(filtered);
+                foreach (var filter in _filters)
+                {
+                    filtered = filter.Apply(filtered);
+                }
             }
 
             return filtered;
         }
 
-        private void Fire(JToken state)
+        private void Fire(string path, JToken state)
         {
             SnapshotCallback callback;
             
@@ -171,7 +175,7 @@ namespace FirebaseSharp.Portable
                 }
             }
 
-            callback(new DataSnapshot(state), null, Context);
+            callback(new DataSnapshot(path, state), null, Context);
         }
     }
 }

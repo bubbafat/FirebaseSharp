@@ -12,8 +12,14 @@ namespace FirebaseSharp.Portable
 {
     internal class SubscriptionDatabase
     {
+        private readonly SyncDatabase _syncDb;
         private readonly List<Subscription> _subscriptions = new List<Subscription>();
         private readonly object _lock = new object();
+
+        public SubscriptionDatabase(SyncDatabase syncDb)
+        {
+            _syncDb = syncDb;
+        }
 
         public void Subscribe(string path, string eventName, SnapshotCallback callback, object context, bool once, IEnumerable<ISubscriptionFilter> filters)
         {
@@ -22,24 +28,31 @@ namespace FirebaseSharp.Portable
                 throw new ArgumentException("Cannot subscribe to an empty path");
             }
 
+            var sub = new Subscription(filters)
+            {
+                Event = eventName,
+                Callback = callback,
+                Context = context,
+                Once = once,
+                Path = path,
+            };
+
             lock (_lock)
             {
-                _subscriptions.Add(new Subscription(filters)
-                {
-                    Event = eventName,
-                    Callback = callback,
-                    Context = context,
-                    Once = once,
-                    Path = path,
-                });
+                _subscriptions.Add(sub);
             }
+
+            _syncDb.ExecuteInitial(sub);
         }
 
         internal IEnumerable<Subscription> Subscriptions
         {
             get
             {
-                return _subscriptions;                
+                lock (_lock)
+                {
+                    return _subscriptions.ToList();
+                }
             }
         }
 

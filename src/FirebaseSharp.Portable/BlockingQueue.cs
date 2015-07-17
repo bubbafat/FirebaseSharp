@@ -9,7 +9,7 @@ namespace FirebaseSharp.Portable
     {
         private readonly Queue<T> _queue = new Queue<T>();
         private readonly SemaphoreSlim _semaphone = new SemaphoreSlim(1, 1);
-        ManualResetEvent _available = new ManualResetEvent(false);
+        private readonly ManualResetEvent _available = new ManualResetEvent(false);
 
         public void Enqueue(CancellationToken cancel, T item)
         {

@@ -22,7 +22,7 @@ namespace FirebaseSharp.Tests.Firebase
             ManualResetEvent mre = new ManualResetEvent(false);
             post1Ref.Once("value", (snap, prev, ctx) =>
             {
-                JToken actual = JToken.Parse(snap.Value);
+                JToken actual = JToken.Parse(snap.Value());
                 Assert.IsNotNull(actual["name"]);
                 JValue name = (JValue)actual["name"];
                 Assert.AreEqual("Post 1", name.Value);

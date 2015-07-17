@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FirebaseSharp.Portable.Interfaces;
 using Newtonsoft.Json.Linq;
 
@@ -11,9 +9,10 @@ namespace FirebaseSharp.Portable
     class DataSnapshot : IDataSnapshot
     {
         private readonly JToken _token;
-        internal DataSnapshot(JToken token)
+        internal DataSnapshot(string key, JToken token)
         {
             _token = token != null ? token.DeepClone() : null;
+            Key = key.TrimStart(new char[]{'/'});
         }
 
         internal JToken Token
@@ -25,16 +24,16 @@ namespace FirebaseSharp.Portable
         {
             get { return _token != null; }
         }
-        public IDataSnapshot Child(string path)
+        public IDataSnapshot Child(string childName)
         {
             JToken child = null;
 
             if (_token != null)
             {
-                child =_token[path];
+                child =_token[childName];
             }
 
-            return new DataSnapshot(child);
+            return new DataSnapshot(childName, child);
         }
 
         public IEnumerable<IDataSnapshot> Children
@@ -46,7 +45,7 @@ namespace FirebaseSharp.Portable
                     return new List<IDataSnapshot>();
                 }
 
-                return _token.Children().Select(t => new DataSnapshot(t));
+                return _token.Children().Select(t => new DataSnapshot(t.Path, t));
             }
         }
 
@@ -69,10 +68,34 @@ namespace FirebaseSharp.Portable
         public IFirebasePriority Priority { get; private set; }
         public string Key { get; private set; }
 
-        public string Value
+        public T Value<T>() where T: struct
         {
-            get { return (_token == null) ? string.Empty : _token.ToString(); }
+            string value = GetValueString();
+
+            return (T)Convert.ChangeType(value, typeof(T));
+        }
+
+        public string Value()
+        {
+            return GetValueString();
         }
         public string ExportVal { get; private set; }
+
+        private string GetValueString()
+        {
+            JProperty jp = _token as JProperty;
+            if (jp != null)
+            {
+                return jp.Value.ToString();
+            }
+
+            JValue jv = _token as JValue;
+            if (jv != null)
+            {
+                return jv.Value.ToString();
+            }
+
+            return _token.Value<string>();
+        }
     }
 }

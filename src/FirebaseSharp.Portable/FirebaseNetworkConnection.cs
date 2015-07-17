@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Messages;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
@@ -19,7 +14,7 @@ namespace FirebaseSharp.Portable
     class FirebaseNetworkConnection : IFirebaseNetworkConnection
     {
         private readonly object _lock = new object();
-        private bool _connected = false;
+        private bool _connected;
         private HttpClient _client;
         private readonly Uri _root;
         private readonly BlockingQueue<FirebaseMessage> _sendQueue = new BlockingQueue<FirebaseMessage>();
@@ -29,8 +24,6 @@ namespace FirebaseSharp.Portable
         public FirebaseNetworkConnection(Uri root)
         {
             _root = root;
-
-            Connect();
         }
 
         private async void SendThread(CancellationToken cancel)
@@ -42,7 +35,9 @@ namespace FirebaseSharp.Portable
                     cancel.ThrowIfCancellationRequested();
 
                     var message = _sendQueue.Dequeue(cancel);
+
                     HttpRequestMessage request = new HttpRequestMessage(GetMethod(message), GetUri(message.Path));
+                    
                     if (!string.IsNullOrEmpty(message.Value))
                     {
                         request.Content = new StringContent(message.Value);
@@ -190,7 +185,7 @@ namespace FirebaseSharp.Portable
             _sendQueue.Enqueue(_cancelSource.Token, message);
         }
 
-        public event FirebaseEventReceived Received;
+        public event EventHandler<FirebaseEventReceivedEventArgs> Received;
         public void Disconnect()
         {
             lock (_lock)
@@ -234,6 +229,7 @@ namespace FirebaseSharp.Portable
         {
             Disconnect();
             using (_client) {  }
+            using (_cancelSource) { }
         }
     }
 }

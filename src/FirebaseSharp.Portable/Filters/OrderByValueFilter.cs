@@ -8,11 +8,17 @@ using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable.Filters
 {
-    class OrderByKeyValueFilter : ISubscriptionFilter
+    class OrderByValueFilter<T> : ISubscriptionFilter
     {
         public JToken Apply(JToken filtered)
         {
-            throw new NotImplementedException();
+            JObject result = new JObject();
+            foreach (var child in filtered.Children().OrderBy(t => t.First.Value<T>()))
+            {
+                result.Add(child);
+            }
+
+            return result;
         }
     }
 }

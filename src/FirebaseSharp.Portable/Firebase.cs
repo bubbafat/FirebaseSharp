@@ -67,9 +67,9 @@ namespace FirebaseSharp.Portable
             return this;
         }
 
-        public IFirebase OrderByValue()
+        public IFirebase OrderByValue<T>()
         {
-            _filters.Add(new OrderByKeyValueFilter());
+            _filters.Add(new OrderByValueFilter<T>());
             return this;
         }
 

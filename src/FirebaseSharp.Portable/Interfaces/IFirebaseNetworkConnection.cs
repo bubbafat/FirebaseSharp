@@ -18,13 +18,11 @@ namespace FirebaseSharp.Portable.Interfaces
         public FirebaseMessage Message { get; private set; }
     }
 
-    internal delegate void FirebaseEventReceived(object sender, FirebaseEventReceivedEventArgs e);
-
     internal interface IFirebaseNetworkConnection : IDisposable
     {
         void Send(FirebaseMessage message);
 
-        event FirebaseEventReceived Received;
+        event EventHandler<FirebaseEventReceivedEventArgs> Received;
 
         void Disconnect();
         void Connect();

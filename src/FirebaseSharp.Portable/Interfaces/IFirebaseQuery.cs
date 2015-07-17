@@ -17,7 +17,7 @@ namespace FirebaseSharp.Portable.Interfaces
         IFirebase Once(string eventName, SnapshotCallback callback, object context, FirebaseStatusCallback cancelledCallback = null);
         IFirebase OrderByChild(string key);
         IFirebase OrderByKey();
-        IFirebase OrderByValue();
+        IFirebase OrderByValue<T>();
         IFirebase OrderByPriority();
         IFirebase StartAt(string startingValue);
         IFirebase StartAt(long startingValue);

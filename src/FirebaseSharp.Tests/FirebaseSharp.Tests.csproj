@@ -77,7 +77,10 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Filter\TakeFirst.cs" />
+    <Compile Include="Filter\OrderByKeyTests.cs" />
+    <Compile Include="Filter\OrderByValue.cs" />
+    <Compile Include="Properties\AppFactory.cs" />
+    <Compile Include="Filter\LimitToFirstTests.cs" />
     <Compile Include="Firebase\Query.cs" />
     <Compile Include="Firebase\PushTests.cs" />
     <Compile Include="JsonCache\IntegrityTests.cs" />

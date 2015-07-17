@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Subscriptions;
-using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
 {
@@ -16,12 +12,22 @@ namespace FirebaseSharp.Portable
         private readonly SyncDatabase _cache;
         private readonly SubscriptionDatabase _subscriptions;
 
+        internal FirebaseApp(Uri rootUri, IFirebaseNetworkConnection connection)
+        {
+            _rootUri = rootUri;
+            _cache = new SyncDatabase(connection);
+            _subscriptions = new SubscriptionDatabase(_cache);
+            _cache.Changed += FireChangeEvents;
+            GoOnline();
+        }
+
         public FirebaseApp(Uri root)
         {
             _rootUri = root;
             _cache = new SyncDatabase(new FirebaseNetworkConnection(root));
-            _subscriptions = new SubscriptionDatabase();
+            _subscriptions = new SubscriptionDatabase(_cache);
             _cache.Changed += FireChangeEvents;
+            GoOnline();
         }
 
         private void FireChangeEvents(object sender, JsonCacheUpdateEventArgs args)

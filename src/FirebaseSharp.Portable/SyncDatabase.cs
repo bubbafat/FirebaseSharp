@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Messages;
 using Newtonsoft.Json;
@@ -9,15 +8,6 @@ using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
 {
-    class JsonCacheUpdateEventArgs : EventArgs
-    {
-        public JsonCacheUpdateEventArgs(string path)
-        {
-            Path = path;
-        }
-
-        public string Path { get; private set; }
-    }
     /// <summary>
     /// The SyncDatabase is a single JSON object that represents the state of the 
     /// data as we know it.  As changes come in the object is updated 
@@ -39,9 +29,11 @@ namespace FirebaseSharp.Portable
     class SyncDatabase : IDisposable
     {
         private JToken _root;
+        private bool _initialReceive = false;
         private readonly object _lock = new object();
         private readonly IFirebaseNetworkConnection _connection;
         private readonly FirebasePushIdGenerator _idGenerator = new FirebasePushIdGenerator();
+        private readonly Queue<Subscription> _initialSubscriptions = new Queue<Subscription>(); 
 
         public SyncDatabase(IFirebaseNetworkConnection connection)
         {
@@ -55,26 +47,43 @@ namespace FirebaseSharp.Portable
 
         public DataSnapshot SnapFor(string path)
         {
-            JToken token;
-
-            if (TryGetChild(path, out token))
+            lock (_lock)
             {
-                return new DataSnapshot(token);
-            }
+                JToken token;
 
-            return new DataSnapshot(null);
+                if (TryGetChild(path, out token))
+                {
+                    return new DataSnapshot(path, token);
+                }
+
+                return new DataSnapshot(null, null);
+            }
         }
 
         private void ConnectionOnReceived(object sender, FirebaseEventReceivedEventArgs e)
         {
-            switch (e.Message.Behavior)
+            lock (_lock)
             {
-                case WriteBehavior.Replace:
-                    Set(e.Message);
-                    break;
-                case WriteBehavior.Merge:
-                    Update(e.Message);
-                    break;
+                switch (e.Message.Behavior)
+                {
+                    case WriteBehavior.Replace:
+                        Set(e.Message);
+                        DrainInitialQueue();
+                        break;
+                    case WriteBehavior.Merge:
+                        Update(e.Message);
+                        break;
+                }
+            }
+        }
+
+        private void DrainInitialQueue()
+        {
+            _initialReceive = true;
+            while (_initialSubscriptions.Any())
+            {
+                var sub = _initialSubscriptions.Dequeue();
+                sub.Process(this);
             }
         }
 
@@ -88,8 +97,12 @@ namespace FirebaseSharp.Portable
         public void Set(string path, string data, FirebaseStatusCallback callback)
         {
             var message = new FirebaseMessage(WriteBehavior.Replace, path, data, callback);
-            Set(message);
-            QueueUpdate(message);
+
+            lock (_lock)
+            {
+                Set(message);
+                QueueUpdate(message);
+            }
         }
 
         private void Set(FirebaseMessage message)
@@ -141,9 +154,12 @@ namespace FirebaseSharp.Portable
         public string Push(string path, string data, FirebaseStatusCallback callback)
         {
             string newPath = CreatePushPath(path);
-            Set(newPath, data, callback);
 
-            return newPath;
+            lock (_lock)
+            {
+                Set(newPath, data, callback);
+                return newPath;
+            }
         }
 
         private string CreatePushPath(string path)
@@ -155,8 +171,12 @@ namespace FirebaseSharp.Portable
         public void Update(string path, string data, FirebaseStatusCallback callback)
         {
             var message = new FirebaseMessage(WriteBehavior.Merge, path, data, callback);
-            Update(message);
-            QueueUpdate(message);
+
+            lock (_lock)
+            {
+                Update(message);
+                QueueUpdate(message);
+            }
         }
 
         private void Update(FirebaseMessage message)
@@ -186,7 +206,7 @@ namespace FirebaseSharp.Portable
             OnChanged(message);
         }
 
-        public void OnChanged(FirebaseMessage message)
+        private void OnChanged(FirebaseMessage message)
         {
             var callback = Changed;
             if (callback != null)
@@ -341,6 +361,20 @@ namespace FirebaseSharp.Portable
         public void Dispose()
         {
             using (_connection) { }
+        }
+
+        internal void ExecuteInitial(Subscription sub)
+        {
+            lock (_lock)
+            {
+                if (!_initialReceive)
+                {
+                    _initialSubscriptions.Enqueue(sub);
+                    return;
+                }
+            }
+
+            sub.Process(this);
         }
     }
 }
