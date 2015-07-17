@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="Filter\OrderByKeyTests.cs" />
     <Compile Include="Filter\OrderByValue.cs" />
+    <Compile Include="Filter\CombinedFilterTests.cs" />
     <Compile Include="Properties\AppFactory.cs" />
     <Compile Include="Filter\LimitToFirstTests.cs" />
     <Compile Include="Firebase\Query.cs" />
