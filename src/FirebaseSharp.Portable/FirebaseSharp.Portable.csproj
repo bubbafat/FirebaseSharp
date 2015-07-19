@@ -40,8 +40,9 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Filters\EndAtNumericFilter.cs" />
     <Compile Include="Filters\EndAtStringFilter.cs" />
-    <Compile Include="Filters\EqualToNumericFilter.cs" />
-    <Compile Include="Filters\EqualToStringFilter.cs" />
+    <Compile Include="Filters\EqualToFilter.cs" />
+    <Compile Include="Filters\FirebaseKeySorter.cs" />
+    <Compile Include="Filters\FirebaseValueSorter.cs" />
     <Compile Include="FirebasePushIdGenerator.cs" />
     <Compile Include="Firebase.cs" />
     <Compile Include="FirebaseApp.cs" />

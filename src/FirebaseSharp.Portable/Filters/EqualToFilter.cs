@@ -8,20 +8,21 @@ using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable.Filters
 {
-    class StartAtStringFilter : ISubscriptionFilter
+    class EqualToFilter<T> : ISubscriptionFilter
+        where T: IEquatable<T>
     {
-        private readonly string _startingValue;
+        private readonly T _value;
 
-        public StartAtStringFilter(string startingValue)
+        public EqualToFilter(T value)
         {
-            _startingValue = startingValue;
+            _value = value;
         }
 
         public JToken Apply(JToken filtered)
         {
             JObject result = new JObject();
 
-            foreach (var child in filtered.Children().SkipWhile(t => String.Compare(t.First.Value<string>(), _startingValue, StringComparison.Ordinal) <= 0))
+            foreach (var child in filtered.Children().Where(t => t.First.Value<T>().Equals(_value)))
             {
                 result.Add(child);
             }

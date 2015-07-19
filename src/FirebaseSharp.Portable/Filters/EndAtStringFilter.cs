@@ -19,7 +19,14 @@ namespace FirebaseSharp.Portable.Filters
 
         public JToken Apply(JToken filtered)
         {
-            throw new NotImplementedException();
+            JObject result = new JObject();
+
+            foreach (var child in filtered.Children().TakeWhile(t => String.Compare(t.First.Value<string>(), _endingValue, StringComparison.Ordinal) <= 0))
+            {
+                result.Add(child);
+            }
+
+            return result;
         }
     }
 }

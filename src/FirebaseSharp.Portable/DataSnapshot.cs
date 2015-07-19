@@ -12,7 +12,7 @@ namespace FirebaseSharp.Portable
         internal DataSnapshot(string key, JToken token)
         {
             _token = token != null ? token.DeepClone() : null;
-            Key = key.TrimStart(new char[]{'/'});
+            Key = (key != null) ? key.TrimStart(new char[] {'/'}) : string.Empty;
         }
 
         internal JToken Token

@@ -105,13 +105,13 @@ namespace FirebaseSharp.Portable
 
         public IFirebase EqualTo(string value)
         {
-            _filters.Add(new EqualToStringFilter(value));
+            _filters.Add(new EqualToFilter<string>(value));
             return this;
         }
 
         public IFirebase EqualTo(long value)
         {
-            _filters.Add(new EqualToNumericFilter(value));
+            _filters.Add(new EqualToFilter<long>(value));
             return this;
         }
 
