@@ -21,6 +21,31 @@ namespace FirebaseSharp.Tests.Filter
             RunTest(json, "test3", new[] { "keyAAA", "keyXXX" });
         }
 
+        [TestMethod]
+        public void BooleanTests()
+        {
+            string json = @"
+{
+    'keyXXX': {
+        'test1': false,
+        'test2': false
+    },
+    'keyAAA': {
+        'test1': true,
+        'test2': false
+    },
+    'keyBBB': {
+        'test1': false,
+        'test2': false
+    },
+}
+";
+
+            RunTest(json, "test1", new[] { "keyBBB", "keyXXX", "keyAAA" });
+            RunTest(json, "test2", new[] { "keyAAA", "keyBBB", "keyXXX" });
+        }
+
+
         private void RunTest(string json, string testName, string[] expectedOrder)
         {
             using (FirebaseApp app = AppFactory.FromJson(json))

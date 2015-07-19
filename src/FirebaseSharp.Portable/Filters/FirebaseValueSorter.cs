@@ -205,7 +205,7 @@ namespace FirebaseSharp.Portable.Filters
                 return true;
             }
 
-            if (y.Type == JTokenType.Boolean)
+            if (y.Type == JTokenType.Null)
             {
                 result = 1;
                 return true;
