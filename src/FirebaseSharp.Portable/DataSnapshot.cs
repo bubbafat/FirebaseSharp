@@ -30,7 +30,7 @@ namespace FirebaseSharp.Portable
 
             if (_token != null)
             {
-                child =_token[childName];
+                child =_token.First[childName];
             }
 
             return new DataSnapshot(childName, child);
@@ -79,6 +79,12 @@ namespace FirebaseSharp.Portable
         {
             return GetValueString();
         }
+
+        public IDataSnapshot this[string child]
+        {
+            get { return Child(child); }
+        }
+
         public string ExportVal { get; private set; }
 
         private string GetValueString()

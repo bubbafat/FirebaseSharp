@@ -10,7 +10,7 @@ namespace Examples
 {
     static class TopThreeDinos
     {
-        public static void Run()
+        public static void ByScore()
         {
             /* Node:
              * 
@@ -41,5 +41,36 @@ namespace Examples
                 done.WaitOne(TimeSpan.FromSeconds(15));
             }
         }
+
+        public static void ByScoreChild()
+        {
+            /* Node:
+             * 
+             * var ref = new Firebase("https://dinosaur-facts.firebaseio.com/dinosaurs");
+             * ref.orderByChild("height").on("child_added", function(snapshot) {
+              *  console.log(snapshot.key() + " was " + snapshot.val().height + " meters tall");
+             * });             
+             */
+
+            ManualResetEvent done = new ManualResetEvent(false);
+            int got = 0;
+
+            using (FirebaseApp app = new FirebaseApp(new Uri("https://dinosaur-facts.firebaseio.com/")))
+            {
+                var scoresRef = app.Child("dinosaurs").OrderByChild("height").On("child_added",
+                    (snapshot, child, context) =>
+                    {
+                        Console.WriteLine("{0} was {1} meters tall", snapshot.Key, snapshot["height"].Value<float>());
+
+                        if (++got == 6)
+                        {
+                            done.Set();
+                        }
+                    });
+
+                done.WaitOne(TimeSpan.FromSeconds(15));
+            }
+        }
+
     }
 }

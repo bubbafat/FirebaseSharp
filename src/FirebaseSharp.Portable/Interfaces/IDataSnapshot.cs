@@ -21,5 +21,7 @@ namespace FirebaseSharp.Portable.Interfaces
         T Value<T>() where T : struct;
         string Value();
 
+        IDataSnapshot this[string child] { get; }
+
     }
 }
