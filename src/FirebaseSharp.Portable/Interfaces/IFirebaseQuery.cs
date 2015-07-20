@@ -7,26 +7,24 @@ namespace FirebaseSharp.Portable.Interfaces
 {
     public delegate void SnapshotCallback(IDataSnapshot snap, string previousChild = null, object context = null);
 
-    public interface IFirebaseQuery
+    public interface IFirebaseQuery : IFirebaseReadonlyQuery
     {
-        IFirebase On(string eventName, SnapshotCallback callback);
-        IFirebase On(string eventName, SnapshotCallback callback, object context);
-        void Off(string eventName, SnapshotCallback callback);
-        void Off(string eventName, SnapshotCallback callback, object context);
-        IFirebase Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null);
-        IFirebase Once(string eventName, SnapshotCallback callback, object context, FirebaseStatusCallback cancelledCallback = null);
-        IFirebase OrderByChild(string key);
-        IFirebase OrderByKey();
-        IFirebase OrderByValue<T>();
-        IFirebase OrderByPriority();
-        IFirebase StartAt(string startingValue);
-        IFirebase StartAt(long startingValue);
-        IFirebase EndAt(string endingValue);
-        IFirebase EndAt(long endingValue);
-        IFirebase EqualTo(string value);
-        IFirebase EqualTo(long value);
-        IFirebase LimitToFirst(int limit);
-        IFirebase LimitToLast(int limit);
-        IFirebase Ref();
+        IFirebaseReadonlyQuery On(string eventName, SnapshotCallback callback);
+        IFirebaseReadonlyQuery On(string eventName, SnapshotCallback callback, object context);
+        IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null);
+        IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback, object context, FirebaseStatusCallback cancelledCallback = null);
+
+        IFirebaseQuery OrderByChild(string key);
+        IFirebaseQuery OrderByKey();
+        IFirebaseQuery OrderByValue<T>();
+        IFirebaseQuery OrderByPriority();
+        IFirebaseQuery StartAt(string startingValue);
+        IFirebaseQuery StartAt(long startingValue);
+        IFirebaseQuery EndAt(string endingValue);
+        IFirebaseQuery EndAt(long endingValue);
+        IFirebaseQuery EqualTo(string value);
+        IFirebaseQuery EqualTo(long value);
+        IFirebaseQuery LimitToFirst(int limit);
+        IFirebaseQuery LimitToLast(int limit);
     }
 }

@@ -11,6 +11,7 @@ namespace FirebaseSharp.Portable
         private readonly FirebaseApp _app;
         private readonly string _path;
         private readonly List<ISubscriptionFilter> _filters;
+        private Guid _queryId = Guid.Empty;
 
         internal Firebase(FirebaseApp app, string path, List<ISubscriptionFilter> filters = null)
         {
@@ -22,119 +23,115 @@ namespace FirebaseSharp.Portable
                 : new List<ISubscriptionFilter>(filters);
         }
 
-        public IFirebase On(string eventName, SnapshotCallback callback)
+        public IFirebaseReadonlyQuery On(string eventName, SnapshotCallback callback)
         {
             return On(eventName, callback, null);
         }
 
-        public IFirebase On(string eventName, SnapshotCallback callback, object context)
+        public IFirebaseReadonlyQuery On(string eventName, SnapshotCallback callback, object context)
         {
-            _app.Subscribe(eventName, _path, callback, context, _filters);
+            _queryId = _app.Subscribe(eventName, _path, callback, context, _filters);
             return this;
         }
 
-        public void Off(string eventName, SnapshotCallback callback)
+        public void Off()
         {
-            Off(eventName, callback, null);
+            _app.Unsubscribe(_queryId);
         }
 
-        public void Off(string eventName, SnapshotCallback callback, object context)
-        {
-            _app.Unsubscribe(eventName, _path, callback, context);
-        }
-
-        public IFirebase Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null)
+        public IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null)
         {
             return Once(eventName, callback, null, cancelledCallback);
         }
 
-        public IFirebase Once(string eventName, SnapshotCallback callback, object context,
+        public IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback, object context,
             FirebaseStatusCallback cancelledCallback = null)
         {
-            _app.SubscribeOnce(eventName, _path, callback, context, _filters, cancelledCallback);
+            _queryId = _app.SubscribeOnce(eventName, _path, callback, context, _filters, cancelledCallback);
             return this;
         }
 
-        public IFirebase OrderByChild(string child)
+        public IFirebaseQuery OrderByChild(string child)
         {
             _filters.Add(new OrderByChildFilter(child));
             return this;
         }
 
-        public IFirebase OrderByKey()
+        public IFirebaseQuery OrderByKey()
         {
             _filters.Add(new OrderByKeyFilter());
             return this;
         }
 
-        public IFirebase OrderByValue<T>()
+        public IFirebaseQuery OrderByValue<T>()
         {
             _filters.Add(new OrderByValueFilter<T>());
             return this;
         }
 
-        public IFirebase OrderByPriority()
+        public IFirebaseQuery OrderByPriority()
         {
             _filters.Add(new OrderByPriorityFilter());
             return this;
         }
 
-        public IFirebase StartAt(string startingValue)
+        public IFirebaseQuery StartAt(string startingValue)
         {
             _filters.Add(new StartAtStringFilter(startingValue));
             return this;
         }
 
-        public IFirebase StartAt(long startingValue)
+        public IFirebaseQuery StartAt(long startingValue)
         {
             _filters.Add(new StartAtNumericFilter(startingValue));
             return this;
         }
 
-        public IFirebase EndAt(string endingValue)
+        public IFirebaseQuery EndAt(string endingValue)
         {
             _filters.Add(new EndAtStringFilter(endingValue));
             return this;
         }
 
-        public IFirebase EndAt(long endingValue)
+        public IFirebaseQuery EndAt(long endingValue)
         {
             _filters.Add(new EndAtNumericFilter(endingValue));
             return this;
         }
 
-        public IFirebase EqualTo(string value)
+        public IFirebaseQuery EqualTo(string value)
         {
             _filters.Add(new EqualToFilter<string>(value));
             return this;
         }
 
-        public IFirebase EqualTo(long value)
+        public IFirebaseQuery EqualTo(long value)
         {
             _filters.Add(new EqualToFilter<long>(value));
             return this;
         }
 
-        public IFirebase LimitToFirst(int limit)
+        public IFirebaseQuery LimitToFirst(int limit)
         {
             _filters.Add(new LimitToFirstFilter(limit));
             return this;
         }
 
-        public IFirebase LimitToLast(int limit)
+        public IFirebaseQuery LimitToLast(int limit)
         {
             _filters.Add(new LimitToLastFilter(limit));
             return this;
         }
 
-        public IFirebase Ref()
+        public IFirebaseQuery Ref()
         {
             return new Firebase(_app, _path, _filters);
         }
 
         public IFirebase Child(string childPath)
         {
-            throw new NotImplementedException();
+            childPath = childPath.Trim(new[] {'/', ' '});
+            return _app.Child(String.Format("{0}/{1}", _path, childPath));
         }
 
         public IFirebase Parent()
@@ -144,7 +141,7 @@ namespace FirebaseSharp.Portable
 
         public IFirebase Root()
         {
-            throw new NotImplementedException();
+            return _app.Child("/");
         }
 
         public string Key

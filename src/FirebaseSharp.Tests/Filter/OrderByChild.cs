@@ -255,7 +255,7 @@ namespace FirebaseSharp.Tests.Filter
             using (FirebaseApp app = AppFactory.FromJson(json))
             {
                 ManualResetEvent fired = new ManualResetEvent(false);
-                IFirebase limited = app.Child("/")
+                var query = app.Child("/")
                     .OrderByChild(testName)
                     .On("value", (snap, previous, context) =>
                     {

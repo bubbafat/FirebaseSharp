@@ -21,7 +21,7 @@ namespace FirebaseSharp.Tests.Filter
                 string previousKey = null;
 
                 ManualResetEvent fired = new ManualResetEvent(false);
-                IFirebase limited = app.Child("/dinosaurs")
+                var query = app.Child("/dinosaurs")
                     .OrderByKey()
                     .On("child_added", (snap, previous, context) =>
                     {

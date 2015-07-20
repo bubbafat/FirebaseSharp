@@ -19,7 +19,7 @@ namespace FirebaseSharp.Tests.Filter
                 int current = 0;
 
                 ManualResetEvent fired = new ManualResetEvent(false);
-                IFirebase limited = app.Child("/dinosaurs")
+                var query = app.Child("/dinosaurs")
                     .LimitToFirst(limit)
                     .On("child_added", (snap, previous, context) =>
                     {
@@ -45,7 +45,7 @@ namespace FirebaseSharp.Tests.Filter
                 int current = 0;
 
                 ManualResetEvent fired = new ManualResetEvent(false);
-                IFirebase limited = app.Child("/dinosaurs")
+                var query = app.Child("/dinosaurs")
                     .LimitToFirst(limit)
                     .On("child_added", (snap, previous, context) =>
                     {

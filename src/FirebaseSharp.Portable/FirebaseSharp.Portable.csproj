@@ -58,6 +58,7 @@
     <Compile Include="Interfaces\IFirebaseOnDisconnect.cs" />
     <Compile Include="Interfaces\IFirebasePriority.cs" />
     <Compile Include="Interfaces\IFirebaseQuery.cs" />
+    <Compile Include="Interfaces\IFirebaseReadonlyQuery.cs" />
     <Compile Include="Interfaces\IFirebaseStructure.cs" />
     <Compile Include="Interfaces\IFirebaseUpdate.cs" />
     <Compile Include="Interfaces\IFirebaseUserManager.cs" />

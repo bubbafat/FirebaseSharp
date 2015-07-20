@@ -108,19 +108,19 @@ namespace FirebaseSharp.Portable
 
         public event AuthChangedEvent AuthChanged;
 
-        internal void Subscribe(string eventName, string path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters)
+        internal Guid Subscribe(string eventName, string path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters)
         {
-            _subscriptions.Subscribe(path, eventName, callback, context, false, filters);
+            return _subscriptions.Subscribe(path, eventName, callback, context, false, filters);
         }
 
-        internal void Unsubscribe(string eventName, string path, SnapshotCallback callback, object context)
+        internal void Unsubscribe(Guid queryId)
         {
-            _subscriptions.Unsubscribe(path, eventName, callback, context);
+            _subscriptions.Unsubscribe(queryId);
         }
 
-        internal void SubscribeOnce(string eventName, string path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters, FirebaseStatusCallback cancelledCallback)
+        internal Guid SubscribeOnce(string eventName, string path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters, FirebaseStatusCallback cancelledCallback)
         {
-            _subscriptions.Subscribe(path, eventName, callback, context, true, filters);
+            return _subscriptions.Subscribe(path, eventName, callback, context, true, filters);
         }
 
         public void Dispose()

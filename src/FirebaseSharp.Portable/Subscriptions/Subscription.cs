@@ -16,11 +16,15 @@ namespace FirebaseSharp.Portable
 
         internal Subscription(IEnumerable<ISubscriptionFilter> filters)
         {
+            SubscriptionId = Guid.NewGuid();
+
             if (filters != null)
             {
                 _filters.AddRange(filters);
             }
         }
+
+        public Guid SubscriptionId { get; private set; }
 
         public string Event { get; internal set; }
         public object Context { get; internal set; }

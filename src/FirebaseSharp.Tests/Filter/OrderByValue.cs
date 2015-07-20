@@ -22,7 +22,7 @@ namespace FirebaseSharp.Tests.Filter
                 int index = 0;
 
                 ManualResetEvent fired = new ManualResetEvent(false);
-                IFirebase limited = app.Child("/scores")
+                var query = app.Child("/scores")
                     .OrderByValue<int>()
                     .On("child_added", (snap, previous, context) =>
                     {
