@@ -6,9 +6,10 @@ namespace FirebaseSharp.Portable.Filters
 {
     class OrderByKeyFilter :  ISubscriptionFilter
     {
-        public JToken Apply(JToken filtered)
+        public JToken Apply(JToken filtered, IFilterContext context)
         {
             JObject result = new JObject();
+
             foreach (var child in filtered.Children().OrderBy(t => t.Path, new FirebaseKeySorter()))
             {
                 result.Add(child);

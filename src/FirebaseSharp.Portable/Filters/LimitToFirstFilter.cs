@@ -16,7 +16,7 @@ namespace FirebaseSharp.Portable.Filters
             _limit = limit;
         }
 
-        public JToken Apply(JToken filtered)
+        public JToken Apply(JToken filtered, IFilterContext context)
         {
             foreach (var child in filtered.Children().Skip(_limit).ToList())
             {

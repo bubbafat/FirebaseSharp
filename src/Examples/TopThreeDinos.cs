@@ -42,7 +42,7 @@ namespace Examples
             }
         }
 
-        public static void ByScoreChild()
+        public static void ByHeightChild()
         {
             /* Node:
              * 
@@ -70,6 +70,33 @@ namespace Examples
 
                 done.WaitOne(TimeSpan.FromSeconds(15));
             }
+        }
+
+        public static void ByHeightFilter()
+        {
+            //var ref = new Firebase("https://dinosaur-facts.firebaseio.com/dinosaurs");
+            //ref.orderByChild("height").equalTo(25).on("child_added", function(snapshot) {
+            //  console.log(snapshot.key());
+            //});            
+
+            ManualResetEvent done = new ManualResetEvent(false);
+
+            using (FirebaseApp app = new FirebaseApp(new Uri("https://dinosaur-facts.firebaseio.com/")))
+            {
+                var scoresRef = app.Child("dinosaurs")
+                                   .OrderByChild("height")
+                                   .EqualTo(25)
+                                   .On("child_added",
+                    (snapshot, child, context) =>
+                    {
+                        Console.WriteLine(snapshot.Key);
+                        done.Set();
+                    });
+
+                done.WaitOne(TimeSpan.FromSeconds(15));
+            }
+
+
         }
 
     }

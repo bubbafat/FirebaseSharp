@@ -10,7 +10,7 @@ namespace FirebaseSharp.Portable.Filters
 {
     class OrderByPriorityFilter : ISubscriptionFilter
     {
-        public JToken Apply(JToken filtered)
+        public JToken Apply(JToken filtered, IFilterContext context)
         {
             throw new NotImplementedException();
         }

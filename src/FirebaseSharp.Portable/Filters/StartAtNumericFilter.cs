@@ -17,11 +17,11 @@ namespace FirebaseSharp.Portable.Filters
             _startingValue = startingValue;
         }
 
-        public JToken Apply(JToken filtered)
+        public JToken Apply(JToken filtered, IFilterContext context)
         {
             JObject result = new JObject();
 
-            foreach (var child in filtered.Children().SkipWhile(t => t.First.Value<long>() < _startingValue))
+            foreach (var child in filtered.Children().SkipWhile(t => t[context.FilterColumn].Value<long>() < _startingValue))
             {
                 result.Add(child);
             }

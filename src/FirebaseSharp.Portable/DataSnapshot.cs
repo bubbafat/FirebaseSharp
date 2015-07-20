@@ -101,7 +101,7 @@ namespace FirebaseSharp.Portable
                 return jv.Value.ToString();
             }
 
-            return _token.Value<string>();
+            return _token.ToString();
         }
     }
 }

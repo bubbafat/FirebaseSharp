@@ -10,7 +10,7 @@ namespace FirebaseSharp.Portable.Filters
 {
     class OrderByValueFilter<T> : ISubscriptionFilter
     {
-        public JToken Apply(JToken filtered)
+        public JToken Apply(JToken filtered, IFilterContext context)
         {
             JObject result = new JObject();
             foreach (var child in filtered.Children().OrderBy(t => t.First, new FirebaseValueSorter()))

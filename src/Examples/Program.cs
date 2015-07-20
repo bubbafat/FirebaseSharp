@@ -12,7 +12,7 @@ namespace Examples
     {
         static void Main(string[] args)
         {
-            TopThreeDinos.ByScoreChild();
+            TopThreeDinos.ByHeightFilter();
         }
     }
 }

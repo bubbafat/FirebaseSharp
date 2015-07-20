@@ -41,6 +41,7 @@
     <Compile Include="Filters\EndAtNumericFilter.cs" />
     <Compile Include="Filters\EndAtStringFilter.cs" />
     <Compile Include="Filters\EqualToFilter.cs" />
+    <Compile Include="Filters\FilterContext.cs" />
     <Compile Include="Filters\FirebaseKeySorter.cs" />
     <Compile Include="Filters\FirebaseValueSorter.cs" />
     <Compile Include="FirebasePushIdGenerator.cs" />

@@ -17,7 +17,7 @@ namespace FirebaseSharp.Portable.Filters
             _limit = limit;
         }
 
-        public JToken Apply(JToken filtered)
+        public JToken Apply(JToken filtered, IFilterContext context)
         {
             // if they have 6 and we want 2 then skip to index 4 (exclusive)
             int toIndex = filtered.Children().Count() - _limit;

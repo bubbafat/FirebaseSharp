@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using FirebaseSharp.Portable.Filters;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Subscriptions;
 using Newtonsoft.Json.Linq;
@@ -144,12 +145,13 @@ namespace FirebaseSharp.Portable
         private JToken ApplyFilters(JToken jToken)
         {
             JToken filtered = jToken;
+            FilterContext context = new FilterContext();
 
             if (filtered != null)
             {
                 foreach (var filter in _filters)
                 {
-                    filtered = filter.Apply(filtered);
+                    filtered = filter.Apply(filtered, context);
                 }
             }
 

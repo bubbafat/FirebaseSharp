@@ -165,6 +165,11 @@ namespace FirebaseSharp.Portable
 
         private void OnReceived(WriteBehavior behavior, string data)
         {
+            if (behavior == WriteBehavior.None)
+            {
+                return;
+            }
+
             var callback = Received;
             if (callback != null)
             {
