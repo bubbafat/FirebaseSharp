@@ -5,14 +5,27 @@ using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable.Filters
 {
+    /// <summary>
+    /// Implements the orderByChild sorting rules described here:
+    /// https://www.firebase.com/docs/web/guide/retrieving-data.html#section-ordered-data
+    /// </summary>
     class FirebaseValueSorter : Comparer<JToken>
     {
         public override int Compare(JToken x, JToken y)
         {
+            // use paths, not values, for object equality
+            // since we might be dealing with cloned objects
             if (x.Path == y.Path)
             {
                 return 0;
             }
+
+            // the order is really important here
+            // by the time we're checking strings we need to know that
+            // neither is a null, boolean or numeric - each successive
+            // test becomes easier because the possible implicit conversions
+            // (e.g., string to int) was resolved by the target type (int)
+            // handler.
 
             int result;
             if (TryNullTests(x, y, out result))
@@ -89,7 +102,7 @@ namespace FirebaseSharp.Portable.Filters
                 return true;
             }
 
-            if (y.Type == JTokenType.Boolean)
+            if (y.Type == JTokenType.String)
             {
                 result = 1;
                 return true;
@@ -101,23 +114,17 @@ namespace FirebaseSharp.Portable.Filters
 
         private bool IsNumeric(JToken x)
         {
-            switch (x.Type)
-            {
-                case JTokenType.Float:
-                case JTokenType.Integer:
-                    return true;
-                default:
-                    return false;
-            }
+            return x.Type == JTokenType.Integer || x.Type == JTokenType.Float;
         }
 
         private int SortNumeric(JToken x, JToken y)
         {
-            if (x.Type == JTokenType.Integer && y.Type == JTokenType.Integer)
+            if (x.Type == JTokenType.Integer && x.Type == JTokenType.Integer)
             {
                 return x.Value<int>().CompareTo(y.Value<int>());
             }
 
+            // if one is a float, compare them both as floats
             return x.Value<float>().CompareTo(y.Value<float>());
         }
 
