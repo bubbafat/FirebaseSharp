@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FirebaseSharp.Portable.Interfaces
 {
-    public interface IFirebase : IFirebaseQuery, IFirebaseStructure, IFirebaseUpdate, IFirebaseUserManager
+    public interface IFirebase : IFirebaseStructure, IFirebaseUpdate, IFirebaseUserManager, IFirebaseQueryExecutorAny
     {
         IFirebaseApp GetApp();
     }

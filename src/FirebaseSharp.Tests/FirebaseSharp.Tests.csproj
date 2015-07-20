@@ -81,6 +81,7 @@
     <Compile Include="Filter\OrderByValue.cs" />
     <Compile Include="Filter\CombinedFilterTests.cs" />
     <Compile Include="Filter\OrderByChild.cs" />
+    <Compile Include="Filter\StartEndTests.cs" />
     <Compile Include="Properties\AppFactory.cs" />
     <Compile Include="Filter\LimitToFirstTests.cs" />
     <Compile Include="Firebase\Query.cs" />

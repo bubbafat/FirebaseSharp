@@ -21,7 +21,7 @@ namespace FirebaseSharp.Portable.Filters
         {
             JObject result = new JObject();
 
-            foreach (var child in filtered.Children().SkipWhile(t => String.Compare(t[context.FilterColumn].Value<string>(), _startingValue, StringComparison.Ordinal) <= 0))
+            foreach (var child in filtered.Children().SkipWhile(t => String.Compare(t.First[context.FilterColumn].Value<string>(), _startingValue, StringComparison.Ordinal) < 0))
             {
                 result.Add(child);
             }

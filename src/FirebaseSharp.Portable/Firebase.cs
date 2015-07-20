@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using FirebaseSharp.Portable.Filters;
 using FirebaseSharp.Portable.Interfaces;
-using FirebaseSharp.Portable.Subscriptions;
 
 namespace FirebaseSharp.Portable
 {
@@ -10,122 +10,129 @@ namespace FirebaseSharp.Portable
     {
         private readonly FirebaseApp _app;
         private readonly string _path;
-        private readonly List<ISubscriptionFilter> _filters;
-        private Guid _queryId = Guid.Empty;
+        private readonly string _key;
+        private readonly string _parent;
 
-        internal Firebase(FirebaseApp app, string path, List<ISubscriptionFilter> filters = null)
+        internal Firebase(FirebaseApp app, string path)
         {
             _app = app;
             _path = path;
+            _key = null;
 
-            _filters = filters == null 
-                ? new List<ISubscriptionFilter>() 
-                : new List<ISubscriptionFilter>(filters);
+            if (_path != null)
+            {
+                _key = _path.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+                _parent = BuildParentPath(_path);
+            }
+        }
+
+        private string BuildParentPath(string path)
+        {
+            var parts = path.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length <= 1)
+            {
+                return "/";
+            }
+
+            StringBuilder sb = new StringBuilder();
+            foreach (var part in parts.Take(parts.Length - 1))
+            {
+                sb.AppendFormat("/{0}", part.Trim());
+            }
+
+            return sb.ToString();
+        }
+
+        FirebaseQuery CreateQuery()
+        {
+            return new FirebaseQuery(_app, _path);
         }
 
         public IFirebaseReadonlyQuery On(string eventName, SnapshotCallback callback)
         {
-            return On(eventName, callback, null);
+            return CreateQuery().On(eventName, callback);
         }
 
         public IFirebaseReadonlyQuery On(string eventName, SnapshotCallback callback, object context)
         {
-            _queryId = _app.Subscribe(eventName, _path, callback, context, _filters);
-            return this;
-        }
-
-        public void Off()
-        {
-            _app.Unsubscribe(_queryId);
+            return CreateQuery().On(eventName, callback, context);
         }
 
         public IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null)
         {
-            return Once(eventName, callback, null, cancelledCallback);
+            return CreateQuery().Once(eventName, callback, cancelledCallback);
         }
 
         public IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback, object context,
             FirebaseStatusCallback cancelledCallback = null)
         {
-            _queryId = _app.SubscribeOnce(eventName, _path, callback, context, _filters, cancelledCallback);
-            return this;
+            return CreateQuery().Once(eventName, callback, context, cancelledCallback);
         }
 
-        public IFirebaseQuery OrderByChild(string child)
+        public IFilterableQueryExecutor OrderByChild(string child)
         {
-            _filters.Add(new OrderByChildFilter(child));
-            return this;
+            return CreateQuery().OrderByChild(child);
         }
 
-        public IFirebaseQuery OrderByKey()
+        public IFilterableQueryExecutor OrderByKey()
         {
-            _filters.Add(new OrderByKeyFilter());
-            return this;
+            return CreateQuery().OrderByKey();
         }
 
-        public IFirebaseQuery OrderByValue<T>()
+        public IFilterableQueryExecutor OrderByValue<T>()
         {
-            _filters.Add(new OrderByValueFilter<T>());
-            return this;
+
+            return CreateQuery().OrderByValue<T>();
         }
 
-        public IFirebaseQuery OrderByPriority()
+        public IFilterableQueryExecutor OrderByPriority()
         {
-            _filters.Add(new OrderByPriorityFilter());
-            return this;
+            return CreateQuery().OrderByPriority();
         }
 
-        public IFirebaseQuery StartAt(string startingValue)
+        public IFirebaseQueryExecutorAny StartAt(string startingValue)
         {
-            _filters.Add(new StartAtStringFilter(startingValue));
-            return this;
+            return CreateQuery().StartAt(startingValue);
         }
 
-        public IFirebaseQuery StartAt(long startingValue)
+        public IFirebaseQueryExecutorAny StartAt(long startingValue)
         {
-            _filters.Add(new StartAtNumericFilter(startingValue));
-            return this;
+            return CreateQuery().StartAt(startingValue);
         }
 
-        public IFirebaseQuery EndAt(string endingValue)
+        public IOrderableQueryExecutor EndAt(string endingValue)
         {
-            _filters.Add(new EndAtStringFilter(endingValue));
-            return this;
+            return CreateQuery().EndAt(endingValue);
         }
 
-        public IFirebaseQuery EndAt(long endingValue)
+        public IOrderableQueryExecutor EndAt(long endingValue)
         {
-            _filters.Add(new EndAtNumericFilter(endingValue));
-            return this;
+            return CreateQuery().EndAt(endingValue);
         }
 
-        public IFirebaseQuery EqualTo(string value)
+        public IOrderableQueryExecutor EqualTo(string value)
         {
-            _filters.Add(new EqualToFilter<string>(value));
-            return this;
+            return CreateQuery().EqualTo(value);
         }
 
-        public IFirebaseQuery EqualTo(long value)
+        public IOrderableQueryExecutor EqualTo(long value)
         {
-            _filters.Add(new EqualToFilter<long>(value));
-            return this;
+            return CreateQuery().EqualTo(value);
         }
 
-        public IFirebaseQuery LimitToFirst(int limit)
+        public IOrderableQueryExecutor LimitToFirst(int limit)
         {
-            _filters.Add(new LimitToFirstFilter(limit));
-            return this;
+            return CreateQuery().LimitToFirst(limit);
         }
 
-        public IFirebaseQuery LimitToLast(int limit)
+        public IOrderableQueryExecutor LimitToLast(int limit)
         {
-            _filters.Add(new LimitToLastFilter(limit));
-            return this;
+            return CreateQuery().LimitToLast(limit);
         }
 
-        public IFirebaseQuery Ref()
+        public IFirebase Ref()
         {
-            return new Firebase(_app, _path, _filters);
+            return new Firebase(_app, _path);
         }
 
         public IFirebase Child(string childPath)
@@ -136,7 +143,7 @@ namespace FirebaseSharp.Portable
 
         public IFirebase Parent()
         {
-            throw new NotImplementedException();
+            return _app.Child(_parent);
         }
 
         public IFirebase Root()
@@ -146,7 +153,7 @@ namespace FirebaseSharp.Portable
 
         public string Key
         {
-            get { throw new NotImplementedException(); }
+            get { return _key; }
         }
 
         public Uri AbsoluteUri
