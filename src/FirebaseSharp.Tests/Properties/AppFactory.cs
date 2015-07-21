@@ -15,8 +15,7 @@ namespace FirebaseSharp.Tests
     {
         internal static FirebaseApp Empty(Uri root)
         {
-            var connection = A.Fake<IFirebaseNetworkConnection>();
-            return new FirebaseApp(root, connection);            
+            return FromJson("{}");
         }
 
         internal static FirebaseApp FromJson(string json)

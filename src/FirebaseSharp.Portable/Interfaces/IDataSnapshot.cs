@@ -15,7 +15,7 @@ namespace FirebaseSharp.Portable.Interfaces
         bool HasChildren { get; }
         int NumChildren { get; }
         IFirebase Ref { get; }
-        IFirebasePriority Priority { get; }
+        FirebasePriority Priority { get; }
         string Key { get; }
         string ExportVal { get; }
         T Value<T>() where T : struct;

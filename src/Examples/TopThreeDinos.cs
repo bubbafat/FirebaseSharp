@@ -99,5 +99,30 @@ namespace Examples
 
         }
 
+        public static void StartAtFilter()
+        {
+            //var ref = new Firebase("https://dinosaur-facts.firebaseio.com/dinosaurs");
+            //ref.orderByChild("height").startAt(3).on("child_added", function(snapshot) {
+            //  console.log(snapshot.key())
+            //});            
+
+
+            ManualResetEvent done = new ManualResetEvent(false);
+
+            using (FirebaseApp app = new FirebaseApp(new Uri("https://dinosaur-facts.firebaseio.com/")))
+            {
+                var scoresRef = app.Child("dinosaurs")
+                                   .OrderByChild("height")
+                                   .StartAt(3)
+                                   .On("child_added",
+                    (snapshot, child, context) =>
+                    {
+                        Console.WriteLine(snapshot.Key);
+                        done.Set();
+                    });
+
+                done.WaitOne(TimeSpan.FromSeconds(15));
+            }
+        }
     }
 }

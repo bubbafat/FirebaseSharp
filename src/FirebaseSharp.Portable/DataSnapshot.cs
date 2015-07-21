@@ -65,7 +65,7 @@ namespace FirebaseSharp.Portable
             }
         }
         public IFirebase Ref { get; private set; }
-        public IFirebasePriority Priority { get; private set; }
+        public FirebasePriority Priority { get; private set; }
         public string Key { get; private set; }
 
         public T Value<T>() where T: struct

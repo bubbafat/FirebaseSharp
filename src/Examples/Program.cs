@@ -12,7 +12,17 @@ namespace Examples
     {
         static void Main(string[] args)
         {
-            TopThreeDinos.ByHeightFilter();
+            using (FirebaseApp app = new FirebaseApp(new Uri("https://docs-examples.firebaseio.com/rest/saving-data/fireblog/users")))
+            {
+                app.Child("gracehop").Once("value", (snap, child, context) =>
+                {
+                    Console.WriteLine(snap.Value());
+                });
+
+                Thread.Sleep(TimeSpan.FromSeconds(5));
+            }
+
+            TopThreeDinos.StartAtFilter();
         }
     }
 }

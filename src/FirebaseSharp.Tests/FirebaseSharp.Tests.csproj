@@ -90,6 +90,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PushIdTests.cs" />
     <Compile Include="TestConfig.cs" />
+    <Compile Include="PriorityTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FirebaseSharp.Portable\FirebaseSharp.Portable.csproj">

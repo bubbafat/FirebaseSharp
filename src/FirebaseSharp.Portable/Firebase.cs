@@ -182,12 +182,12 @@ namespace FirebaseSharp.Portable
             return Child(_app.Push(_path, value, callback));
         }
 
-        public void SetWithPriority(string value, IFirebasePriority priority, FirebaseStatusCallback callback = null)
+        public void SetWithPriority(string value, FirebasePriority priority, FirebaseStatusCallback callback = null)
         {
             throw new NotImplementedException();
         }
 
-        public void SetPriority(IFirebasePriority priority, FirebaseStatusCallback callback = null)
+        public void SetPriority(FirebasePriority priority, FirebaseStatusCallback callback = null)
         {
             throw new NotImplementedException();
         }

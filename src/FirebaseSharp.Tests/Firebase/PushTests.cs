@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using FirebaseSharp.Portable;
 using FirebaseSharp.Portable.Interfaces;
@@ -11,25 +13,35 @@ namespace FirebaseSharp.Tests.Firebase
     public class PushTests
     {
         [TestMethod]
-        [Ignore]
         public void PushPushes()
         {
-            FirebaseApp app = new FirebaseApp(new Uri("https://todo.example.com/"));
-            IFirebase list = app.Child("message_list");
-
-            IFirebase post1Ref = list.Push("{ \"name\": \"Post 1\" }", error => { });
-
-            ManualResetEvent mre = new ManualResetEvent(false);
-            post1Ref.Once("value", (snap, prev, ctx) =>
+            using (FirebaseApp app = AppFactory.Empty(new Uri("https://todo.example.com/")))
             {
-                JToken actual = JToken.Parse(snap.Value());
-                Assert.IsNotNull(actual["name"]);
-                JValue name = (JValue)actual["name"];
-                Assert.AreEqual("Post 1", name.Value);
-                mre.Set();
-            });
+                ManualResetEvent done= new ManualResetEvent(false);
 
-            Assert.IsTrue(mre.WaitOne(TimeSpan.FromSeconds(5)), "Callback never fired");
+                var list = app.Child("message_list");
+                List<string> ids = new List<string>();
+
+                ids.Add(list.Push("{'name':'Post 1'}").Key);
+                ids.Add(list.Push("{'name':'Post 2'}").Key);
+                ids.Add(list.Push("{'name':'Post 3'}").Key);
+
+                list.Once("value", (snap, child, context) =>
+                {
+                    var children = snap.Children.ToList();
+                    Assert.AreEqual(ids[0], children[0].Key);
+                    Assert.AreEqual(ids[1], children[1].Key);
+                    Assert.AreEqual(ids[2], children[2].Key);
+
+                    Assert.AreEqual("Post 1", children[0]["name"].Value());
+                    Assert.AreEqual("Post 2", children[1]["name"].Value());
+                    Assert.AreEqual("Post 3", children[2]["name"].Value());
+
+                    done.Set();
+                });
+
+                Assert.IsTrue(done.WaitOne(TimeSpan.FromSeconds(15)), "callback never fired");
+            }
         }
     }
 }

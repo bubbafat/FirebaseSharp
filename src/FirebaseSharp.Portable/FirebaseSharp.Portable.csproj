@@ -43,8 +43,10 @@
     <Compile Include="Filters\EqualToFilter.cs" />
     <Compile Include="Filters\FilterContext.cs" />
     <Compile Include="Filters\FirebaseKeySorter.cs" />
+    <Compile Include="Filters\FirebasePrioritySorter.cs" />
     <Compile Include="Filters\FirebaseQuery.cs" />
     <Compile Include="Filters\FirebaseValueSorter.cs" />
+    <Compile Include="FirebasePriority.cs" />
     <Compile Include="FirebasePushIdGenerator.cs" />
     <Compile Include="Firebase.cs" />
     <Compile Include="FirebaseApp.cs" />
@@ -58,7 +60,6 @@
     <Compile Include="Interfaces\IFirebaseHttpResponseMessage.cs" />
     <Compile Include="Interfaces\IFirebaseNetworkConnection.cs" />
     <Compile Include="Interfaces\IFirebaseOnDisconnect.cs" />
-    <Compile Include="Interfaces\IFirebasePriority.cs" />
     <Compile Include="Interfaces\IFirebaseQueryExecutor.cs" />
     <Compile Include="Interfaces\IFirebaseQueryExecutorAny.cs" />
     <Compile Include="Interfaces\IFirebaseReadonlyQuery.cs" />
