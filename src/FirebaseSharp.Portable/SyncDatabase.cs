@@ -153,13 +153,18 @@ namespace FirebaseSharp.Portable
 
         public string Push(string path, string data, FirebaseStatusCallback callback)
         {
-            string newPath = CreatePushPath(path);
+            string childPath = _idGenerator.Next();
+            string newPath = path + "/" + childPath;
 
-            lock (_lock)
+            if (data != null)
             {
-                Set(newPath, data, callback);
-                return newPath;
+                lock (_lock)
+                {
+                    Set(newPath, data, callback);
+                }
             }
+
+            return childPath;
         }
 
         private string CreatePushPath(string path)

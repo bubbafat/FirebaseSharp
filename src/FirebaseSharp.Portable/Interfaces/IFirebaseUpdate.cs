@@ -14,7 +14,7 @@ namespace FirebaseSharp.Portable.Interfaces
         void Set(string value, FirebaseStatusCallback callback = null);
         void Update(string value, FirebaseStatusCallback callback = null);
         void Remove(FirebaseStatusCallback callback = null);
-        IFirebase Push(string value, FirebaseStatusCallback callback = null);
+        IFirebase Push(string value = null, FirebaseStatusCallback callback = null);
         void SetWithPriority(string value, FirebasePriority priority, FirebaseStatusCallback callback = null);
         void SetPriority(FirebasePriority priority, FirebaseStatusCallback callback = null);
         void Transaction(TransactionUpdate updateCallback, TransactionComplete completeCallback = null, bool applyLocally = true);
