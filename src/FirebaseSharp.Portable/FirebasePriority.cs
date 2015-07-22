@@ -57,8 +57,15 @@ namespace FirebaseSharp.Portable
 
         public FirebasePriority(string priority)
         {
-            Type = PriorityType.String;
-            _sp = priority;
+            if (priority == null)
+            {
+                Type = PriorityType.None;
+            }
+            else
+            {
+                Type = PriorityType.String;
+                _sp = priority;
+            }
         }
 
         public FirebasePriority(float priority)
@@ -144,19 +151,45 @@ namespace FirebaseSharp.Portable
             throw new Exception("Priority sorting did not detect a valid state");
         }
 
+        public string JsonValue
+        {
+            get
+            {
+                switch (Type)
+                {
+                    case PriorityType.None:
+                        return "null";
+                    case PriorityType.Numeric:
+                        return _fp.ToString();
+                    case PriorityType.String:
+                        return string.Format("\"{0}\"", _sp);
+                    default:
+                        throw new NotImplementedException("Unknown format type: {0}" + Type);
+                }
+            }
+        }
+
+        public string Value
+        {
+            get
+            {
+                switch (Type)
+                {
+                    case PriorityType.None:
+                        return null;
+                    case PriorityType.Numeric:
+                        return _fp.ToString();
+                    case PriorityType.String:
+                        return _sp;
+                    default:
+                        throw new NotImplementedException("Unknown format type: {0}" + Type);
+                }
+            }
+        }
+
         public override string ToString()
         {
-            switch (Type)
-            {
-                case PriorityType.None:
-                    return null;
-                case PriorityType.Numeric:
-                    return _fp.ToString();
-                case PriorityType.String:
-                    return _sp;
-            }
-
-            throw new Exception(string.Format("Unknown priority type: {0}", Type));
+            return Value;
         }
     }
 }

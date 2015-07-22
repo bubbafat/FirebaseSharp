@@ -221,6 +221,88 @@ namespace FirebaseSharp.Tests
             }
         }
 
+        [TestMethod]
+        public void SetPriorityTest()
+        {
+            string json = @"
+{
+    'aaa': {
+    },
+    'bbb': {
+    },
+    'ccc': {
+    },
+}
+";
 
+            using (var app = AppFactory.FromJson(json))
+            {
+                ManualResetEvent called = new ManualResetEvent(false);
+
+                var root = app.Child("/");
+
+                // check start stat
+                root.OrderByPriority().Once("value", (snap, child, context) =>
+                {
+                    var children = snap.Children.ToArray();
+                    Assert.AreEqual("aaa", children[0].Key);
+                    Assert.AreEqual("bbb", children[1].Key);
+                    Assert.AreEqual("ccc", children[2].Key);
+                    called.Set();
+                });
+
+                Assert.IsTrue(called.WaitOne(TimeSpan.FromSeconds(5)), "callback was never fired");
+
+                // now update the priorites
+                root.Child("aaa").SetPriority(3);
+                root.Child("bbb").SetPriority(2);
+                root.Child("ccc").SetPriority(1);
+
+                called.Reset();
+                // check start stat
+                root.OrderByPriority().Once("value", (snap, child, context) =>
+                {
+                    var children = snap.Children.ToArray();
+                    Assert.AreEqual("ccc", children[0].Key);
+                    Assert.AreEqual("bbb", children[1].Key);
+                    Assert.AreEqual("aaa", children[2].Key);
+                    called.Set();
+                });
+
+                Assert.IsTrue(called.WaitOne(TimeSpan.FromSeconds(5)), "callback was never fired");
+
+            }
+        
+        }
+
+        [TestMethod]
+        public void SetWithPriorityTest()
+        {
+            using (var app = AppFactory.Empty())
+            {
+                ManualResetEvent called = new ManualResetEvent(false);
+
+                var root = app.Child("/");
+
+                // now update the priorites
+                root.Child("aaa").SetWithPriority("{}", 3);
+                root.Child("bbb").SetWithPriority("{}", 2);
+                root.Child("ccc").SetWithPriority("{}", 1);
+
+                root.OrderByPriority().Once("value", (snap, child, context) =>
+                {
+                    var children = snap.Children.ToArray();
+                    Assert.AreEqual("ccc", children[0].Key);
+                    Assert.AreEqual(1, float.Parse(children[0].GetPriority().Value));
+                    Assert.AreEqual("bbb", children[1].Key);
+                    Assert.AreEqual(2, float.Parse(children[1].GetPriority().Value));
+                    Assert.AreEqual("aaa", children[2].Key);
+                    Assert.AreEqual(3, float.Parse(children[2].GetPriority().Value));
+                    called.Set();
+                });
+
+                Assert.IsTrue(called.WaitOne(TimeSpan.FromSeconds(5)), "callback was never fired");
+            }
+        }
     }
 }

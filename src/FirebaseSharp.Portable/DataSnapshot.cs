@@ -88,7 +88,12 @@ namespace FirebaseSharp.Portable
 
         public FirebasePriority GetPriority()
         {
-            return new FirebasePriority(_token );
+            if (_token == null || _token.First == null)
+            {
+                return null;
+            }
+
+            return new FirebasePriority(_token.First);
         }
         public string Key { get { return _path.Key; } }
 

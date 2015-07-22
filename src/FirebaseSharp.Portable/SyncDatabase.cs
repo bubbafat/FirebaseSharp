@@ -98,7 +98,12 @@ namespace FirebaseSharp.Portable
 
         public void Set(FirebasePath path, string data, FirebaseStatusCallback callback)
         {
-            var message = new FirebaseMessage(WriteBehavior.Replace, path, data, callback);
+            Set(path, data, null, callback);
+        }
+
+        private void Set(FirebasePath path, string data, FirebasePriority priority, FirebaseStatusCallback callback)
+        {
+            var message = new FirebaseMessage(WriteBehavior.Replace, path, data, priority, callback);
 
             lock (_lock)
             {
@@ -116,6 +121,11 @@ namespace FirebaseSharp.Portable
             else
             {
                 JToken newData = CreateToken(message.Value);
+                if (message.Priority != null)
+                {
+                    newData[".priority"] = new JValue(message.Priority.JsonValue);
+                }
+
                 lock (_lock)
                 {
                     JToken found;
@@ -366,6 +376,16 @@ namespace FirebaseSharp.Portable
             }
 
             sub.Process(this);
+        }
+
+        internal void SetPriority(FirebasePath path, FirebasePriority priority, FirebaseStatusCallback callback)
+        {
+            Set(path.Child(".priority"), priority.JsonValue, callback);
+        }
+
+        internal void SetWithPriority(FirebasePath path, string value, FirebasePriority priority, FirebaseStatusCallback callback)
+        {
+            Set(path, value, priority, callback);
         }
     }
 }

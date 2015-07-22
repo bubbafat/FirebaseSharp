@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using FirebaseSharp.Portable.Filters;
 using FirebaseSharp.Portable.Interfaces;
+using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
 {
@@ -155,47 +156,24 @@ namespace FirebaseSharp.Portable
             return Child(_app.Push(_path, value, callback));
         }
 
-        public void SetWithPriority(string value, FirebasePriority priority, FirebaseStatusCallback callback = null)
+        public void SetWithPriority(string value, string priority, FirebaseStatusCallback callback = null)
         {
-            throw new NotImplementedException();
+            _app.SetWithPriority(_path, value, new FirebasePriority(priority), callback);
         }
 
-        public void SetPriority(FirebasePriority priority, FirebaseStatusCallback callback = null)
+        public void SetWithPriority(string value, float priority, FirebaseStatusCallback callback = null)
         {
-            throw new NotImplementedException();
+            _app.SetWithPriority(_path, value, new FirebasePriority(priority), callback);
         }
 
-        public void Transaction(TransactionUpdate updateCallback, TransactionComplete completeCallback = null,
-            bool applyLocally = true)
+        public void SetPriority(string priority, FirebaseStatusCallback callback = null)
         {
-            throw new NotImplementedException();
+            _app.SetPriority(_path, new FirebasePriority(priority), callback);
         }
 
-        public void CreateUser(string email, string password, FirebaseStatusCallback callback = null)
+        public void SetPriority(float priority, FirebaseStatusCallback callback = null)
         {
-            throw new NotImplementedException();
-        }
-
-        public void ChangeEmail(string oldEmail, string newEmail, string password,
-            FirebaseStatusCallback callback = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ChangePassword(string email, string oldPassword, string newPassword,
-            FirebaseStatusCallback callback = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveUser(string email, string password, FirebaseStatusCallback callback = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ResetPassword(string email, FirebaseStatusCallback callback = null)
-        {
-            throw new NotImplementedException();
+            _app.SetPriority(_path, new FirebasePriority(priority), callback);
         }
 
         public IFirebaseApp GetApp()

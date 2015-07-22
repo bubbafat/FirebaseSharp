@@ -56,6 +56,8 @@ namespace FirebaseSharp.Portable
             {
                 sub.Process(_cache);
             }
+
+            _subscriptions.ClearDone();
         }
 
         internal Uri RootUri
@@ -99,6 +101,16 @@ namespace FirebaseSharp.Portable
         public void Dispose()
         {
             using (_cache) { }
+        }
+
+        internal void SetPriority(FirebasePath _path, FirebasePriority priority, FirebaseStatusCallback callback)
+        {
+            _cache.SetPriority(_path, priority, callback);
+        }
+
+        internal void SetWithPriority(FirebasePath _path, string value, FirebasePriority priority, FirebaseStatusCallback callback)
+        {
+            _cache.SetWithPriority(_path, value, priority, callback);
         }
     }
 }

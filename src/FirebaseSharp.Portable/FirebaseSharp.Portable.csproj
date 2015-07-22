@@ -64,7 +64,7 @@
     <Compile Include="Interfaces\IFirebaseReadonlyQuery.cs" />
     <Compile Include="Interfaces\IFirebaseStructure.cs" />
     <Compile Include="Interfaces\IFirebaseUpdate.cs" />
-    <Compile Include="Interfaces\IFirebaseUserManager.cs" />
+    <Compile Include="Interfaces\FirebaseError.cs" />
     <Compile Include="Interfaces\IDataSnapshot.cs" />
     <Compile Include="Filters\LimitToFirstFilter.cs" />
     <Compile Include="Filters\LimitToLastFilter.cs" />

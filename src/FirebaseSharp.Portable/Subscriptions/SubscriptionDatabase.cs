@@ -58,5 +58,13 @@ namespace FirebaseSharp.Portable
                 _subscriptions.RemoveAll(q => q.SubscriptionId == subscriptionId);
             }
         }
+
+        internal void ClearDone()
+        {
+            lock (_lock)
+            {
+                _subscriptions.RemoveAll(q => q.Callback == null);
+            }
+        }
     }
 }
