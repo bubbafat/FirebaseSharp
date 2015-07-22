@@ -84,6 +84,7 @@
     <Compile Include="Filter\StartEndTests.cs" />
     <Compile Include="Firebase\Child.cs" />
     <Compile Include="Firebase\Parent.cs" />
+    <Compile Include="Firebase\Root.cs" />
     <Compile Include="Properties\AppFactory.cs" />
     <Compile Include="Filter\LimitToFirstTests.cs" />
     <Compile Include="Firebase\Query.cs" />

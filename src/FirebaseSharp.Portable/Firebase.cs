@@ -185,5 +185,10 @@ namespace FirebaseSharp.Portable
         {
             return _app;
         }
+
+        public override string ToString()
+        {
+            return AbsoluteUri.ToString();
+        }
     }
 }
