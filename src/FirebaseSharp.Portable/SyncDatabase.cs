@@ -290,7 +290,6 @@ namespace FirebaseSharp.Portable
             {
                 foreach (var newChildPath in newData.Children())
                 {
-                    var existingTarget = target[newChildPath.Path];
                     var newChild = newData[newChildPath.Path];
 
                     // a PATCH of a null object is skipped
@@ -300,19 +299,13 @@ namespace FirebaseSharp.Portable
                         continue;
                     }
 
-                    JValue existingValue = existingTarget as JValue;
-
-                    if (existingValue != null)
+                    if (target[newChildPath.Path] is JValue && newChild is JValue)
                     {
-                        JValue newValue = newChild as JValue;
-                        if (newValue != null)
-                        {
-                            existingValue.Replace(newValue);
-                            continue;
-                        }
+                        ((JValue)target[newChildPath.Path]).Value = ((JValue)newChild).Value;
+                        continue;
                     }
 
-                    target[newChild.Path] = newChild;
+                    target[newChildPath.Path] = newChild;
                 }
             }
         }

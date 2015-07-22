@@ -125,13 +125,13 @@ namespace FirebaseSharp.Portable
             JProperty jp = _token as JProperty;
             if (jp != null)
             {
-                return jp.Value.ToString();
+                return string.Format("{{ {0} }}", jp.ToString());
             }
 
             JValue jv = _token as JValue;
             if (jv != null)
             {
-                return jv.Value.ToString();
+                return jv.ToString();
             }
 
             return _token.ToString();
