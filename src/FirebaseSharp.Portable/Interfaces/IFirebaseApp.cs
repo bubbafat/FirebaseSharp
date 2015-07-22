@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FirebaseSharp.Portable.Interfaces
+namespace FirebaseSharp.Portable
 {
     public interface IFirebaseApp : IDisposable
     {

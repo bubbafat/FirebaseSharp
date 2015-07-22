@@ -12,7 +12,7 @@ namespace FirebaseSharp.Portable
         {
             if (string.IsNullOrWhiteSpace(path))
             {
-                _normalized = "/";
+                _normalized = string.Empty;
                 _segments = new string[0];
             }
             else
@@ -71,7 +71,7 @@ namespace FirebaseSharp.Portable
 
         public string Key
         {
-            get { return _segments.LastOrDefault(); }
+            get { return _segments.LastOrDefault() ?? "/"; }
         }
 
         public int CompareTo(FirebasePath other)
