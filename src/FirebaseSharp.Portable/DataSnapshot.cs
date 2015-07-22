@@ -33,9 +33,15 @@ namespace FirebaseSharp.Portable
 
             if (_token != null)
             {
+                child = _token.First;
                 foreach (string childPath in new FirebasePath(childName).Segments)
                 {
-                    child = _token.First[childPath];
+                    if (child == null)
+                    {
+                        break;
+                    }
+
+                    child = child[childPath];
                     if (child == null)
                     {
                         break;
