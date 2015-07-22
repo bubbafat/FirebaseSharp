@@ -117,6 +117,11 @@ namespace FirebaseSharp.Portable
 
         public IFirebase Parent()
         {
+            if (_path.IsRoot)
+            {
+                return null;
+            }
+
             return _app.Child(_path.Parent());
         }
 

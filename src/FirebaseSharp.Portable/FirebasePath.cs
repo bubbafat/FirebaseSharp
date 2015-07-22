@@ -53,12 +53,12 @@ namespace FirebaseSharp.Portable
 
         public FirebasePath Parent()
         {
-            if (_segments.Length == 0)
+            if (IsRoot)
             {
                 return new FirebasePath();
             }
 
-            return new FirebasePath(string.Join("/", _segments));
+            return new FirebasePath(string.Join("/", _segments.Take(_segments.Length - 1)));
         }
 
         public IEnumerable<string> Segments
@@ -67,6 +67,11 @@ namespace FirebaseSharp.Portable
             {
                 return _segments;
             }
+        }
+
+        public bool IsRoot
+        {
+            get { return _segments.Length == 0; }
         }
 
         public string Key
