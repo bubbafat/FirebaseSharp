@@ -44,18 +44,18 @@ namespace FirebaseSharp.Tests.JsonCache
             A.CallTo(() => client.Send(A<FirebaseMessage>._)).Invokes((FirebaseMessage message) =>
             {
                 Assert.AreEqual(WriteBehavior.Replace, message.Behavior);
-                Assert.AreEqual("/", message.Path);
+                Assert.AreEqual(new FirebasePath(), message.Path);
                 Assert.IsTrue(JToken.DeepEquals(expected, JToken.Parse(message.Value)),
                     "The contents being written did not match the provided contents");
 
                 message.Callback(null);
             });
 
-            var jc = new SyncDatabase(client);
+            var jc = new SyncDatabase(null, client);
 
             using (var mre = new ManualResetEvent(false))
             {
-                jc.Set("/", _weather, (error) =>
+                jc.Set(new FirebasePath(), _weather, (error) =>
                 {
                     mre.Set();
                 });
@@ -77,18 +77,18 @@ namespace FirebaseSharp.Tests.JsonCache
             A.CallTo(() => client.Send(A<FirebaseMessage>._)).Invokes((FirebaseMessage message) =>
             {
                 Assert.AreEqual(WriteBehavior.Merge, message.Behavior);
-                Assert.AreEqual("/", message.Path);
+                Assert.AreEqual(new FirebasePath(), message.Path);
                 Assert.IsTrue(JToken.DeepEquals(expected, JToken.Parse(message.Value)),
                     "The contents being written did not match the provided contents");
 
                 message.Callback(null);
             });
 
-            var jc = new SyncDatabase(client);
+            var jc = new SyncDatabase(null, client);
 
             using (var mre = new ManualResetEvent(false))
             {
-                jc.Update("/", _weather, (error) =>
+                jc.Update(new FirebasePath(), _weather, (error) =>
                 {
                     mre.Set();
                 });
@@ -159,7 +159,7 @@ namespace FirebaseSharp.Tests.JsonCache
                 message.Callback(null);
             });
 
-            var jc = new SyncDatabase(client);
+            var jc = new SyncDatabase(null, client);
             ManualResetEvent called = new ManualResetEvent(false);
 
             foreach(var item in data)
@@ -168,7 +168,7 @@ namespace FirebaseSharp.Tests.JsonCache
                 string path = item.Item1.Item1;
                 string value = item.Item1.Item2;
                 var expected = JToken.Parse(item.Item2);
-                jc.Update(path, value, error =>
+                jc.Update(new FirebasePath(path), value, error =>
                 {
                     JToken actual = JToken.Parse(jc.Dump());
                     Assert.IsTrue(JToken.DeepEquals(expected, actual),
@@ -236,7 +236,7 @@ namespace FirebaseSharp.Tests.JsonCache
             });
 
 
-            var jc = new SyncDatabase(client);
+            var jc = new SyncDatabase(null, client);
             ManualResetEvent called = new ManualResetEvent(false);
 
             foreach (var item in data)
@@ -245,7 +245,7 @@ namespace FirebaseSharp.Tests.JsonCache
                 string path = item.Item1.Item1;
                 string value = item.Item1.Item2;
                 var expected = JToken.Parse(item.Item2);
-                jc.Set(path, value, error =>
+                jc.Set(new FirebasePath(path), value, error =>
                 {
                     JToken actual = JToken.Parse(jc.Dump());
                     Assert.IsTrue(JToken.DeepEquals(expected, actual),

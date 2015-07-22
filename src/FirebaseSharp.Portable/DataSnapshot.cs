@@ -9,10 +9,13 @@ namespace FirebaseSharp.Portable
     class DataSnapshot : IDataSnapshot
     {
         private readonly JToken _token;
-        internal DataSnapshot(string key, JToken token)
+        private readonly FirebaseApp _app;
+        private readonly FirebasePath _path;
+        internal DataSnapshot(FirebaseApp app, FirebasePath path, JToken token)
         {
             _token = token != null ? token.DeepClone() : null;
-            Key = (key != null) ? key.TrimStart(new char[] {'/'}) : string.Empty;
+            _app = app;
+            _path = path;
         }
 
         internal JToken Token
@@ -30,10 +33,17 @@ namespace FirebaseSharp.Portable
 
             if (_token != null)
             {
-                child =_token.First[childName];
+                foreach (string childPath in new FirebasePath(childName).Segments)
+                {
+                    child = _token.First[childPath];
+                    if (child == null)
+                    {
+                        break;
+                    }
+                }
             }
 
-            return new DataSnapshot(childName, child);
+            return new DataSnapshot(_app, _path.Child(childName), child);
         }
 
         public IEnumerable<IDataSnapshot> Children
@@ -45,7 +55,7 @@ namespace FirebaseSharp.Portable
                     return new List<IDataSnapshot>();
                 }
 
-                return _token.Children().Select(t => new DataSnapshot(t.Path, t));
+                return _token.Children().Select(t => new DataSnapshot(_app, _path.Child(t.Path), t));
             }
         }
 
@@ -64,9 +74,17 @@ namespace FirebaseSharp.Portable
                 return (_token == null) ? 0 : _token.Children().Count();
             }
         }
-        public IFirebase Ref { get; private set; }
-        public FirebasePriority Priority { get; private set; }
-        public string Key { get; private set; }
+
+        public IFirebase Ref()
+        {
+            return new Firebase(_app, _path);
+        }
+
+        public FirebasePriority GetPriority()
+        {
+            return new FirebasePriority(_token );
+        }
+        public string Key { get { return _path.Key; } }
 
         public T Value<T>() where T: struct
         {
@@ -85,7 +103,11 @@ namespace FirebaseSharp.Portable
             get { return Child(child); }
         }
 
-        public string ExportVal { get; private set; }
+        public string ExportVal()
+        {
+            // TODO: trim priority
+            return Value();
+        }
 
         private string GetValueString()
         {

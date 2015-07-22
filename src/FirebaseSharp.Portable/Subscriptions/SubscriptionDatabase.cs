@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Subscriptions;
 
@@ -15,20 +11,17 @@ namespace FirebaseSharp.Portable
         private readonly SyncDatabase _syncDb;
         private readonly List<Subscription> _subscriptions = new List<Subscription>();
         private readonly object _lock = new object();
+        private readonly FirebaseApp _app;
 
-        public SubscriptionDatabase(SyncDatabase syncDb)
+        public SubscriptionDatabase(FirebaseApp app, SyncDatabase syncDb)
         {
+            _app = app;
             _syncDb = syncDb;
         }
 
-        public Guid Subscribe(string path, string eventName, SnapshotCallback callback, object context, bool once, IEnumerable<ISubscriptionFilter> filters)
+        public Guid Subscribe(FirebasePath path, string eventName, SnapshotCallback callback, object context, bool once, IEnumerable<ISubscriptionFilter> filters)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentException("Cannot subscribe to an empty path");
-            }
-
-            var sub = new Subscription(filters)
+            var sub = new Subscription(_app, filters)
             {
                 Event = eventName,
                 Callback = callback,

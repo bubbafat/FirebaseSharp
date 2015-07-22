@@ -29,14 +29,16 @@ namespace FirebaseSharp.Portable
     class SyncDatabase : IDisposable
     {
         private JToken _root;
-        private bool _initialReceive = false;
+        private bool _initialReceive;
         private readonly object _lock = new object();
         private readonly IFirebaseNetworkConnection _connection;
         private readonly FirebasePushIdGenerator _idGenerator = new FirebasePushIdGenerator();
-        private readonly Queue<Subscription> _initialSubscriptions = new Queue<Subscription>(); 
+        private readonly Queue<Subscription> _initialSubscriptions = new Queue<Subscription>();
+        private readonly FirebaseApp _app;
 
-        public SyncDatabase(IFirebaseNetworkConnection connection)
+        public SyncDatabase(FirebaseApp app, IFirebaseNetworkConnection connection)
         {
+            _app = app;
             _root = new JObject();
 
             _connection = connection;
@@ -45,7 +47,7 @@ namespace FirebaseSharp.Portable
 
         public EventHandler<JsonCacheUpdateEventArgs> Changed;
 
-        public DataSnapshot SnapFor(string path)
+        public DataSnapshot SnapFor(FirebasePath path)
         {
             lock (_lock)
             {
@@ -53,10 +55,10 @@ namespace FirebaseSharp.Portable
 
                 if (TryGetChild(path, out token))
                 {
-                    return new DataSnapshot(path, token);
+                    return new DataSnapshot(_app, path, token);
                 }
 
-                return new DataSnapshot(null, null);
+                return new DataSnapshot(_app, null, null);
             }
         }
 
@@ -94,7 +96,7 @@ namespace FirebaseSharp.Portable
                 : new JValue(value);
         }
 
-        public void Set(string path, string data, FirebaseStatusCallback callback)
+        public void Set(FirebasePath path, string data, FirebaseStatusCallback callback)
         {
             var message = new FirebaseMessage(WriteBehavior.Replace, path, data, callback);
 
@@ -151,29 +153,22 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        public string Push(string path, string data, FirebaseStatusCallback callback)
+        public string Push(FirebasePath path, string data, FirebaseStatusCallback callback)
         {
             string childPath = _idGenerator.Next();
-            string newPath = path + "/" + childPath;
 
             if (data != null)
             {
                 lock (_lock)
                 {
-                    Set(newPath, data, callback);
+                    Set(path.Child(childPath), data, callback);
                 }
             }
 
             return childPath;
         }
 
-        private string CreatePushPath(string path)
-        {
-            string id = _idGenerator.Next();
-            return path + "/" + id;
-        }
-
-        public void Update(string path, string data, FirebaseStatusCallback callback)
+        public void Update(FirebasePath path, string data, FirebaseStatusCallback callback)
         {
             var message = new FirebaseMessage(WriteBehavior.Merge, path, data, callback);
 
@@ -219,7 +214,7 @@ namespace FirebaseSharp.Portable
                 callback(this, new JsonCacheUpdateEventArgs(message.Path));
             }
         }
-        private void Delete(string path)
+        private void Delete(FirebasePath path)
         {
             lock (_lock)
             {
@@ -259,9 +254,9 @@ namespace FirebaseSharp.Portable
 
             return false;
         }
-        private JToken InsertAt(string path, JToken newData)
+        private void InsertAt(FirebasePath path, JToken newData)
         {
-            string[] segments = NormalizePath(path).Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] segments = path.Segments.ToArray();
 
             if (segments.Length > 0)
             {
@@ -283,12 +278,10 @@ namespace FirebaseSharp.Portable
                 }
 
                 node[segments[segments.Length - 1]] = newData;
-                return node[segments[segments.Length - 1]];
             }
             else
             {
                 _root = newData;
-                return _root;
             }
         }
 
@@ -325,15 +318,13 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        private bool TryGetChild(string path, out JToken node)
+        private bool TryGetChild(FirebasePath path, out JToken node)
         {
-            string[] segments = NormalizePath(path).Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-
             node = _root;
 
             if (node != null)
             {
-                foreach (var segment in segments)
+                foreach (var segment in path.Segments)
                 {
                     node = node[segment];
                     if (node == null)
@@ -346,11 +337,6 @@ namespace FirebaseSharp.Portable
             }
 
             return false;
-        }
-
-        private static string NormalizePath(string path)
-        {
-            return path.TrimStart(new char[] { '/' }).Trim().Replace('/', '.');
         }
 
         internal void GoOnline()

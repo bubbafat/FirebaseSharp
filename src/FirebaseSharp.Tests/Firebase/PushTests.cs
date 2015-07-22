@@ -15,7 +15,7 @@ namespace FirebaseSharp.Tests.Firebase
         [TestMethod]
         public void PushPushes()
         {
-            using (FirebaseApp app = AppFactory.Empty(new Uri("https://todo.example.com/")))
+            using (FirebaseApp app = AppFactory.Empty())
             {
                 ManualResetEvent done= new ManualResetEvent(false);
 
@@ -47,7 +47,7 @@ namespace FirebaseSharp.Tests.Firebase
         [TestMethod]
         public void PushEmptyCreatesChild()
         {
-            using (FirebaseApp app = AppFactory.Empty(new Uri("https://todo.example.com/")))
+            using (FirebaseApp app = AppFactory.Empty())
             {
                 ManualResetEvent done = new ManualResetEvent(false);
 

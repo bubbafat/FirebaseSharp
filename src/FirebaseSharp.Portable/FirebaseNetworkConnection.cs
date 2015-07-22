@@ -21,9 +21,11 @@ namespace FirebaseSharp.Portable
         private CancellationTokenSource _cancelSource;
         private Task _sendTask;
         private Task _receiveTask;
-        public FirebaseNetworkConnection(Uri root)
+        private readonly string _authToken;
+        public FirebaseNetworkConnection(Uri root, string authToken = null)
         {
             _root = root;
+            _authToken = authToken;
         }
 
         private async void SendThread(CancellationToken cancel)
@@ -44,17 +46,12 @@ namespace FirebaseSharp.Portable
                     }
 
                     await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancel).ContinueWith(
-                        (rsp) =>
+                        rsp =>
                         {
-                            if (rsp.Exception != null)
-                            {
-                                message.Callback(new FirebaseError(rsp.Exception.Message));
-                            }
-                            else
-                            {
-                                message.Callback(null);
-                            }
-
+                            message.Callback(
+                                rsp.Exception != null 
+                                    ? new FirebaseError(rsp.Exception.Message) 
+                                    : null);
                         }, TaskContinuationOptions.NotOnCanceled).ConfigureAwait(false);
                 }
             }
@@ -63,14 +60,14 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        private Uri GetUri(string path)
+        private Uri GetUri(FirebasePath path)
         {
-            string uri = _root.AbsoluteUri + path + ".json";
+            string uri = _root.AbsoluteUri + path.Path + ".json";
 
-            //if (!string.IsNullOrEmpty(_authToken))
-            //{
-            //    uri += string.Format("?auth={0}", _authToken);
-            //}
+            if (!string.IsNullOrEmpty(_authToken))
+            {
+                uri += string.Format("?auth={0}", _authToken);
+            }
 
             return new Uri(uri, UriKind.Absolute);
         }
@@ -98,7 +95,7 @@ namespace FirebaseSharp.Portable
                 {
                     cancel.ThrowIfCancellationRequested();
 
-                    var uri = GetUri("/");
+                    var uri = GetUri(new FirebasePath());
                     HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
                     request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
@@ -177,7 +174,7 @@ namespace FirebaseSharp.Portable
 
                 var args =
                     new FirebaseEventReceivedEventArgs(new FirebaseMessage(behavior, 
-                        result["path"].ToString(), 
+                        new FirebasePath(result["path"].ToString()), 
                         result["data"].ToString(), 
                         null));
 

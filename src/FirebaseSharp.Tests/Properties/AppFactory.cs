@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FakeItEasy;
 using FirebaseSharp.Portable;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Messages;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FirebaseSharp.Tests
 {
     static class AppFactory
     {
-        internal static FirebaseApp Empty(Uri root)
+        internal static FirebaseApp Empty()
         {
             return FromJson("{}");
         }
@@ -24,7 +20,7 @@ namespace FirebaseSharp.Tests
             var connection = A.Fake<IFirebaseNetworkConnection>();
             A.CallTo(() => connection.Connect()).Invokes(() =>
             {
-                var msg = new FirebaseMessage(WriteBehavior.Replace, "/", json, null);
+                var msg = new FirebaseMessage(WriteBehavior.Replace, new FirebasePath(), json, null);
                 var args = new FirebaseEventReceivedEventArgs(msg);
 
                 // do it on a separate thread to make sure we don't ignore
@@ -32,7 +28,7 @@ namespace FirebaseSharp.Tests
                 Task.Run(() => connection.Received += Raise.With(args));
             });
 
-            return new FirebaseApp(new Uri("https://dinosaur-facts.firebaseio.com/"), connection);            
+            return new FirebaseApp(new Uri("https://example.com/"), connection);            
         }
 
         internal static FirebaseApp Dinosaurs()

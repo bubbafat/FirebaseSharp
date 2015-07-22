@@ -14,10 +14,10 @@ namespace FirebaseSharp.Portable.Interfaces
         IEnumerable<IDataSnapshot> Children { get; }
         bool HasChildren { get; }
         int NumChildren { get; }
-        IFirebase Ref { get; }
-        FirebasePriority Priority { get; }
+        IFirebase Ref();
+        FirebasePriority GetPriority();
         string Key { get; }
-        string ExportVal { get; }
+        string ExportVal();
         T Value<T>() where T : struct;
         string Value();
 

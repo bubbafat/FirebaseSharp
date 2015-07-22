@@ -4,11 +4,11 @@ namespace FirebaseSharp.Portable
 {
     class JsonCacheUpdateEventArgs : EventArgs
     {
-        public JsonCacheUpdateEventArgs(string path)
+        public JsonCacheUpdateEventArgs(FirebasePath path)
         {
             Path = path;
         }
 
-        public string Path { get; private set; }
+        public FirebasePath Path { get; private set; }
     }
 }

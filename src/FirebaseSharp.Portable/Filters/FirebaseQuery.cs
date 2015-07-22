@@ -9,10 +9,10 @@ namespace FirebaseSharp.Portable.Filters
     {
         private readonly FirebaseApp _app;
         private Guid _queryId;
-        private readonly string _path;
+        private readonly FirebasePath _path;
         private readonly List<ISubscriptionFilter> _filters;
 
-        public FirebaseQuery(FirebaseApp app, string path)
+        public FirebaseQuery(FirebaseApp app, FirebasePath path)
         {
             _app = app;
             _path = path;

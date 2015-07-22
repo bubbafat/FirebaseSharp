@@ -13,9 +13,11 @@ namespace FirebaseSharp.Portable
 
         private readonly object _lock = new object();
         private readonly List<ISubscriptionFilter> _filters = new List<ISubscriptionFilter>();
+        private readonly FirebaseApp _app;
 
-        internal Subscription(IEnumerable<ISubscriptionFilter> filters)
+        internal Subscription(FirebaseApp app, IEnumerable<ISubscriptionFilter> filters)
         {
+            _app = app;
             SubscriptionId = Guid.NewGuid();
 
             if (filters != null)
@@ -30,7 +32,7 @@ namespace FirebaseSharp.Portable
         public object Context { get; internal set; }
         public SnapshotCallback Callback { get; internal set; }
         public bool Once { get; internal set; }
-        public string Path { get; internal set; }
+        public FirebasePath Path { get; internal set; }
 
         public void Process(SyncDatabase root)
         {
@@ -85,7 +87,7 @@ namespace FirebaseSharp.Portable
                 var previous = last[child.Path];
                 if (!JToken.DeepEquals(child, previous))
                 {
-                    Fire(child.Path, child);
+                    Fire(Path.Child(child.Path), child);
                 }
             }
         }
@@ -101,13 +103,13 @@ namespace FirebaseSharp.Portable
             {
                 if (snap == null)
                 {
-                    Fire(child.Path, child);
+                    Fire(Path.Child(child.Path), child);
                 }
                 else
                 {
                     if (snap[child.Path] == null)
                     {
-                        Fire(child.Path, child);
+                        Fire(Path.Child(child.Path), child);
                     }
                 }
             }
@@ -124,13 +126,13 @@ namespace FirebaseSharp.Portable
             {
                 if (last == null)
                 {
-                    Fire(child.Path, child);
+                    Fire(Path.Child(child.Path), child);
                 }
                 else
                 {
                     if (last[child.Path] == null)
                     {
-                        Fire(child.Path, child);
+                        Fire(Path.Child(child.Path), child);
                     }
                 }
             }
@@ -162,7 +164,7 @@ namespace FirebaseSharp.Portable
             return filtered;
         }
 
-        private void Fire(string path, JToken state)
+        private void Fire(FirebasePath path, JToken state)
         {
             SnapshotCallback callback;
             
@@ -181,7 +183,7 @@ namespace FirebaseSharp.Portable
                 }
             }
 
-            callback(new DataSnapshot(path, state), null, Context);
+            callback(new DataSnapshot(_app, path, state), null, Context);
         }
     }
 }

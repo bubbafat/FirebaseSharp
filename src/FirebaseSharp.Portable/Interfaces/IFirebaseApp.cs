@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FirebaseSharp.Portable.Interfaces
 {
-    public interface IFirebaseApp : IFirebaseConnection, IFirebaseAuth, IDisposable
+    public interface IFirebaseApp : IDisposable
     {
-
+        void GoOnline();
+        void GoOffline();
+        IFirebase Child(string path);
     }
 }

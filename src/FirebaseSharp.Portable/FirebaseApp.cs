@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Subscriptions;
 
@@ -7,7 +8,6 @@ namespace FirebaseSharp.Portable
 {
     public sealed class FirebaseApp : IFirebaseApp
     {
-        private AuthenticationState _authState;
         private readonly Uri _rootUri;
         private readonly SyncDatabase _cache;
         private readonly SubscriptionDatabase _subscriptions;
@@ -15,19 +15,39 @@ namespace FirebaseSharp.Portable
         internal FirebaseApp(Uri rootUri, IFirebaseNetworkConnection connection)
         {
             _rootUri = rootUri;
-            _cache = new SyncDatabase(connection);
-            _subscriptions = new SubscriptionDatabase(_cache);
+            _cache = new SyncDatabase(this, connection);
             _cache.Changed += FireChangeEvents;
+            _subscriptions = new SubscriptionDatabase(this, _cache);
             GoOnline();
         }
 
-        public FirebaseApp(Uri root)
+        public FirebaseApp(Uri root, string auth = null)
         {
             _rootUri = root;
-            _cache = new SyncDatabase(new FirebaseNetworkConnection(root));
-            _subscriptions = new SubscriptionDatabase(_cache);
+            _cache = new SyncDatabase(this, new FirebaseNetworkConnection(root, auth));
             _cache.Changed += FireChangeEvents;
+            _subscriptions = new SubscriptionDatabase(this, _cache);
             GoOnline();
+        }
+
+        public IFirebase Child(string path)
+        {
+            return Child(new FirebasePath(path));
+        }
+
+        internal Firebase Child(FirebasePath path)
+        {
+            return new Firebase(this, path);   
+        }
+
+        public void GoOnline()
+        {
+            _cache.GoOnline();
+        }
+
+        public void GoOffline()
+        {
+            _cache.GoOffline();
         }
 
         private void FireChangeEvents(object sender, JsonCacheUpdateEventArgs args)
@@ -46,69 +66,22 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        internal void Set(string path, string value, FirebaseStatusCallback callback)
+        internal void Set(FirebasePath path, string value, FirebaseStatusCallback callback)
         {
             _cache.Set(path, value, callback);
         }
 
-        internal void Update(string path, string value, FirebaseStatusCallback callback)
+        internal void Update(FirebasePath path, string value, FirebaseStatusCallback callback)
         {
             _cache.Update(path, value, callback);
         }
 
-        internal string Push(string path, string value, FirebaseStatusCallback callback)
+        internal string Push(FirebasePath path, string value, FirebaseStatusCallback callback)
         {
             return _cache.Push(path, value, callback);
         }
 
-        public IFirebase Child(string path)
-        {
-            return new Firebase(this, path);
-        }
-
-        public void GoOnline()
-        {
-            _cache.GoOnline();
-        }
-
-        public void GoOffline()
-        {
-            _cache.GoOffline();
-        }
-
-        public void AuthWithCustomToken(string authToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AuthAnonymously()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AuthWithPassword(string email, string password)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AuthWithOAuthToken(string provider, string credentials)
-        {
-            throw new NotImplementedException();
-        }
-
-        public AuthenticationState GetAuth()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Unauth()
-        {
-            throw new NotImplementedException();
-        }
-
-        public event AuthChangedEvent AuthChanged;
-
-        internal Guid Subscribe(string eventName, string path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters)
+        internal Guid Subscribe(string eventName, FirebasePath path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters)
         {
             return _subscriptions.Subscribe(path, eventName, callback, context, false, filters);
         }
@@ -118,7 +91,7 @@ namespace FirebaseSharp.Portable
             _subscriptions.Unsubscribe(queryId);
         }
 
-        internal Guid SubscribeOnce(string eventName, string path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters, FirebaseStatusCallback cancelledCallback)
+        internal Guid SubscribeOnce(string eventName, FirebasePath path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters, FirebaseStatusCallback cancelledCallback)
         {
             return _subscriptions.Subscribe(path, eventName, callback, context, true, filters);
         }

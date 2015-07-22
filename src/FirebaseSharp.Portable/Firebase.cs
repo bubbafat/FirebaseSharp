@@ -9,38 +9,12 @@ namespace FirebaseSharp.Portable
     internal sealed class Firebase : IFirebase
     {
         private readonly FirebaseApp _app;
-        private readonly string _path;
-        private readonly string _key;
-        private readonly string _parent;
+        private readonly FirebasePath _path;
 
-        internal Firebase(FirebaseApp app, string path)
+        internal Firebase(FirebaseApp app, FirebasePath path)
         {
             _app = app;
             _path = path;
-            _key = null;
-
-            if (_path != null)
-            {
-                _key = _path.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
-                _parent = BuildParentPath(_path);
-            }
-        }
-
-        private string BuildParentPath(string path)
-        {
-            var parts = path.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length <= 1)
-            {
-                return "/";
-            }
-
-            StringBuilder sb = new StringBuilder();
-            foreach (var part in parts.Take(parts.Length - 1))
-            {
-                sb.AppendFormat("/{0}", part.Trim());
-            }
-
-            return sb.ToString();
         }
 
         FirebaseQuery CreateQuery()
@@ -137,28 +111,27 @@ namespace FirebaseSharp.Portable
 
         public IFirebase Child(string childPath)
         {
-            childPath = childPath.Trim(new[] {'/', ' '});
-            return _app.Child(String.Format("{0}/{1}", _path, childPath));
+            return _app.Child(_path.Child(childPath));
         }
 
         public IFirebase Parent()
         {
-            return _app.Child(_parent);
+            return _app.Child(_path.Parent());
         }
 
         public IFirebase Root()
         {
-            return _app.Child("/");
+            return _app.Child(new FirebasePath());
         }
 
         public string Key
         {
-            get { return _key; }
+            get { return _path.Key; }
         }
 
         public Uri AbsoluteUri
         {
-            get { return new Uri(_app.RootUri, _path); }
+            get { return new Uri(_app.RootUri, _path.RelativeUri); }
 
         }
 

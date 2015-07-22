@@ -17,7 +17,7 @@ namespace FirebaseSharp.Portable.Messages
 
     class FirebaseMessage
     {
-        public FirebaseMessage(WriteBehavior behavior, string path, string value, FirebaseStatusCallback callback)
+        public FirebaseMessage(WriteBehavior behavior, FirebasePath path, string value, FirebaseStatusCallback callback)
         {
             Behavior = behavior;
             Path = path;
@@ -25,7 +25,7 @@ namespace FirebaseSharp.Portable.Messages
             Callback = callback;
         }
         public WriteBehavior Behavior {get; private set;}
-        public string Path { get; private set; }
+        public FirebasePath Path { get; private set; }
         public string Value { get; private set; }
         public FirebaseStatusCallback Callback { get; private set; }
     }
