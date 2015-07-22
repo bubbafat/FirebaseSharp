@@ -36,16 +36,19 @@ namespace FirebaseSharp.Portable
 
         public void Process(SyncDatabase root)
         {
+            JToken last;
+            JToken snap;
+
             lock (_lock)
             {
-                JToken last = _lastRead;
-                JToken snap = ApplyFilters(root.SnapFor(Path).Token);
+                last = _lastRead;
+                snap = ApplyFilters(root.SnapFor(Path).Token);
 
                 // store the state for next time
                 _lastRead = snap != null ? snap.DeepClone() : null;
-
-                FireEvents(snap, last);
             }
+
+            FireEvents(snap, last);
         }
 
         private void FireEvents(JToken snap, JToken last)

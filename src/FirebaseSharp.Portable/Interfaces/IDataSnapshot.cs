@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FirebaseSharp.Portable.Interfaces
+namespace FirebaseSharp.Portable
 {
     public interface IDataSnapshot
     {

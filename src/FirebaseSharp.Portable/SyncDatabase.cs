@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Messages;
 using Newtonsoft.Json;
@@ -64,18 +65,15 @@ namespace FirebaseSharp.Portable
 
         private void ConnectionOnReceived(object sender, FirebaseEventReceivedEventArgs e)
         {
-            lock (_lock)
+            switch (e.Message.Behavior)
             {
-                switch (e.Message.Behavior)
-                {
-                    case WriteBehavior.Replace:
-                        Set(e.Message);
-                        DrainInitialQueue();
-                        break;
-                    case WriteBehavior.Merge:
-                        Update(e.Message);
-                        break;
-                }
+                case WriteBehavior.Replace:
+                    Set(e.Message);
+                    DrainInitialQueue();
+                    break;
+                case WriteBehavior.Merge:
+                    Update(e.Message);
+                    break;
             }
         }
 
@@ -105,11 +103,8 @@ namespace FirebaseSharp.Portable
         {
             var message = new FirebaseMessage(WriteBehavior.Replace, path, data, priority, callback);
 
-            lock (_lock)
-            {
-                Set(message);
-                QueueUpdate(message);
-            }
+            Set(message);
+            QueueUpdate(message);
         }
 
         private void Set(FirebaseMessage message)
@@ -169,10 +164,7 @@ namespace FirebaseSharp.Portable
 
             if (data != null)
             {
-                lock (_lock)
-                {
-                    Set(path.Child(childPath), data, callback);
-                }
+                Set(path.Child(childPath), data, callback);
             }
 
             return childPath;
@@ -182,11 +174,8 @@ namespace FirebaseSharp.Portable
         {
             var message = new FirebaseMessage(WriteBehavior.Merge, path, data, callback);
 
-            lock (_lock)
-            {
-                Update(message);
-                QueueUpdate(message);
-            }
+            Update(message);
+            QueueUpdate(message);
         }
 
         private void Update(FirebaseMessage message)
@@ -336,7 +325,13 @@ namespace FirebaseSharp.Portable
             {
                 foreach (var segment in path.Segments)
                 {
+                    if (!node.Children().Any())
+                    {
+                        return false;
+                    }
+
                     node = node[segment];
+                    
                     if (node == null)
                     {
                         return false;

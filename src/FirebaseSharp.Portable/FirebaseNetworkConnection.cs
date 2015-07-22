@@ -48,10 +48,13 @@ namespace FirebaseSharp.Portable
                     await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancel).ContinueWith(
                         rsp =>
                         {
-                            message.Callback(
-                                rsp.Exception != null 
-                                    ? new FirebaseError(rsp.Exception.Message) 
-                                    : null);
+                            if (message.Callback != null)
+                            {
+                                message.Callback(
+                                    rsp.Exception != null
+                                        ? new FirebaseError(rsp.Exception.Message)
+                                        : null);
+                            }
                         }, TaskContinuationOptions.NotOnCanceled).ConfigureAwait(false);
                 }
             }
@@ -171,11 +174,14 @@ namespace FirebaseSharp.Portable
             if (callback != null)
             {
                 JObject result = JObject.Parse(data);
+                string dataValue = result["data"].Type == JTokenType.Null 
+                    ? null 
+                    : result["data"].ToString();
 
                 var args =
                     new FirebaseEventReceivedEventArgs(new FirebaseMessage(behavior, 
-                        new FirebasePath(result["path"].ToString()), 
-                        result["data"].ToString(), 
+                        new FirebasePath(result["path"].ToString()),
+                        dataValue, 
                         null));
 
                 callback(this, args);
