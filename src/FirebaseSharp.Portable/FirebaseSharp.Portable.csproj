@@ -16,6 +16,7 @@
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <NuGetPackageImportStamp>1722a065</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,31 +36,74 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BlockingQueue.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Filters\EndAtNumericFilter.cs" />
+    <Compile Include="Filters\EndAtStringFilter.cs" />
+    <Compile Include="Filters\EqualToFilter.cs" />
+    <Compile Include="Filters\FilterContext.cs" />
+    <Compile Include="Filters\FirebaseKeySorter.cs" />
+    <Compile Include="Filters\FirebasePrioritySorter.cs" />
+    <Compile Include="Filters\FirebaseQuery.cs" />
+    <Compile Include="Filters\FirebaseValueSorter.cs" />
+    <Compile Include="FirebasePath.cs" />
+    <Compile Include="FirebasePriority.cs" />
+    <Compile Include="FirebasePushIdGenerator.cs" />
     <Compile Include="Firebase.cs" />
-    <Compile Include="FirebaseCache.cs" />
-    <Compile Include="Network\FirebaseHttpClient.cs" />
-    <Compile Include="Network\FirebaseResponseMessage.cs" />
-    <Compile Include="Network\IFirebaseHttpClient.cs" />
-    <Compile Include="Network\IFirebaseResponseMessage.cs" />
-    <Compile Include="Response.cs" />
+    <Compile Include="FirebaseApp.cs" />
+    <Compile Include="FirebaseNetworkConnection.cs" />
+    <Compile Include="Interfaces\IFilterableQueryExecutor.cs" />
+    <Compile Include="Interfaces\IFirebase.cs" />
+    <Compile Include="Interfaces\IFirebaseApp.cs" />
+    <Compile Include="Interfaces\IFirebaseHttpClient.cs" />
+    <Compile Include="Interfaces\IFirebaseHttpResponseMessage.cs" />
+    <Compile Include="Interfaces\IFirebaseNetworkConnection.cs" />
+    <Compile Include="Interfaces\IFirebaseOnDisconnect.cs" />
+    <Compile Include="Interfaces\IFirebaseQueryExecutor.cs" />
+    <Compile Include="Interfaces\IFirebaseQueryExecutorAny.cs" />
+    <Compile Include="Interfaces\IFirebaseReadonlyQuery.cs" />
+    <Compile Include="Interfaces\IFirebaseStructure.cs" />
+    <Compile Include="Interfaces\IFirebaseUpdate.cs" />
+    <Compile Include="Interfaces\FirebaseError.cs" />
+    <Compile Include="Interfaces\IDataSnapshot.cs" />
+    <Compile Include="Filters\LimitToFirstFilter.cs" />
+    <Compile Include="Filters\LimitToLastFilter.cs" />
+    <Compile Include="Interfaces\IOrderableQueryExecutor.cs" />
+    <Compile Include="JsonCacheUpdateEventArgs.cs" />
+    <Compile Include="Messages\FirebaseMessage.cs" />
+    <Compile Include="Filters\OrderByChildFilter.cs" />
+    <Compile Include="Filters\OrderByKeyFilter.cs" />
+    <Compile Include="Filters\OrderByValueFilter.cs" />
+    <Compile Include="Filters\OrderByPriorityFilter.cs" />
+    <Compile Include="Filters\StartAtNumericFilter.cs" />
+    <Compile Include="Filters\StartAtStringFilter.cs" />
+    <Compile Include="Subscriptions\ISubscriptionFilter.cs" />
+    <Compile Include="Subscriptions\Subscription.cs" />
+    <Compile Include="Subscriptions\SubscriptionDatabase.cs" />
+    <Compile Include="SyncDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Request.cs" />
+    <Compile Include="DataSnapshot.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\portable-net45+wp80+win8+wpa81+aspnetcore50\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="System.Net.Http">
+    <Reference Include="System.Net.Http, Version=1.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="System.Net.Http.Extensions">
+    <Reference Include="System.Net.Http.Extensions, Version=1.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Extensions.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="System.Net.Http.Primitives">
+    <Reference Include="System.Net.Http.Primitives, Version=1.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.Primitives.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
@@ -69,6 +113,11 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

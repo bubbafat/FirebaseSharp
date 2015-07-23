@@ -1,30 +1,31 @@
 ﻿using FirebaseSharp.Portable;
-using Newtonsoft.Json;
 using System;
-using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Newtonsoft.Json.Linq;
+using FirebaseSharp.Portable.Interfaces;
 
 namespace FirebaseWpfDraw
 {
 
-    public class IncrementalPayload
-    {
-        public string path;
-        public string data;
-    }
-
     public class PaintQueue
     {
-        public Point Point;
-        public string Color;
+        public PaintQueue(Point point, string color)
+        {
+            Point = point;
+            Color = color;
+        }
+
+        public readonly Point Point;
+        public readonly string Color;
     }
 
     /// <summary>
@@ -36,9 +37,12 @@ namespace FirebaseWpfDraw
         // https://www.firebase.com/tutorial/#session/tsqic8m0ifl
 
         private readonly Dictionary<string, SolidColorBrush> _brushMap;
-        private readonly Firebase _firebase = new Firebase("https://tsqic8m0ifl.firebaseio-demo.com/");
-        private readonly BackgroundWorker _firebaseWorker = new BackgroundWorker();
-        private readonly BlockingCollection<PaintQueue> _queue = new BlockingCollection<PaintQueue>();
+        private readonly FirebaseApp _app = new FirebaseApp(new Uri("https://tsqic8m0ifl.firebaseio-demo.com/"));
+        private readonly string[] _colors =
+            {
+                "fff", "000", "f00", "0f0", "00f", "88f", "f8d", "f88", "f05", "f80", "0f8", "cf0", "08f",
+                "408", "ff8", "8ff"
+            };
 
         public MainWindow()
         {
@@ -46,137 +50,135 @@ namespace FirebaseWpfDraw
 
             _brushMap = new Dictionary<string, SolidColorBrush>();
 
-            // the colors that the web demo uses
-            string[] colors =
-            {
-                "fff", "000", "f00", "0f0", "00f", "88f", "f8d", "f88", "f05", "f80", "0f8", "cf0", "08f",
-                "408", "ff8", "8ff"
-            };
 
             // cache the brushes for the known colors
-            foreach (string color in colors)
+            foreach (string color in _colors)
             {
                 GetBrushFromFirebaseColor(color);
             }
-
-            // this is the worker loop that does all the communication with Firebase
-            _firebaseWorker = new BackgroundWorker();
-            _firebaseWorker.DoWork += _firebaseWorker_DoWork;
         }
 
-        void _firebaseWorker_DoWork(object sender, DoWorkEventArgs e)
+        private void AddOrUpdate(IDataSnapshot snap)
         {
-            // setup streaming
-            _firebase.GetStreaming(string.Empty, 
-                added: (s, args) => PaintNewitem(args),
-                changed: (s, args) => UpdateExistingItem(args),
-                removed: (s, args) => RemovedItem(args));
+            Dispatcher.Invoke(() => PaintItem(snap));
+        }
 
-            // changes are queued so that the UI thread doesn't need
-            // to do anything expensive
-            while (true)
+        private void Removed(IDataSnapshot snap)
+        {
+            Dispatcher.Invoke(() => RemoveItem(snap));
+        }
+
+        private void PaintItem(IDataSnapshot snap)
+        {
+            Point p = NormalizedPointFromFirebase(snap.Key);
+            PaintPoint(p, GetBrushFromFirebaseColor(snap.Value()));
+        }
+
+        private void RemoveItem(IDataSnapshot snap)
+        {
+            UIElement found = null;
+
+            foreach (UIElement ui in PaintCanvas.Children)
             {
-                PaintQueue queue = _queue.Take();
-
-                try
+                Rectangle r = ui as Rectangle;
+                if (r != null)
                 {
-                    _firebase.PutAsync(FirebaseIdFromPoint(queue.Point), 
-                                       string.Format("\"{0}\"", queue.Color)).Wait();
-                }
-                catch (Exception)
-                {
-                    // This is really robust
+                    if (r.Tag.ToString() == snap.Key)
+                    {
+                        found = r;
+                        break;
+                    }
                 }
             }
+
+            if (found != null)
+            {
+                PaintCanvas.Children.Remove(found);
+            }
         }
+
 
         private string FirebaseIdFromPoint(Point p)
         {
             return string.Format("{0}:{1}", p.X, p.Y);
         }
 
-        private void RemovedItem(ValueRemovedEventArgs args)
+        private void RemoveAll()
         {
-            PaintCanvas.Dispatcher.Invoke(() =>
-            {
-                UIElement found = null;
-
-                foreach (UIElement ui in PaintCanvas.Children)
-                {
-                    Rectangle r = ui as Rectangle;
-                    if (r != null)
-                    {
-                        if (r.Tag.ToString() == args.Path.Substring(1))
-                        {
-                            found = r;
-                            break;
-                        }
-                    }
-                }
-
-                if (found != null)
-                {
-                    PaintCanvas.Children.Remove(found);
-                }
-            });
+            PaintCanvas.Children.Clear();
         }
 
-        private void UpdateExistingItem(ValueChangedEventArgs args)
+        private Rectangle GetRectangleAtPoint(Point normalizedCanvasPoint)
         {
-            PaintCanvas.Dispatcher.Invoke(() =>
+            string tag = FirebaseIdFromPoint(FirebasePointFromCanvas(normalizedCanvasPoint));
+            foreach (UIElement ui in PaintCanvas.Children)
             {
-                foreach (UIElement ui in PaintCanvas.Children)
+                Rectangle r = ui as Rectangle;
+                if (r != null)
                 {
-                    Rectangle r = ui as Rectangle;
-                    if (r != null)
+                    if (r.Tag.ToString() == tag)
                     {
-                        if (r.Tag.ToString() == args.Path.Substring(1))
-                        {
-                            r.Fill = GetBrushFromFirebaseColor(args.Data);
-                            break;
-                        }
+                        return r;
                     }
                 }
-            });
-        }
+            }
 
-        private void PaintNewitem(ValueAddedEventArgs args)
-        {
-            Point p = NormalizedPointFromFirebase(args.Path.Substring(1));
-            Brush b = GetBrushFromFirebaseColor(args.Data);
-
-            PaintPoint(p, b);
+            return null;
         }
 
 
         // wait to start the background worker until the canvas is loaded
         private void PaintCanvas_OnLoaded(object sender, RoutedEventArgs e)
         {
-            _firebaseWorker.RunWorkerAsync();
+            _app.Child("/").On("child_added", (snap, previous_child, context) => AddOrUpdate(snap));
+            _app.Child("/").On("child_changed", (snap, previous_child, context) => AddOrUpdate(snap));
+            _app.Child("/").On("child_removed", (snap, previous_child, context) => Removed(snap));
         }
 
         // paint a point
         private void PaintCanvas_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            Point firebasePoint = FirebasePointFromCanvas(GetNormalizedPoint(e.GetPosition(PaintCanvas)));
-            _queue.Add(new PaintQueue
-            {
-                Point = firebasePoint,
-                Color = "000",
-            });
+            string path = FirebaseIdFromPoint(FirebasePointFromCanvas(GetNormalizedPoint(e.GetPosition(PaintCanvas))));
+            string data = string.Format("\"{0}\"", _colors[_rng.Next(0, _colors.Length)]);
+
+            _app.Child(path).Set(data);           
         }
+
+        string _lastPoint = null;
 
         // this is where we'd paint lines if we wanted
         private void PaintCanvas_OnMouseMove(object sender, MouseEventArgs e)
         {
-            // paint a line
+            if (Mouse.LeftButton == MouseButtonState.Pressed)
+            {
+                string path = FirebaseIdFromPoint(FirebasePointFromCanvas(GetNormalizedPoint(e.GetPosition(PaintCanvas))));
+                if (_lastPoint != path)
+                {
+                    string data = string.Format("\"{0}\"", _colors[_rng.Next(0, _colors.Length)]);
+                    _app.Child(path).Set(data);
+                    _lastPoint = path;
+                }
+            }
+            else
+            {
+                _lastPoint = null;
+            }
         }
 
+        private readonly Random _rng = new Random();
+
         // paint on the canvas
-        void PaintPoint(Point point, Brush brush)
+        void PaintPoint(Point normalizedCanvasPoint, Brush brush)
         {
-            Point normalized = GetNormalizedPoint(point);
-            PaintCanvas.Dispatcher.BeginInvoke((Action)(() => PaintCanvas.Children.Add(RectangleFromPoint(normalized, brush))));
+            Rectangle r = GetRectangleAtPoint(normalizedCanvasPoint);
+            if (r != null)
+            {
+                r.Fill = brush;
+            }
+            else
+            {
+                PaintCanvas.Children.Add(RectangleFromPoint(normalizedCanvasPoint, brush));
+            }
         }
 
 
@@ -186,7 +188,7 @@ namespace FirebaseWpfDraw
             SolidColorBrush brush;
             if (!_brushMap.TryGetValue(color, out brush))
             {
-                Color c = (Color)ColorConverter.ConvertFromString(ThreeDigitToSixDigitHex(color));
+                Color c = (Color)ColorConverter.ConvertFromString(ThreeDigitToSixDigitHex(color.Trim(new []{'\"'})));
                 brush = new SolidColorBrush(c);
                 _brushMap.Add(color, brush);
             }

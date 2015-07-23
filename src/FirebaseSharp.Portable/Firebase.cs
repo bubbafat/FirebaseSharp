@@ -1,174 +1,194 @@
 ﻿using System;
-using System.Threading.Tasks;
-using FirebaseSharp.Portable.Network;
+using System.Linq;
+using System.Text;
+using FirebaseSharp.Portable.Filters;
+using FirebaseSharp.Portable.Interfaces;
+using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
 {
-    /// <summary>
-    /// Class to read and write to a Firebase database
-    /// 
-    /// Firebase fb = new Firebase("http://path.firebaseio.com");
-    /// string jsonResponse = await fb.Get("/path");
-    /// </summary>
-    public sealed class Firebase : IDisposable
+    internal sealed class Firebase : IFirebase
     {
-        private readonly Request _request;
+        private readonly FirebaseApp _app;
+        private readonly FirebasePath _path;
 
-        /// <summary>
-        /// Creates a firebase instance at the specified URI.
-        /// </summary>
-        /// <param name="rootUri">The absolute URI of the Firebase root</param>
-        /// <param name="authToken">The optional Firebase authentication token</param>
-        public Firebase(string rootUri, string authToken = null)
-            : this(new Uri(rootUri, UriKind.Absolute), authToken)
-        {            
+        internal Firebase(FirebaseApp app, FirebasePath path)
+        {
+            _app = app;
+            _path = path;
         }
 
-        /// <summary>
-        /// Creates a firebase instance at the specified URI.
-        /// </summary>
-        /// <param name="rootUri">The absolute URI of the Firebase root</param>
-        /// <param name="authToken">The optional Firebase authentication token</param>
-        public Firebase(Uri rootUri, string authToken = null)
+        FirebaseQuery CreateQuery()
         {
-            if (rootUri == null)
+            return new FirebaseQuery(_app, _path);
+        }
+
+        public IFirebaseReadonlyQuery On(string eventName, SnapshotCallback callback)
+        {
+            return CreateQuery().On(eventName, callback);
+        }
+
+        public IFirebaseReadonlyQuery On(string eventName, SnapshotCallback callback, object context)
+        {
+            return CreateQuery().On(eventName, callback, context);
+        }
+
+        public IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null)
+        {
+            return CreateQuery().Once(eventName, callback, cancelledCallback);
+        }
+
+        public IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback, object context,
+            FirebaseStatusCallback cancelledCallback = null)
+        {
+            return CreateQuery().Once(eventName, callback, context, cancelledCallback);
+        }
+
+        public IFilterableQueryExecutor OrderByChild(string child)
+        {
+            return CreateQuery().OrderByChild(child);
+        }
+
+        public IFilterableQueryExecutor OrderByKey()
+        {
+            return CreateQuery().OrderByKey();
+        }
+
+        public IFilterableQueryExecutor OrderByValue<T>()
+        {
+
+            return CreateQuery().OrderByValue<T>();
+        }
+
+        public IFilterableQueryExecutor OrderByPriority()
+        {
+            return CreateQuery().OrderByPriority();
+        }
+
+        public IFirebaseQueryExecutorAny StartAt(string startingValue)
+        {
+            return CreateQuery().StartAt(startingValue);
+        }
+
+        public IFirebaseQueryExecutorAny StartAt(long startingValue)
+        {
+            return CreateQuery().StartAt(startingValue);
+        }
+
+        public IOrderableQueryExecutor EndAt(string endingValue)
+        {
+            return CreateQuery().EndAt(endingValue);
+        }
+
+        public IOrderableQueryExecutor EndAt(long endingValue)
+        {
+            return CreateQuery().EndAt(endingValue);
+        }
+
+        public IOrderableQueryExecutor EqualTo(string value)
+        {
+            return CreateQuery().EqualTo(value);
+        }
+
+        public IOrderableQueryExecutor EqualTo(long value)
+        {
+            return CreateQuery().EqualTo(value);
+        }
+
+        public IOrderableQueryExecutor LimitToFirst(int limit)
+        {
+            return CreateQuery().LimitToFirst(limit);
+        }
+
+        public IOrderableQueryExecutor LimitToLast(int limit)
+        {
+            return CreateQuery().LimitToLast(limit);
+        }
+
+        public IFirebase Ref()
+        {
+            return new Firebase(_app, _path);
+        }
+
+        public IFirebase Child(string childPath)
+        {
+            return _app.Child(_path.Child(childPath));
+        }
+
+        public IFirebase Parent()
+        {
+            if (_path.IsRoot)
             {
-                throw new ArgumentNullException("rootUri");
+                return null;
             }
 
-            if (!rootUri.IsAbsoluteUri)
-            {
-                throw new ArgumentException("The root URI must be an absolute URI", "rootUri");
-            }
-
-            _request = new Request(new FirebaseHttpClient(rootUri), authToken);
+            return _app.Child(_path.Parent());
         }
 
-        /// <summary>
-        /// The root URI of this firebase instance
-        /// </summary>
-        public Uri RootUri
+        public IFirebase Root()
         {
-            get { return _request.RootUri; }
+            return _app.Child(new FirebasePath());
         }
 
-        [Obsolete("Use PostAsync instead.  This method will be removed in the next version.")]
-        public string Post(string path, string payload)
+        public string Key
         {
-            return PostAsync(path, payload).Result;
+            get { return _path.Key; }
         }
 
-        /// <summary>
-        /// Performs an HTTP POST (list push) to the specified path with the specified payload.
-        /// See: https://www.firebase.com/docs/rest/api/
-        /// </summary>
-        /// <param name="path">The firebase path (relative to the base URI)</param>
-        /// <param name="payload">The payload to post</param>
-        /// <returns>The child name of the new data that was added</returns>
-        public async Task<string> PostAsync(string path, string payload)
+        public Uri AbsoluteUri
         {
-            return await _request.Post(path, payload).ConfigureAwait(false);
+            get { return new Uri(_app.RootUri, _path.RelativeUri); }
+
         }
 
-        [Obsolete("Use PutAsync instead.  This method will be removed in the next version.")]
-        public string Put(string path, string payload)
+        public void Set(string value, FirebaseStatusCallback callback = null)
         {
-            return PutAsync(path, payload).Result;
+            _app.Set(_path, value, callback);
         }
 
-        /// <summary>
-        /// Performs an HTTP PUT to the specified path with the specified payload.
-        /// See: https://www.firebase.com/docs/rest/api/
-        /// </summary>
-        /// <param name="path">The firebase path (relative to the base URI)</param>
-        /// <param name="payload">The payload to PUT</param>
-        /// <returns>The JSON data that was written</returns>
-        public async Task<string> PutAsync(string path, string payload)
+        public void Update(string value, FirebaseStatusCallback callback = null)
         {
-            return await _request.Put(path, payload).ConfigureAwait(false);
+            _app.Update(_path, value, callback);
         }
 
-        [Obsolete("Use PatchAsync instead.  This method will be removed in the next version.")]
-        public string Patch(string path, string payload)
+        public void Remove(FirebaseStatusCallback callback = null)
         {
-            return PatchAsync(path, payload).Result;
+            _app.Set(_path, null, callback);
         }
 
-        /// <summary>
-        /// Performs an HTTP PATCH to the specified path with the specified payload.
-        /// See: https://www.firebase.com/docs/rest/api/
-        /// </summary>
-        /// <param name="path">The firebase path (relative to the base URI)</param>
-        /// <param name="payload">The payload to PATCH</param>
-        /// <returns>The JSON data that was written</returns>
-        public async Task<string> PatchAsync(string path, string payload)
+        public IFirebase Push(string value, FirebaseStatusCallback callback = null)
         {
-            return await _request.Patch(path, payload).ConfigureAwait(false);
+            return Child(_app.Push(_path, value, callback));
         }
 
-        [Obsolete("Use DeleteAsync instead.  This method will be removed in the next version.")]
-        public void Delete(string path)
+        public void SetWithPriority(string value, string priority, FirebaseStatusCallback callback = null)
         {
-            DeleteAsync(path).Wait();
+            _app.SetWithPriority(_path, value, new FirebasePriority(priority), callback);
         }
 
-        /// <summary>
-        /// Performs an HTTP DELETE to the specified path.
-        /// See: https://www.firebase.com/docs/rest/api/
-        /// </summary>
-        /// <param name="path">The firebase path (relative to the base URI)</param>
-        /// <returns>A void task</returns>
-        public async Task DeleteAsync(string path)
+        public void SetWithPriority(string value, float priority, FirebaseStatusCallback callback = null)
         {
-            await _request.Delete(path).ConfigureAwait(false);
+            _app.SetWithPriority(_path, value, new FirebasePriority(priority), callback);
         }
 
-        [Obsolete("Use GetAsync instead.  This method will be removed in the next version.")]
-        public string Get(string path)
+        public void SetPriority(string priority, FirebaseStatusCallback callback = null)
         {
-            return GetAsync(path).Result;
+            _app.SetPriority(_path, new FirebasePriority(priority), callback);
         }
 
-        /// <summary>
-        /// Performs an HTTP GET at the specified path.
-        /// See: https://www.firebase.com/docs/rest/api/
-        /// </summary>
-        /// <param name="path">The firebase path (relative to the base URI)</param>
-        /// <returns>The JSON data at that location</returns>
-        public async Task<string> GetAsync(string path)
+        public void SetPriority(float priority, FirebaseStatusCallback callback = null)
         {
-            return await _request.GetSingle(path).ConfigureAwait(false);
+            _app.SetPriority(_path, new FirebasePriority(priority), callback);
         }
 
-        [Obsolete("Use GetStreamingAsync instead.  This method will be removed in the next version.")]
-        public Response GetStreaming(string path, 
-            ValueAddedEventHandler added = null,
-            ValueChangedEventHandler changed = null,
-            ValueRemovedEventHandler removed = null)
+        public IFirebaseApp GetApp()
         {
-            return GetStreamingAsync(path, added, changed, removed).Result;
+            return _app;
         }
 
-        /// <summary>
-        /// Performs an streaming HTTP GET at the specified path.
-        /// See: https://www.firebase.com/docs/rest/api/
-        /// </summary>
-        /// <param name="path">The firebase path (relative to the base URI)</param>
-        /// <param name="added">Callback fired when data is added (put event)</param>
-        /// <param name="changed">Callback fired when data is changed (patch event)</param>
-        /// <param name="removed">Callback fired when data is removed (put with null data)</param>
-        /// <returns>A Response object</returns>
-        public async Task<Response> GetStreamingAsync(string path,
-            ValueAddedEventHandler added = null,
-            ValueChangedEventHandler changed = null,
-            ValueRemovedEventHandler removed = null)
+        public override string ToString()
         {
-            return await _request.GetStreaming(path, added, changed, removed).ConfigureAwait(false);
-        }
-
-        public void Dispose()
-        {
-            using (_request) { }
+            return AbsoluteUri.ToString();
         }
     }
 }
