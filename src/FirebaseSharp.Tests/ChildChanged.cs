@@ -29,9 +29,9 @@ namespace FirebaseSharp.Tests
         {
             List<Tuple<string, string, string>> expected = new List<Tuple<string, string, string>>
             {
-                new Tuple<string, string, string>("put", @"{'foo': 'bar'}", @"{'foo': 'bar'}"),
-                new Tuple<string, string, string>("patch", @"{'foo': 'baz'}", @"{'foo': 'baz'}"),
-                new Tuple<string, string, string>("put", @"{'foo': 'pipo'}", @"{'foo': 'pipo'}"),
+                new Tuple<string, string, string>("put", @"{'foo': 'bar'}", "bar"),
+                new Tuple<string, string, string>("patch", @"{'foo': 'baz'}", "baz"),
+                new Tuple<string, string, string>("put", @"{'foo': 'pipo'}", "pipo"),
             };
 
             ManualResetEvent done = new ManualResetEvent(false);
@@ -39,10 +39,8 @@ namespace FirebaseSharp.Tests
             int[] counter = new []{ 0 };
             var loc = _app.Child("/").On("child_changed", (snap, child, context) =>
             {
-                JToken expect = JToken.Parse(expected[counter[0]].Item3);
-                string actualStr = snap.Value();
-                JToken actual = JToken.Parse(actualStr);
-                Assert.IsTrue(JToken.DeepEquals(expect, actual));
+                Assert.AreEqual("foo", snap.Key);
+                Assert.AreEqual(expected[counter[0]].Item3, snap.Value());
                 if (++counter[0] == 3)
                 {
                     done.Set();

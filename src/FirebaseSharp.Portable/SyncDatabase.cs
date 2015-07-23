@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 using FirebaseSharp.Portable.Interfaces;
@@ -29,7 +30,7 @@ namespace FirebaseSharp.Portable
     /// </summary>
     class SyncDatabase : IDisposable
     {
-        private JToken _root;
+        private JObject _root;
         private bool _initialReceive;
         private readonly object _lock = new object();
         private readonly IFirebaseNetworkConnection _connection;
@@ -153,7 +154,13 @@ namespace FirebaseSharp.Portable
                 }
                 else
                 {
-                    _root = newData;
+                    JObject newObj = newData as JObject;
+                    if (newObj == null)
+                    {
+                        throw new Exception("Root object must be a JSON object type - illegal type: " + newData.Type);
+                    }
+
+                    _root = newObj;
                 }
             }
         }
@@ -193,7 +200,7 @@ namespace FirebaseSharp.Portable
                     JToken found;
                     if (TryGetChild(message.Path, out found))
                     {
-                        Merge(found, newData);
+                        Merge(message.Path, found, newData);
                     }
                     else
                     {
@@ -255,11 +262,14 @@ namespace FirebaseSharp.Portable
         }
         private void InsertAt(FirebasePath path, JToken newData)
         {
+            // if there is aleady a node at the path, delete it
+            Delete(path);
+
             string[] segments = path.Segments.ToArray();
 
             if (segments.Length > 0)
             {
-                var node = _root;
+                JToken node = _root;
 
                 for (int i = 0; i < segments.Length - 1; i++)
                 {
@@ -276,38 +286,59 @@ namespace FirebaseSharp.Portable
                     }
                 }
 
-                node[segments[segments.Length - 1]] = newData;
+                string newPath = segments[segments.Length - 1];
+                JObject newObj = node as JObject;
+                if (newObj == null)
+                {
+                    throw new Exception("Node object must be a JSON object type - illegal type: " + newData.Type);
+                }
+
+                if (newData is JProperty)
+                {
+                    newObj.Add(newData);
+                }
+                else
+                {
+                    newObj[newPath] = newData;
+                }
             }
             else
             {
-                _root = newData;
+                JObject newObj = newData as JObject;
+                if (newObj == null)
+                {
+                    throw new Exception("Root object must be a JSON object type - illegal type: " + newData.Type);
+                }
+
+                _root = newObj;
             }
         }
 
-        private void Merge(JToken target, JToken newData)
+        private void Merge(FirebasePath root, JToken target, JToken newData)
         {
             if (!UpdateValues(target, newData))
             {
-                foreach (var newChildPath in newData.Children())
+                foreach (var newChild in newData.Children())
                 {
-                    var newChild = newData[newChildPath.Path];
-
-                    // a PATCH of a null object is skipped
-                    // use PUT to delete
-                    if (newChild.Type == JTokenType.Null)
+                    if (DeleteFromTarget(root, newData, newChild.Path))
                     {
                         continue;
                     }
 
-                    if (target[newChildPath.Path] is JValue && newChild is JValue)
-                    {
-                        ((JValue)target[newChildPath.Path]).Value = ((JValue)newChild).Value;
-                        continue;
-                    }
-
-                    target[newChildPath.Path] = newChild;
+                    InsertAt(root.Child(newChild.Path), newChild);
                 }
             }
+        }
+
+        private bool DeleteFromTarget(FirebasePath targetPath, JToken newData, string path)
+        {
+            if (newData[path].Type == JTokenType.Null)
+            {
+                Delete(targetPath.Child(path));
+                return true;
+            }
+
+            return false;
         }
 
         private bool TryGetChild(FirebasePath path, out JToken node)

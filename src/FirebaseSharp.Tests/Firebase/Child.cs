@@ -25,28 +25,28 @@ namespace FirebaseSharp.Tests.Firebase
         [TestMethod]
         public void SingleLevel_Exists()
         {
-            _app.Child("foo").Set("bar");
+            _app.Child("foo").Set("{value: 'bar'}");
             Assert.AreEqual("foo", _app.Child("foo").Key);
         }
 
         [TestMethod]
         public void MultiLevel_Exists()
         {
-            _app.Child("foo/bar/baz").Set("bar");
+            _app.Child("foo/bar/baz").Set("{value: 'bar'}");
             Assert.AreEqual("baz", _app.Child("foo/bar/baz").Key);
         }
 
         [TestMethod]
         public void SingleLevel_Missing()
         {
-            _app.Child("foo").Set("bar");
+            _app.Child("foo").Set("{value: 'bar'}");
             Assert.AreEqual("foo", _app.Child("foo").Key);
         }
 
         [TestMethod]
         public void MultiLevel_Missing()
         {
-            _app.Child("foo/bar/baz").Set("bar");
+            _app.Child("foo/bar/baz").Set("{value: 'bar'}");
             Assert.AreEqual("baz", _app.Child("foo/bar/baz").Key);
         }
 

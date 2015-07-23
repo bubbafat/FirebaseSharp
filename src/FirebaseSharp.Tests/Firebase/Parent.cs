@@ -25,7 +25,7 @@ namespace FirebaseSharp.Tests.Firebase
         [TestMethod]
         public void ChildGivesParent_Exists()
         {
-            _app.Child("foo/bar/baz").Set("value");
+            _app.Child("foo/bar/baz").Set("{ value: 'val1'}");
             Assert.AreEqual("bar", _app.Child("foo/bar/baz").Parent().Key);
         }
 

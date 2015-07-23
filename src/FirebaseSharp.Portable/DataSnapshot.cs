@@ -36,15 +36,18 @@ namespace FirebaseSharp.Portable
                 child = _token.First;
                 foreach (string childPath in new FirebasePath(childName).Segments)
                 {
-                    if (child == null)
+                    if (child == null || child.Type == JTokenType.Null)
                     {
                         break;
                     }
 
-                    child = child[childPath];
-                    if (child == null)
+                    if (child.HasValues)
                     {
-                        break;
+                        child = child[childPath];
+                        if (child == null)
+                        {
+                            break;
+                        }
                     }
                 }
             }
@@ -123,15 +126,15 @@ namespace FirebaseSharp.Portable
         private string GetValueString()
         {
             JProperty jp = _token as JProperty;
-            if (jp != null)
+            if (jp != null && jp.Type != JTokenType.Null)
             {
-                return string.Format("{{ {0} }}", jp.ToString());
+                return jp.Value.ToString();
             }
 
             JValue jv = _token as JValue;
-            if (jv != null)
+            if (jv != null && jv.Type != JTokenType.Null)
             {
-                return jv.ToString();
+                return jv.Value.ToString();
             }
 
             return _token.ToString();

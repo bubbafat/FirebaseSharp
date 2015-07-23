@@ -144,12 +144,12 @@ namespace FirebaseSharp.Tests.JsonCache
                         "{ \"me\": {\"name\": \"Bobert\"}}"),
                     "{\"people\": { \"me\": {\"name\": \"Bobert\" }, \"you\": {\"name\": \"Susan\"}}}"),
 
-                // nulls are ignored on patch
+                // nulls delete
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/me",
                         "{\"name\": null}"),
-                    "{\"people\": { \"me\": {\"name\": \"Bobert\" }, \"you\": {\"name\": \"Susan\"}}}"),
+                    "{\"people\": { \"me\": { }, \"you\": {\"name\": \"Susan\"}}}"),
 
             };
 
