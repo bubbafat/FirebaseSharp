@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using FirebaseSharp.Portable.Interfaces;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
