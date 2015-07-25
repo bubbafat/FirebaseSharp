@@ -45,7 +45,7 @@ namespace FirebaseSharp.Portable.Filters
                             {
                                 return String.Compare(test.Value<string>(),
                                                      _endingValue,
-                                                     StringComparison.Ordinal) < 0;
+                                                     StringComparison.Ordinal) <= 0;
                             }
 
                             // non-nulls aren't skipped

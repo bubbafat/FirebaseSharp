@@ -7,10 +7,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace FirebaseSharp.Tests.Filter
 {
     [TestClass]
-    public class StartAtNumericTests
+    public class EndAt
     {
         [TestMethod]
-        public void StartAtNumeric()
+        public void EndAt_Numeric()
         {
             string json = @"
 {
@@ -32,24 +32,26 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", 1, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test1", 2, new[] { "keyBBB", "keyCCC" });
-            RunTest(json, "test1", 3, new[] { "keyCCC" });
-            RunTest(json, "test1", 4, new string[0]);
+            RunTest(json, "test1", 4, new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test1", 3, new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test1", 2, new[] { "keyAAA", "keyBBB" });
+            RunTest(json, "test1", 1, new[] { "keyAAA" });
+            RunTest(json, "test1", 0, new string[0]);
 
+            RunTest(json, "test2", 4, new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test2", 3, new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test2", 2, new[] { "keyAAA", "keyBBB", "keyCCC" });
             RunTest(json, "test2", 1, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test2", 2, new string[0]);
-            RunTest(json, "test2", 3, new string[0]);
-            RunTest(json, "test2", 4, new string[0]);
+            RunTest(json, "test1", -1, new string[0]);
 
-            RunTest(json, "test3", 1, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", 2, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", 3, new[] { "keyCCC" });
-            RunTest(json, "test3", 4, new string[0]);
+            RunTest(json, "test3", 4, new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test3", 3, new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test3", 2, new[] { "keyAAA", "keyBBB" });
+            RunTest(json, "test3", 1, new string[0]);
         }
 
         [TestMethod]
-        public void StartAtString()
+        public void EndAt_String()
         {
             string json = @"
 {
@@ -71,30 +73,32 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", "a", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test1", "b", new[] { "keyBBB", "keyCCC" });
-            RunTest(json, "test1", "c", new[] { "keyCCC" });
-            RunTest(json, "test1", "d", new string[0]);
+            RunTest(json, "test1", "d", new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test1", "c", new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test1", "b", new[] { "keyAAA", "keyBBB" });
+            RunTest(json, "test1", "a", new[] { "keyAAA" });
+            RunTest(json, "test1", null, new string[0]);
 
+            RunTest(json, "test2", "d", new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test2", "c", new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test2", "b", new[] { "keyAAA", "keyBBB", "keyCCC" });
             RunTest(json, "test2", "a", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test2", "b", new string[0]);
-            RunTest(json, "test2", "c", new string[0]);
-            RunTest(json, "test2", "d", new string[0]);
+            RunTest(json, "test1", "$", new string[0]);
 
-            RunTest(json, "test3", "a", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", "b", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", "c", new[] { "keyCCC" });
-            RunTest(json, "test3", "d", new string[0]);
+            RunTest(json, "test3", "d", new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test3", "c", new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test3", "b", new[] { "keyAAA", "keyBBB" });
+            RunTest(json, "test3", "a", new string[0]);
         }
 
-        private void RunTest(string json, string testName, string startAt, string[] expectedOrder)
+        private void RunTest(string json, string testName, string endAt, string[] expectedOrder)
         {
             using (FirebaseApp app = AppFactory.FromJson(json))
             {
                 ManualResetEvent fired = new ManualResetEvent(false);
                 var query = app.Child("/")
                     .OrderByChild(testName)
-                    .StartAt(startAt)
+                    .EndAt(endAt)
                     .On("value", (snap, previous, context) =>
                     {
                         Assert.IsNotNull(snap.Children, testName);
@@ -114,14 +118,14 @@ namespace FirebaseSharp.Tests.Filter
             }
         } 
 
-        private void RunTest(string json, string testName, long startAt, string[] expectedOrder)
+        private void RunTest(string json, string testName, long endAt, string[] expectedOrder)
         {
             using (FirebaseApp app = AppFactory.FromJson(json))
             {
                 ManualResetEvent fired = new ManualResetEvent(false);
                 var query = app.Child("/")
                     .OrderByChild(testName)
-                    .StartAt(startAt)
+                    .EndAt(endAt)
                     .On("value", (snap, previous, context) =>
                     {
                         Assert.IsNotNull(snap.Children, testName);
