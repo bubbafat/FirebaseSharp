@@ -19,9 +19,8 @@ namespace FirebaseSharp.Portable.Filters
 
         public JToken Apply(JToken filtered, IFilterContext context)
         {
-            context.FilterColumn = _child;
-
             JObject result = new JObject();
+            context.FilterColumn = _child;
 
             JObject obj = filtered as JObject;
             if (obj != null)
