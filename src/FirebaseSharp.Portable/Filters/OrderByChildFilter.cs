@@ -19,15 +19,30 @@ namespace FirebaseSharp.Portable.Filters
 
         public JToken Apply(JToken filtered, IFilterContext context)
         {
-            JObject result = new JObject();
             context.FilterColumn = _child;
 
-            foreach(var ordered in filtered.Children().OrderBy(c => c.First[_child], new FirebaseValueSorter()))
+            JObject result = new JObject();
+
+            JObject obj = filtered as JObject;
+            if (obj != null)
             {
-                result.Add(ordered);
+                foreach (var ordered in filtered.Children().Cast<JProperty>().OrderBy(c =>
+                {
+                    if (c.Value.Type == JTokenType.Object)
+                    {
+                        return ((JObject)c.Value)[_child];
+                    }
+
+                    return (JObject)null;
+                }, new FirebaseValueSorter()))
+                {
+                    result.Add(ordered);
+                }
+
             }
 
             return result;
+
         }
     }
 }
