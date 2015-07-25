@@ -22,12 +22,45 @@ namespace FirebaseSharp.Portable.Filters
         {
             JObject result = new JObject();
 
-            foreach (var child in filtered.Children().Where(t => t.First[context.FilterColumn].Value<T>().Equals(_value)))
+            JObject obj = filtered as JObject;
+            if (obj != null)
             {
-                result.Add(child);
+                foreach (var ordered in filtered.Children().Cast<JProperty>().Where(c =>
+                {
+                    if (c.Value.Type == JTokenType.Object)
+                    {
+                        var test = c.Value[context.FilterColumn];
+                        if (test != null)
+                        {
+                            if (test is JValue)
+                            {
+                                T val;
+                                try
+                                {
+                                    val = test.Value<T>();
+                                }
+                                catch (Exception)
+                                {
+                                    return false;
+                                }
+
+                                return val.Equals(_value);
+                            }
+
+                            return false;
+                        }
+                    }
+
+                    return false;
+                }))
+                {
+                    result.Add(ordered);
+                }
+
             }
 
             return result;
+
         }
     }
 }

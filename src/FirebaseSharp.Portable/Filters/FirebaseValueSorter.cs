@@ -13,9 +13,7 @@ namespace FirebaseSharp.Portable.Filters
     {
         public override int Compare(JToken x, JToken y)
         {
-            // use paths, not values, for object equality
-            // since we might be dealing with cloned objects
-            if (x.Path == y.Path)
+            if (ReferenceEquals(x, y))
             {
                 return 0;
             }
@@ -32,6 +30,13 @@ namespace FirebaseSharp.Portable.Filters
             {
                 Debug.Assert(result != int.MinValue);
                 return result;
+            }
+
+            // use paths, not values, for object equality
+            // since we might be dealing with cloned objects
+            if (x.Path == y.Path)
+            {
+                return 0;
             }
 
             if (TryBooleanTests(x, y, out result))

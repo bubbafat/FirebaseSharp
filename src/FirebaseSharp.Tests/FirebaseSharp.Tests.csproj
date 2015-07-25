@@ -82,6 +82,7 @@
     <Compile Include="Filter\CombinedFilterTests.cs" />
     <Compile Include="Filter\OrderByChild.cs" />
     <Compile Include="Filter\StartEndTests.cs" />
+    <Compile Include="Filter\EqualTo.cs" />
     <Compile Include="Firebase\Child.cs" />
     <Compile Include="Firebase\Parent.cs" />
     <Compile Include="Firebase\Root.cs" />
