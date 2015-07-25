@@ -79,7 +79,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\FirebaseSharp.Portable\FirebaseSharp.Portable.csproj">
+    <ProjectReference Include="..\..\src\FirebaseSharp.Portable\FirebaseSharp.Portable.csproj">
       <Project>{d8788f65-474d-4ec9-b475-9e7f7c5e7460}</Project>
       <Name>FirebaseSharp.Portable</Name>
     </ProjectReference>
