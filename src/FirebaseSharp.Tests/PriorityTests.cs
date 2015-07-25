@@ -285,9 +285,9 @@ namespace FirebaseSharp.Tests
                 var root = app.Child("/");
 
                 // now update the priorites
-                root.Child("aaa").SetWithPriority("{}", 3);
-                root.Child("bbb").SetWithPriority("{}", 2);
-                root.Child("ccc").SetWithPriority("{}", 1);
+                root.Child("aaa").SetWithPriority("{ name: 'aaa'}", 3);
+                root.Child("bbb").SetWithPriority("{ name: 'bbb'}", 2);
+                root.Child("ccc").SetWithPriority("{ name: 'ccc'}", 1);
 
                 root.OrderByPriority().Once("value", (snap, child, context) =>
                 {

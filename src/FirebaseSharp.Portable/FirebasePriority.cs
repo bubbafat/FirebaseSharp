@@ -17,16 +17,15 @@ namespace FirebaseSharp.Portable
         private readonly float? _fp;
         private readonly string _sp;
 
-        internal FirebasePriority(JToken token)
+        internal FirebasePriority(JValue priority)
         {
-            JToken p = token[".priority"];
-            if (p == null)
+            if (priority == null || priority.Type == JTokenType.Null)
             {
                 Type = PriorityType.None;
                 return;
             }
 
-            switch (p.Type)
+            switch (priority.Type)
             {
                 case JTokenType.None:
                     Type = PriorityType.None;
@@ -34,11 +33,11 @@ namespace FirebaseSharp.Portable
                 case JTokenType.Integer:
                 case JTokenType.Float:
                     Type = PriorityType.Numeric;
-                    _fp = p.Value<float>();
+                    _fp = priority.Value<float>();
                     return;
                 case JTokenType.String:
                     int value;
-                    if (int.TryParse(p.Value<string>(), out value))
+                    if (int.TryParse(priority.Value<string>(), out value))
                     {
                         Type = PriorityType.Numeric;
                         _fp = value;
@@ -47,11 +46,11 @@ namespace FirebaseSharp.Portable
                     {
 
                         Type = PriorityType.String;
-                        _sp = p.Value<string>();
+                        _sp = priority.Value<string>();
                     }
                     return;
                 default:
-                    throw new Exception(string.Format("Unable to load priority of type: {0}", p.Type));
+                    throw new Exception(string.Format("Unable to load priority of type: {0}", priority.Type));
             }
         }
 

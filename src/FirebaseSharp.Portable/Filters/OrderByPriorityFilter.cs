@@ -14,9 +14,22 @@ namespace FirebaseSharp.Portable.Filters
         {
             JObject result = new JObject();
 
-            foreach (var ordered in filtered.Children().OrderBy(c => c.First, new FirebasePrioritySorter()))
+            JObject obj = filtered as JObject;
+            if (obj != null)
             {
-                result.Add(ordered);
+                foreach (var ordered in filtered.Children().Cast<JProperty>().OrderBy(c =>
+                {
+                    if (c.Value.Type == JTokenType.Object)
+                    {
+                        return ((JObject)c.Value);
+                    }
+
+                    return (JObject)null;
+                }, new FirebasePrioritySorter()))
+                {
+                    result.Add(ordered);
+                }
+                
             }
 
             return result;

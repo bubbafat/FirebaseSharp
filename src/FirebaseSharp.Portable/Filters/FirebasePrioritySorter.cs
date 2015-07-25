@@ -2,18 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 using FirebaseSharp.Portable.Interfaces;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable.Filters
 {
-    class FirebasePrioritySorter : IComparer<JToken>
+    class FirebasePrioritySorter : IComparer<JObject>
     {
-        readonly Lazy<FirebaseKeySorter> _keySort = new Lazy<FirebaseKeySorter>(() => new FirebaseKeySorter()); 
-        public int Compare(JToken x, JToken y)
+        readonly Lazy<FirebaseKeySorter> _keySort = new Lazy<FirebaseKeySorter>(() => new FirebaseKeySorter());
+        public int Compare(JObject x, JObject y)
         {
-            var xp = new FirebasePriority(x);
-            var yp = new FirebasePriority(y);
+            if (ReferenceEquals(x, y))
+            {
+                return 0;
+            }
+
+            var xp = new FirebasePriority((JValue)x[".priority"]);
+            var yp = new FirebasePriority((JValue)y[".priority"]);
 
             int result = xp.CompareTo(yp);
 
