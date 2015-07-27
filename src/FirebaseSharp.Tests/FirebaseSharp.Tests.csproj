@@ -89,6 +89,7 @@
     <Compile Include="Firebase\Root.cs" />
     <Compile Include="Firebase\ToString.cs" />
     <Compile Include="Firebase\ConnectedTests.cs" />
+    <Compile Include="On\Value.cs" />
     <Compile Include="Properties\AppFactory.cs" />
     <Compile Include="Filter\LimitToFirstTests.cs" />
     <Compile Include="Firebase\Query.cs" />
@@ -99,7 +100,7 @@
     <Compile Include="TestConfig.cs" />
     <Compile Include="PriorityTests.cs" />
     <Compile Include="DataSnapshotTests.cs" />
-    <Compile Include="ChildChanged.cs" />
+    <Compile Include="On\ChildChanged.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FirebaseSharp.Portable\FirebaseSharp.Portable.csproj">

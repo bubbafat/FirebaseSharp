@@ -48,6 +48,7 @@
     <Compile Include="Filters\FirebaseQuery.cs" />
     <Compile Include="Filters\FirebaseValueSorter.cs" />
     <Compile Include="Filters\StartAtKeyFilter.cs" />
+    <Compile Include="FirebaseNetworkDisconnectedEventArgs.cs" />
     <Compile Include="FirebasePath.cs" />
     <Compile Include="FirebasePriority.cs" />
     <Compile Include="FirebasePushIdGenerator.cs" />

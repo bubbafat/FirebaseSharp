@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Messages;
@@ -28,7 +29,7 @@ namespace FirebaseSharp.Portable
     /// </summary>
     internal class SyncDatabase : IDisposable
     {
-        private JObject _root;
+        private readonly JObject _root;
         private bool _initialReceive;
         private readonly object _lock = new object();
         private readonly IFirebaseNetworkConnection _connection;
@@ -46,6 +47,44 @@ namespace FirebaseSharp.Portable
 
             _connection = connection;
             _connection.Received += ConnectionOnReceived;
+            _connection.Disconnected += ConnectionOnDisconnected;
+        }
+
+        private void ConnectionOnDisconnected(object sender, 
+            FirebaseNetworkDisconnectedEventArgs args)
+        {
+            SetConnectedState(false);
+
+            if (args.Error != null)
+            {
+                GoOnline();
+            }
+        }
+
+        private bool GetConnectedState()
+        {
+            lock (_lock)
+            {
+                return ((JValue) _root[".info"]["connected"]).Value<bool>();
+            }
+        }
+
+        private void SetConnectedState(bool state)
+        {
+            Debug.WriteLine("Setting connection state: {0}", state);
+            lock (_lock)
+            {
+                if (GetConnectedState() == state)
+                {
+                    return;
+                }
+
+                _root[".info"]["connected"] = state;
+            }
+            
+            OnChanged(new FirebaseMessage(WriteBehavior.Merge, new FirebasePath(".info"),
+                string.Format("{{connected: {0}}}", state), null, null,
+                MessageSouce.Local));
         }
 
         public EventHandler<JsonCacheUpdateEventArgs> Changed;
@@ -67,6 +106,7 @@ namespace FirebaseSharp.Portable
 
         private void ConnectionOnReceived(object sender, FirebaseEventReceivedEventArgs e)
         {
+            SetConnectedState(true);
             UpdateLocal(e.Message);
             DrainInitialQueue();
         }
@@ -371,15 +411,11 @@ namespace FirebaseSharp.Portable
         internal void GoOnline()
         {
             _connection.Connect();
-            _root[".info"]["connected"] = true;
-            OnChanged(new FirebaseMessage(WriteBehavior.Replace, new FirebasePath(".info"), "{connected: true}", null, null, MessageSouce.Local ));
         }
 
         internal void GoOffline()
         {
             _connection.Disconnect();
-            _root[".info"]["connected"] = false;
-            OnChanged(new FirebaseMessage(WriteBehavior.Replace, new FirebasePath(".info"), "{connected: false}", null, null, MessageSouce.Local));
         }
 
         public void Dispose()

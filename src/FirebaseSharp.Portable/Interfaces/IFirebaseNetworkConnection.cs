@@ -18,6 +18,7 @@ namespace FirebaseSharp.Portable.Interfaces
         void Send(FirebaseMessage message);
 
         event EventHandler<FirebaseEventReceivedEventArgs> Received;
+        event EventHandler<FirebaseNetworkDisconnectedEventArgs> Disconnected;
 
         void Disconnect();
         void Connect();

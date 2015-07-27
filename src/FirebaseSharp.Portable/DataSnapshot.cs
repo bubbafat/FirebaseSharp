@@ -156,14 +156,25 @@ namespace FirebaseSharp.Portable
 
         public T Value<T>()
         {
+            if (_token == null || _token.Type == JTokenType.Null)
+            {
+                return default(T);
+            }
+
             JProperty jp = _token as JProperty;
-            if (jp != null && jp.Type != JTokenType.Null)
+            if (jp != null)
             {
                 return JsonConvert.DeserializeObject<T>(jp.Value.ToString());
             }
 
+            JObject jo = _token as JObject;
+            if (jo != null)
+            {
+                return JsonConvert.DeserializeObject<T>(jo.ToString());
+            }
+
             JValue jv = _token as JValue;
-            if (jv != null && jv.Type != JTokenType.Null)
+            if (jv != null)
             {
                 return (T)Convert.ChangeType(jv.Value.ToString(), typeof (T));
             }

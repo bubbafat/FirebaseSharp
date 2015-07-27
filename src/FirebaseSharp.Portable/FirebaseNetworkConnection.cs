@@ -61,12 +61,18 @@ namespace FirebaseSharp.Portable
                                         ? new FirebaseError("Canceled")
                                         : null;
                                 message.Callback(error);
+                                _sendQueue.Enqueue(cancel, message);
                             }
-                        }, TaskContinuationOptions.NotOnCanceled).ConfigureAwait(false);
+                        }, cancel).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)
             {
+                OnDisconnect("Canceled", null);
+            }
+            catch (Exception ex)
+            {
+                OnDisconnect("Error", ex);
             }
         }
 
@@ -171,6 +177,11 @@ namespace FirebaseSharp.Portable
             }
             catch (OperationCanceledException)
             {
+                OnDisconnect("Operation Canceled", null);
+            }
+            catch (Exception ex)
+            {
+                OnDisconnect("Error", ex);
             }
         }
 
@@ -200,12 +211,22 @@ namespace FirebaseSharp.Portable
             }
         }
 
+        void OnDisconnect(string reason, Exception ex)
+        {
+            var callback = Disconnected;
+            if (callback != null)
+            {
+                callback(this, new FirebaseNetworkDisconnectedEventArgs(reason, ex));
+            }
+        }
+
         public void Send(FirebaseMessage message)
         {
             _sendQueue.Enqueue(_cancelSource.Token, message);
         }
 
         public event EventHandler<FirebaseEventReceivedEventArgs> Received;
+        public event EventHandler<FirebaseNetworkDisconnectedEventArgs> Disconnected;
 
         public void Disconnect()
         {
@@ -218,33 +239,41 @@ namespace FirebaseSharp.Portable
                     _cancelSource = null;
                 }
             }
+
+            OnDisconnect("Disconnect", null);
         }
 
         public void Connect()
         {
             lock (_lock)
             {
-                if (!_connected)
+                if (_connected)
                 {
-                    HttpClientHandler handler = new HttpClientHandler
+                    using (_cancelSource)
                     {
-                        AllowAutoRedirect = true,
-                        MaxAutomaticRedirections = 10,
-                    };
-
-                    _client = new HttpClient(handler, true)
-                    {
-                        BaseAddress = _root,
-                        Timeout = TimeSpan.FromMilliseconds(Timeout.Infinite),
-                    };
-
-                    _cancelSource = new CancellationTokenSource();
-                    _sendTask = Task.Run(() => SendThread(_cancelSource.Token));
-                    _receiveTask = Task.Run(() => ReceiveThread(_cancelSource.Token));
-                    _connected = true;
+                    }
+                    _connected = false;
                 }
+
+                HttpClientHandler handler = new HttpClientHandler
+                {
+                    AllowAutoRedirect = true,
+                    MaxAutomaticRedirections = 10,
+                };
+
+                _client = new HttpClient(handler, true)
+                {
+                    BaseAddress = _root,
+                    Timeout = TimeSpan.FromMilliseconds(Timeout.Infinite),
+                };
+
+                _cancelSource = new CancellationTokenSource();
+                _sendTask = Task.Run(() => SendThread(_cancelSource.Token));
+                _receiveTask = Task.Run(() => ReceiveThread(_cancelSource.Token));
+                _connected = true;
             }
         }
+        
 
         public void Dispose()
         {

@@ -50,7 +50,8 @@ namespace FirebaseSharp.Portable
             {
                 lock (_lock)
                 {
-                    return _subscriptions.ToList();
+                    // valu events come last - and they also sort last
+                    return _subscriptions.OrderBy(s => s.Event);
                 }
             }
         }
