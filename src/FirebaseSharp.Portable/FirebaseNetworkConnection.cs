@@ -45,15 +45,21 @@ namespace FirebaseSharp.Portable
                         request.Content = new StringContent(message.Value);
                     }
 
+                    Debug.WriteLine("SEND: {0} {1}",
+                        message.Path,
+                        message.Value ?? "null");
+
                     await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancel).ContinueWith(
                         rsp =>
                         {
                             if (message.Callback != null)
                             {
-                                message.Callback(
-                                    rsp.Exception != null
-                                        ? new FirebaseError(rsp.Exception.Message)
-                                        : null);
+                                var error = rsp.Exception != null
+                                    ? new FirebaseError(rsp.Exception.Message)
+                                    : rsp.IsCanceled
+                                        ? new FirebaseError("Canceled")
+                                        : null;
+                                message.Callback(error);
                             }
                         }, TaskContinuationOptions.NotOnCanceled).ConfigureAwait(false);
                 }
@@ -77,6 +83,11 @@ namespace FirebaseSharp.Portable
 
         private HttpMethod GetMethod(FirebaseMessage message)
         {
+            if (message.Value == null)
+            {
+                return HttpMethod.Delete;
+            }
+
             switch (message.Behavior)
             {
                 case WriteBehavior.Merge:
@@ -182,7 +193,8 @@ namespace FirebaseSharp.Portable
                     new FirebaseEventReceivedEventArgs(new FirebaseMessage(behavior, 
                         new FirebasePath(result["path"].ToString()),
                         dataValue, 
-                        null));
+                        null,
+                        MessageSouce.Remote));
 
                 callback(this, args);
             }

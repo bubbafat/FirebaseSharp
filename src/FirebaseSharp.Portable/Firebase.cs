@@ -85,12 +85,12 @@ namespace FirebaseSharp.Portable
             return CreateQuery().EndAt(endingValue);
         }
 
-        public IOrderableQueryExecutor EqualTo(string value)
+        public IFirebaseQueryExecutorAny EqualTo(string value)
         {
             return CreateQuery().EqualTo(value);
         }
 
-        public IOrderableQueryExecutor EqualTo(long value)
+        public IFirebaseQueryExecutorAny EqualTo(long value)
         {
             return CreateQuery().EqualTo(value);
         }
@@ -146,6 +146,11 @@ namespace FirebaseSharp.Portable
             _app.Set(_path, value, callback);
         }
 
+        public void Set(object value, FirebaseStatusCallback callback = null)
+        {
+            _app.Set(_path, value, callback);
+        }
+
         public void Update(string value, FirebaseStatusCallback callback = null)
         {
             _app.Update(_path, value, callback);
@@ -157,6 +162,11 @@ namespace FirebaseSharp.Portable
         }
 
         public IFirebase Push(string value, FirebaseStatusCallback callback = null)
+        {
+            return Child(_app.Push(_path, value, callback));
+        }
+
+        public IFirebase Push(object value, FirebaseStatusCallback callback = null)
         {
             return Child(_app.Push(_path, value, callback));
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -7,45 +8,36 @@ namespace FirebaseSharp.Portable
 {
     internal class BlockingQueue<T>
     {
-        private readonly Queue<T> _queue = new Queue<T>();
-        private readonly SemaphoreSlim _semaphone = new SemaphoreSlim(1, 1);
-        private readonly ManualResetEvent _available = new ManualResetEvent(false);
+        private readonly BlockingCollection<T> _queue = new BlockingCollection<T>(new ConcurrentQueue<T>());
 
         public void Enqueue(CancellationToken cancel, T item)
         {
-            _semaphone.Wait(cancel);
-            try
+            int attempts = 0;
+            while (attempts++ < 10)
             {
-                _queue.Enqueue(item);
-                _available.Set();
+                if (_queue.TryAdd(item, -1, cancel))
+                {
+                    return;
+                }
             }
-            finally
-            {
-                _semaphone.Release();
-            }
+
+            throw new Exception("Unable to enqueue the item");
         }
 
         public T Dequeue(CancellationToken cancel)
         {
-            while (true)
+            int attempts = 0;
+            while (attempts++ < 10)
             {
-                _semaphone.Wait(cancel);
-                try
-                {
-                    if (_queue.Any())
-                    {
-                        return _queue.Dequeue();
-                    }
+                T item;
 
-                    _available.Reset();
-                }
-                finally
+                if (_queue.TryTake(out item, -1, cancel))
                 {
-                    _semaphone.Release();
+                    return item;
                 }
-
-                _available.WaitOne(TimeSpan.FromSeconds(1));
             }
+
+            throw new Exception("Unable to dequeue the item");
         }
     }
 }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using FirebaseSharp.Portable.Interfaces;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
@@ -29,31 +31,34 @@ namespace FirebaseSharp.Portable
         }
         public IDataSnapshot Child(string childName)
         {
-            JToken child = _token;
+            JToken next = _token;
 
-            if (_token != null)
+            if (next != null)
             {
                 foreach (string childPath in new FirebasePath(childName).Segments)
                 {
-                    if (child == null)
-                    {
-                        break;
-                    }
-
-                    switch (child.Type)
+                    switch (next.Type)
                     {
                         case JTokenType.Property:
-                            JProperty prop = (JProperty) child;
-                            child = prop.Name == childPath ? prop : null;
+                            JProperty prop = (JProperty) next;
+                            next = prop.Name == childPath ? prop : null;
                             break;
                         case JTokenType.Object:
-                            child = child[childPath];
+                            next = next[childPath];
                             break;
+                        default:
+                            next = null;
+                            break;
+                    }
+
+                    if (next == null)
+                    {
+                        break;
                     }
                 }
             }
 
-            return new DataSnapshot(_app, _path.Child(childName), child);
+            return new DataSnapshot(_app, _path.Child(childName), next);
         }
 
         public IEnumerable<IDataSnapshot> Children
@@ -149,11 +154,9 @@ namespace FirebaseSharp.Portable
         }
         public string Key { get { return _path.Key; } }
 
-        public T Value<T>() where T: struct
+        public T Value<T>()
         {
-            string value = GetValueString();
-
-            return (T)Convert.ChangeType(value, typeof(T));
+            return JsonConvert.DeserializeObject<T>(GetValueString());
         }
 
         public string Value()

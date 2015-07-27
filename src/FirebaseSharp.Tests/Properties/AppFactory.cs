@@ -20,7 +20,7 @@ namespace FirebaseSharp.Tests
             var connection = A.Fake<IFirebaseNetworkConnection>();
             A.CallTo(() => connection.Connect()).Invokes(() =>
             {
-                var msg = new FirebaseMessage(WriteBehavior.Replace, new FirebasePath(), json, null);
+                var msg = new FirebaseMessage(WriteBehavior.Replace, new FirebasePath(), json, null, MessageSouce.Remote);
                 var args = new FirebaseEventReceivedEventArgs(msg);
 
                 // do it on a separate thread to make sure we don't ignore

@@ -7,8 +7,8 @@ namespace FirebaseSharp.Portable.Interfaces
         IFirebaseQueryExecutorAny StartAt(long startingValue);
         IOrderableQueryExecutor EndAt(string endingValue);
         IOrderableQueryExecutor EndAt(long endingValue);
-        IOrderableQueryExecutor EqualTo(string value);
-        IOrderableQueryExecutor EqualTo(long value);
+        IFirebaseQueryExecutorAny EqualTo(string value);
+        IFirebaseQueryExecutorAny EqualTo(long value);
         IOrderableQueryExecutor LimitToFirst(int limit);
         IOrderableQueryExecutor LimitToLast(int limit);
     }

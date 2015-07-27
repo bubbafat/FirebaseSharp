@@ -49,7 +49,7 @@ namespace FirebaseSharp.Portable
 
         public EventHandler<JsonCacheUpdateEventArgs> Changed;
 
-        public DataSnapshot SnapFor(FirebasePath path)
+        internal DataSnapshot SnapFor(FirebasePath path)
         {
             lock (_lock)
             {
@@ -66,25 +66,32 @@ namespace FirebaseSharp.Portable
 
         private void ConnectionOnReceived(object sender, FirebaseEventReceivedEventArgs e)
         {
-            switch (e.Message.Behavior)
-            {
-                case WriteBehavior.Replace:
-                    Set(e.Message);
-                    DrainInitialQueue();
-                    break;
-                case WriteBehavior.Merge:
-                    Update(e.Message);
-                    break;
-            }
+            UpdateLocal(e.Message);
+            DrainInitialQueue();
         }
 
         private void DrainInitialQueue()
         {
-            _initialReceive = true;
-            while (_initialSubscriptions.Any())
+            bool runDrain = false;
+            if (false == _initialReceive)
             {
-                var sub = _initialSubscriptions.Dequeue();
-                sub.Process(this);
+                lock (_lock)
+                {
+                    if (false == _initialReceive)
+                    {
+                        _initialReceive = true;
+                        runDrain = true;
+                    }
+                }
+            }
+
+            if (runDrain)
+            {
+                while (_initialSubscriptions.Any())
+                {
+                    var sub = _initialSubscriptions.Dequeue();
+                    sub.Process(this);
+                }
             }
         }
 
@@ -95,20 +102,25 @@ namespace FirebaseSharp.Portable
                 : new JValue(value);
         }
 
+        public void Set(FirebasePath path, object data, FirebaseStatusCallback callback)
+        {
+            string strData = JToken.FromObject(data).ToString(Formatting.None);
+            Set(path, strData, callback);
+        }
+
         public void Set(FirebasePath path, string data, FirebaseStatusCallback callback)
         {
-            Set(path, data, null, callback);
+            Set(path, data, null, callback, MessageSouce.Local);
         }
 
-        private void Set(FirebasePath path, string data, FirebasePriority priority, FirebaseStatusCallback callback)
+        private void Set(FirebasePath path, string data, FirebasePriority priority, FirebaseStatusCallback callback, MessageSouce source)
         {
-            var message = new FirebaseMessage(WriteBehavior.Replace, path, data, priority, callback);
+            var message = new FirebaseMessage(WriteBehavior.Replace, path, data, priority, callback, source);
 
-            Set(message);
-            QueueUpdate(message);
+            UpdateLocal(message);
         }
 
-        private void Set(FirebaseMessage message)
+        private void UpdateLocal(FirebaseMessage message)
         {
             if (message.Value == null)
             {
@@ -117,26 +129,32 @@ namespace FirebaseSharp.Portable
             else
             {
                 JToken newData = CreateToken(message.Value);
-                if (message.Priority != null)
-                {
-                    newData[".priority"] = new JValue(message.Priority.JsonValue);
-                }
 
-                lock (_lock)
+
+                if (message.Behavior == WriteBehavior.Merge)
                 {
-                    JToken found;
-                    if (TryGetChild(message.Path, out found))
+                    Merge(message.Path, newData);
+                }
+                else
+                {
+                    if (message.Behavior == WriteBehavior.Replace)
                     {
-                        Replace(found, newData);
+                        if (message.Priority != null)
+                        {
+                            newData[".priority"] = new JValue(message.Priority.JsonValue);
+                        }
                     }
-                    else
-                    {
-                        InsertAt(message.Path, newData);
-                    }
+
+                    InsertAt(message.Path, newData);
                 }
             }
 
             OnChanged(message);
+
+            if (message.Source == MessageSouce.Local)
+            {
+                QueueUpdate(message);
+            }
         }
 
         private void QueueUpdate(FirebaseMessage firebaseMessage)
@@ -144,26 +162,17 @@ namespace FirebaseSharp.Portable
             _connection.Send(firebaseMessage);
         }
 
-        private void Replace(JToken found, JToken newData)
+        public string Push(FirebasePath path, object data, FirebaseStatusCallback callback)
         {
-            if (!UpdateValues(found, newData))
+            string json = null;
+            if (data != null)
             {
-                if (found.Parent != null)
-                {
-                    found.Replace(newData);
-                }
-                else
-                {
-                    JObject newObj = newData as JObject;
-                    if (newObj == null)
-                    {
-                        throw new Exception("Root object must be a JSON object type - illegal type: " + newData.Type);
-                    }
-
-                    _root = newObj;
-                }
+                json = JToken.FromObject(data).ToString();
             }
+
+            return Push(path, json, callback);
         }
+
 
         public string Push(FirebasePath path, string data, FirebaseStatusCallback callback)
         {
@@ -179,37 +188,9 @@ namespace FirebaseSharp.Portable
 
         public void Update(FirebasePath path, string data, FirebaseStatusCallback callback)
         {
-            var message = new FirebaseMessage(WriteBehavior.Merge, path, data, callback);
+            var message = new FirebaseMessage(WriteBehavior.Merge, path, data, callback, MessageSouce.Local);
 
-            Update(message);
-            QueueUpdate(message);
-        }
-
-        private void Update(FirebaseMessage message)
-        {
-            if (message.Value == null)
-            {
-                Delete(message.Path);
-            }
-            else
-            {
-                JToken newData = CreateToken(message.Value);
-
-                lock (_lock)
-                {
-                    JToken found;
-                    if (TryGetChild(message.Path, out found))
-                    {
-                        Merge(message.Path, found, newData);
-                    }
-                    else
-                    {
-                        InsertAt(message.Path, newData);
-                    }
-                }
-            }
-
-            OnChanged(message);
+            UpdateLocal(message);
         }
 
         private void OnChanged(FirebaseMessage message)
@@ -314,19 +295,27 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        private void Merge(FirebasePath root, JToken target, JToken newData)
+        private void Merge(FirebasePath root, JToken newData)
         {
-            if (!UpdateValues(target, newData))
+            JToken found;
+            if (TryGetChild(root, out found))
             {
-                foreach (var newChild in newData.Children())
+                if (!UpdateValues(found, newData))
                 {
-                    if (DeleteFromTarget(root, newData, newChild.Path))
+                    foreach (var newChild in newData.Children())
                     {
-                        continue;
-                    }
+                        if (DeleteFromTarget(root, newData, newChild.Path))
+                        {
+                            continue;
+                        }
 
-                    InsertAt(root.Child(newChild.Path), newChild);
-                }
+                        InsertAt(root.Child(newChild.Path), newChild);
+                    }
+                }                
+            }
+            else
+            {
+                InsertAt(root, newData);
             }
         }
 
@@ -404,7 +393,7 @@ namespace FirebaseSharp.Portable
 
         internal void SetWithPriority(FirebasePath path, string value, FirebasePriority priority, FirebaseStatusCallback callback)
         {
-            Set(path, value, priority, callback);
+            Set(path, value, priority, callback, MessageSouce.Local);
         }
     }
 }

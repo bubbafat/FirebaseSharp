@@ -85,12 +85,12 @@ namespace FirebaseSharp.Portable
                 return;
             }
 
-            foreach (var child in snap)
+            foreach (JProperty child in snap.Children<JProperty>())
             {
                 var previous = last[child.Path];
                 if (!JToken.DeepEquals(child, previous))
                 {
-                    Fire(Path.Child(child.Path), child);
+                    Fire(Path.Child(child.Name), child.Value);
                 }
             }
         }
@@ -125,17 +125,17 @@ namespace FirebaseSharp.Portable
                 return;
             }
 
-            foreach (var child in snap)
+            foreach (JProperty child in snap.Children<JProperty>())
             {
                 if (last == null)
                 {
-                    Fire(Path.Child(child.Path), child);
+                    Fire(Path.Child(child.Name), child.Value);
                 }
                 else
                 {
                     if (last[child.Path] == null)
                     {
-                        Fire(Path.Child(child.Path), child);
+                        Fire(Path.Child(child.Name), child.Value);
                     }
                 }
             }
@@ -186,7 +186,8 @@ namespace FirebaseSharp.Portable
                 }
             }
 
-            callback(new DataSnapshot(_app, path, state), null, Context);
+
+            _app.Fire(callback, new DataSnapshot(_app, path, state), Context);
         }
     }
 }

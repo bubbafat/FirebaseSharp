@@ -95,13 +95,13 @@ namespace FirebaseSharp.Portable.Filters
             return this;
         }
 
-        public IOrderableQueryExecutor EqualTo(string value)
+        public IFirebaseQueryExecutorAny EqualTo(string value)
         {
             _filters.Add(new EqualToFilter<string>(value));
             return this;
         }
 
-        public IOrderableQueryExecutor EqualTo(long value)
+        public IFirebaseQueryExecutorAny EqualTo(long value)
         {
             _filters.Add(new EqualToFilter<long>(value));
             return this;

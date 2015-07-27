@@ -30,9 +30,12 @@ namespace FirebaseSharp.Portable
                 Path = path,
             };
 
-            lock (_lock)
+            if (!once)
             {
-                _subscriptions.Add(sub);
+                lock (_lock)
+                {
+                    _subscriptions.Add(sub);
+                }
             }
 
             _syncDb.ExecuteInitial(sub);

@@ -1,16 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
+using System.Threading;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Subscriptions;
+using Newtonsoft.Json;
 
 namespace FirebaseSharp.Portable
 {
+    public static class ServerValue
+    {
+        public static ServerTimestamp TIMESTAMP
+        {
+            get { return new ServerTimestamp(); }
+        }
+
+        public class ServerTimestamp
+        {
+            [JsonProperty(PropertyName = ".sv")] 
+            public string Timestamp = "timestamp";
+        }
+    }
     public sealed class FirebaseApp : IFirebaseApp
     {
         private readonly Uri _rootUri;
         private readonly SyncDatabase _cache;
         private readonly SubscriptionDatabase _subscriptions;
+        private readonly SubscriptionProcessor _subProcessor;
+        private readonly CancellationTokenSource _shutdownToken = new CancellationTokenSource();
 
         internal FirebaseApp(Uri rootUri, IFirebaseNetworkConnection connection)
         {
@@ -18,6 +35,7 @@ namespace FirebaseSharp.Portable
             _cache = new SyncDatabase(this, connection);
             _cache.Changed += FireChangeEvents;
             _subscriptions = new SubscriptionDatabase(this, _cache);
+            _subProcessor = new SubscriptionProcessor(_shutdownToken.Token);
             GoOnline();
         }
 
@@ -27,6 +45,7 @@ namespace FirebaseSharp.Portable
             _cache = new SyncDatabase(this, new FirebaseNetworkConnection(root, auth));
             _cache.Changed += FireChangeEvents;
             _subscriptions = new SubscriptionDatabase(this, _cache);
+            _subProcessor = new SubscriptionProcessor(_shutdownToken.Token);
             GoOnline();
         }
 
@@ -73,12 +92,22 @@ namespace FirebaseSharp.Portable
             _cache.Set(path, value, callback);
         }
 
+        internal void Set(FirebasePath path, object value, FirebaseStatusCallback callback)
+        {
+            _cache.Set(path, value, callback);
+        }
+
         internal void Update(FirebasePath path, string value, FirebaseStatusCallback callback)
         {
             _cache.Update(path, value, callback);
         }
 
         internal string Push(FirebasePath path, string value, FirebaseStatusCallback callback)
+        {
+            return _cache.Push(path, value, callback);
+        }
+
+        internal string Push(FirebasePath path, object value, FirebaseStatusCallback callback)
         {
             return _cache.Push(path, value, callback);
         }
@@ -100,7 +129,9 @@ namespace FirebaseSharp.Portable
 
         public void Dispose()
         {
+            _shutdownToken.Cancel();
             using (_cache) { }
+            using (_shutdownToken) { }
         }
 
         internal void SetPriority(FirebasePath _path, FirebasePriority priority, FirebaseStatusCallback callback)
@@ -111,6 +142,11 @@ namespace FirebaseSharp.Portable
         internal void SetWithPriority(FirebasePath _path, string value, FirebasePriority priority, FirebaseStatusCallback callback)
         {
             _cache.SetWithPriority(_path, value, priority, callback);
+        }
+
+        internal void Fire(SnapshotCallback callback, DataSnapshot snap, object context)
+        {
+            _subProcessor.Add(callback, snap, context);
         }
     }
 }

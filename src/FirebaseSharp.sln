@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HackerNewsUpdatesCLI", "spi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Weather", "..\samples\Weather\Weather.csproj", "{E7ED8A9E-53B3-430C-ACC2-8E532D50EED3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PriorityQueue", "PriorityQueue\PriorityQueue.csproj", "{37E8F625-C9C9-433C-B42D-9E6CD70798DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{E7ED8A9E-53B3-430C-ACC2-8E532D50EED3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7ED8A9E-53B3-430C-ACC2-8E532D50EED3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7ED8A9E-53B3-430C-ACC2-8E532D50EED3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37E8F625-C9C9-433C-B42D-9E6CD70798DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37E8F625-C9C9-433C-B42D-9E6CD70798DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37E8F625-C9C9-433C-B42D-9E6CD70798DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37E8F625-C9C9-433C-B42D-9E6CD70798DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,5 +80,6 @@ Global
 		{23442CE1-BCCC-493F-A509-30030F2C07B4} = {D7E69653-D896-41D7-A12E-A75DD5E1EEAD}
 		{55AA1C41-3693-4121-935C-C8A65BB91BA7} = {D7E69653-D896-41D7-A12E-A75DD5E1EEAD}
 		{E7ED8A9E-53B3-430C-ACC2-8E532D50EED3} = {A151D3F1-B7B8-4B5E-99AB-3D149B66EC9F}
+		{37E8F625-C9C9-433C-B42D-9E6CD70798DD} = {A151D3F1-B7B8-4B5E-99AB-3D149B66EC9F}
 	EndGlobalSection
 EndGlobal
