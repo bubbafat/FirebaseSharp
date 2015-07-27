@@ -40,6 +40,9 @@ namespace FirebaseSharp.Portable
         {
             _app = app;
             _root = new JObject();
+            _root[".data"] = new JObject();
+            _root[".info"] = new JObject();
+            ((JObject)_root[".info"]).Add("connected", false);
 
             _connection = connection;
             _connection.Received += ConnectionOnReceived;
@@ -214,7 +217,7 @@ namespace FirebaseSharp.Portable
                     }
                     else
                     {
-                        _root = new JObject();
+                        _root[".data"] = new JObject();
                     }
                 }
             }
@@ -224,7 +227,7 @@ namespace FirebaseSharp.Portable
         {
             lock (_lock)
             {
-                return _root.ToString(Formatting.None);
+                return _root[".data"].ToString(Formatting.None);
             }
         }
 
@@ -251,7 +254,7 @@ namespace FirebaseSharp.Portable
 
             if (segments.Length > 0)
             {
-                JToken node = _root;
+                JToken node = _root[".data"];
 
                 for (int i = 0; i < segments.Length - 1; i++)
                 {
@@ -292,7 +295,7 @@ namespace FirebaseSharp.Portable
                     throw new Exception("Root object must be a JSON object type - illegal type: " + newData.Type);
                 }
 
-                _root = newObj;
+                _root[".data"] = newObj;
             }
         }
 
@@ -333,7 +336,14 @@ namespace FirebaseSharp.Portable
 
         private bool TryGetChild(FirebasePath path, out JToken node)
         {
-            node = _root;
+            if (!path.IsRoot && path.Segments.First() == ".info")
+            {
+                node = _root;
+            }
+            else
+            {
+                node = _root[".data"];
+            }
 
             if (node != null)
             {
@@ -361,11 +371,15 @@ namespace FirebaseSharp.Portable
         internal void GoOnline()
         {
             _connection.Connect();
+            _root[".info"]["connected"] = true;
+            OnChanged(new FirebaseMessage(WriteBehavior.Replace, new FirebasePath(".info"), "{connected: true}", null, null, MessageSouce.Local ));
         }
 
         internal void GoOffline()
         {
             _connection.Disconnect();
+            _root[".info"]["connected"] = false;
+            OnChanged(new FirebaseMessage(WriteBehavior.Replace, new FirebasePath(".info"), "{connected: false}", null, null, MessageSouce.Local));
         }
 
         public void Dispose()

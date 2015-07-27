@@ -88,6 +88,7 @@
     <Compile Include="Firebase\Parent.cs" />
     <Compile Include="Firebase\Root.cs" />
     <Compile Include="Firebase\ToString.cs" />
+    <Compile Include="Firebase\ConnectedTests.cs" />
     <Compile Include="Properties\AppFactory.cs" />
     <Compile Include="Filter\LimitToFirstTests.cs" />
     <Compile Include="Firebase\Query.cs" />
