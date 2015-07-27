@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FirebaseSharp.Portable.Filters
 {
-    class FirebaseKeySorter : IComparer<string>
+    internal class FirebaseKeySorter : IComparer<string>
     {
         public int Compare(string x, string y)
         {

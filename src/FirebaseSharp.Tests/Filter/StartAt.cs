@@ -32,19 +32,19 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", 1, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test1", 2, new[] { "keyBBB", "keyCCC" });
-            RunTest(json, "test1", 3, new[] { "keyCCC" });
+            RunTest(json, "test1", 1, new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test1", 2, new[] {"keyBBB", "keyCCC"});
+            RunTest(json, "test1", 3, new[] {"keyCCC"});
             RunTest(json, "test1", 4, new string[0]);
 
-            RunTest(json, "test2", 1, new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test2", 1, new[] {"keyAAA", "keyBBB", "keyCCC"});
             RunTest(json, "test2", 2, new string[0]);
             RunTest(json, "test2", 3, new string[0]);
             RunTest(json, "test2", 4, new string[0]);
 
-            RunTest(json, "test3", 1, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", 2, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", 3, new[] { "keyCCC" });
+            RunTest(json, "test3", 1, new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test3", 2, new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test3", 3, new[] {"keyCCC"});
             RunTest(json, "test3", 4, new string[0]);
         }
 
@@ -71,19 +71,19 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", "a", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test1", "b", new[] { "keyBBB", "keyCCC" });
-            RunTest(json, "test1", "c", new[] { "keyCCC" });
+            RunTest(json, "test1", "a", new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test1", "b", new[] {"keyBBB", "keyCCC"});
+            RunTest(json, "test1", "c", new[] {"keyCCC"});
             RunTest(json, "test1", "d", new string[0]);
 
-            RunTest(json, "test2", "a", new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test2", "a", new[] {"keyAAA", "keyBBB", "keyCCC"});
             RunTest(json, "test2", "b", new string[0]);
             RunTest(json, "test2", "c", new string[0]);
             RunTest(json, "test2", "d", new string[0]);
 
-            RunTest(json, "test3", "a", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", "b", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", "c", new[] { "keyCCC" });
+            RunTest(json, "test3", "a", new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test3", "b", new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test3", "c", new[] {"keyCCC"});
             RunTest(json, "test3", "d", new string[0]);
         }
 
@@ -112,7 +112,7 @@ namespace FirebaseSharp.Tests.Filter
 
                 Assert.IsTrue(fired.WaitOne(TimeSpan.FromSeconds(5)), "callback did not fire during " + testName);
             }
-        } 
+        }
 
         private void RunTest(string json, string testName, long startAt, string[] expectedOrder)
         {
@@ -139,6 +139,6 @@ namespace FirebaseSharp.Tests.Filter
 
                 Assert.IsTrue(fired.WaitOne(TimeSpan.FromSeconds(5)), "callback did not fire during " + testName);
             }
-        } 
+        }
     }
 }

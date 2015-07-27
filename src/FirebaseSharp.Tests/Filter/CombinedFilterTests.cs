@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using FirebaseSharp.Portable;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,18 +22,19 @@ namespace FirebaseSharp.Tests.Filter
                     new Tuple<string, int>("pterodactyl", 93),
                 };
 
-                List<Tuple<string,int>> actual = new List<Tuple<string, int>>();
+                List<Tuple<string, int>> actual = new List<Tuple<string, int>>();
 
                 ManualResetEvent loaded = new ManualResetEvent(false);
 
                 var fbRef = app.Child("/scores")
-                    .OrderByValue<int>()
+                    .OrderByValue()
                     .LimitToLast(expected.Count)
                     .On("value", (snap, childPath, context) =>
                     {
                         Assert.IsTrue(snap.HasChildren);
                         Assert.AreEqual(expected.Count, snap.NumChildren);
-                        actual.AddRange(snap.Children.Select(child => new Tuple<string, int>(child.Key, child.Value<int>())));
+                        actual.AddRange(
+                            snap.Children.Select(child => new Tuple<string, int>(child.Key, child.Value<int>())));
                         loaded.Set();
                     });
 

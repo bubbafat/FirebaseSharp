@@ -2,7 +2,7 @@
 
 namespace FirebaseSharp.Portable.Messages
 {
-    enum WriteBehavior
+    internal enum WriteBehavior
     {
         None,
         Replace,
@@ -10,20 +10,22 @@ namespace FirebaseSharp.Portable.Messages
         Push,
     }
 
-    enum MessageSouce
+    internal enum MessageSouce
     {
         Local,
         Remote
     }
 
-    class FirebaseMessage
+    internal class FirebaseMessage
     {
-        public FirebaseMessage(WriteBehavior behavior, FirebasePath path, string value, FirebaseStatusCallback callback, MessageSouce source)
+        public FirebaseMessage(WriteBehavior behavior, FirebasePath path, string value, FirebaseStatusCallback callback,
+            MessageSouce source)
             : this(behavior, path, value, null, callback, source)
         {
         }
 
-        public FirebaseMessage(WriteBehavior behavior, FirebasePath path, string value, FirebasePriority priority, FirebaseStatusCallback callback, MessageSouce source)
+        public FirebaseMessage(WriteBehavior behavior, FirebasePath path, string value, FirebasePriority priority,
+            FirebaseStatusCallback callback, MessageSouce source)
         {
             Behavior = behavior;
             Path = path;
@@ -32,7 +34,8 @@ namespace FirebaseSharp.Portable.Messages
             Priority = priority;
             Source = source;
         }
-        public WriteBehavior Behavior {get; private set;}
+
+        public WriteBehavior Behavior { get; private set; }
         public FirebasePath Path { get; private set; }
         public string Value { get; private set; }
         public FirebaseStatusCallback Callback { get; private set; }

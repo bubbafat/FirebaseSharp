@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
 {
-    class FirebaseNetworkConnection : IFirebaseNetworkConnection
+    internal class FirebaseNetworkConnection : IFirebaseNetworkConnection
     {
         private readonly object _lock = new object();
         private bool _connected;
@@ -22,6 +22,7 @@ namespace FirebaseSharp.Portable
         private Task _sendTask;
         private Task _receiveTask;
         private readonly string _authToken;
+
         public FirebaseNetworkConnection(Uri root, string authToken = null)
         {
             _root = root;
@@ -39,7 +40,7 @@ namespace FirebaseSharp.Portable
                     var message = _sendQueue.Dequeue(cancel);
 
                     HttpRequestMessage request = new HttpRequestMessage(GetMethod(message), GetUri(message.Path));
-                    
+
                     if (!string.IsNullOrEmpty(message.Value))
                     {
                         request.Content = new StringContent(message.Value);
@@ -170,7 +171,6 @@ namespace FirebaseSharp.Portable
             }
             catch (OperationCanceledException)
             {
-                
             }
         }
 
@@ -185,14 +185,14 @@ namespace FirebaseSharp.Portable
             if (callback != null)
             {
                 JObject result = JObject.Parse(data);
-                string dataValue = result["data"].Type == JTokenType.Null 
-                    ? null 
+                string dataValue = result["data"].Type == JTokenType.Null
+                    ? null
                     : result["data"].ToString();
 
                 var args =
-                    new FirebaseEventReceivedEventArgs(new FirebaseMessage(behavior, 
+                    new FirebaseEventReceivedEventArgs(new FirebaseMessage(behavior,
                         new FirebasePath(result["path"].ToString()),
-                        dataValue, 
+                        dataValue,
                         null,
                         MessageSouce.Remote));
 
@@ -206,6 +206,7 @@ namespace FirebaseSharp.Portable
         }
 
         public event EventHandler<FirebaseEventReceivedEventArgs> Received;
+
         public void Disconnect()
         {
             lock (_lock)
@@ -248,9 +249,15 @@ namespace FirebaseSharp.Portable
         public void Dispose()
         {
             Disconnect();
-            using (_client) {  }
-            using (_cancelSource) { }
-            using (_sendQueue) { }
+            using (_client)
+            {
+            }
+            using (_cancelSource)
+            {
+            }
+            using (_sendQueue)
+            {
+            }
         }
     }
 }

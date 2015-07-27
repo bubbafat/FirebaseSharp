@@ -5,7 +5,7 @@ using FirebaseSharp.Portable.Subscriptions;
 
 namespace FirebaseSharp.Portable.Filters
 {
-    class FirebaseQuery : IFirebaseQueryExecutorAny, IFirebaseReadonlyQuery
+    internal class FirebaseQuery : IFirebaseQueryExecutorAny, IFirebaseReadonlyQuery
     {
         private readonly FirebaseApp _app;
         private Guid _queryId;
@@ -35,7 +35,8 @@ namespace FirebaseSharp.Portable.Filters
             _app.Unsubscribe(_queryId);
         }
 
-        public IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null)
+        public IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback,
+            FirebaseStatusCallback cancelledCallback = null)
         {
             return Once(eventName, callback, null, cancelledCallback);
         }
@@ -59,9 +60,9 @@ namespace FirebaseSharp.Portable.Filters
             return this;
         }
 
-        public IFilterableQueryExecutor OrderByValue<T>()
+        public IFilterableQueryExecutor OrderByValue()
         {
-            _filters.Add(new OrderByValueFilter<T>());
+            _filters.Add(new OrderByValueFilter());
             return this;
         }
 

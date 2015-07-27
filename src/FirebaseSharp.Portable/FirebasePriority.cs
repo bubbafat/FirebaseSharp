@@ -44,7 +44,6 @@ namespace FirebaseSharp.Portable
                     }
                     else
                     {
-
                         Type = PriorityType.String;
                         _sp = priority.Value<string>();
                     }
@@ -90,6 +89,7 @@ namespace FirebaseSharp.Portable
          *  they are sorted by key. Numeric keys come first (sorted numerically), 
          *  followed by the remaining keys (sorted lexicographically).
          */
+
         public int CompareTo(FirebasePriority other)
         {
             // Children with no priority (the default) come first.
@@ -101,7 +101,8 @@ namespace FirebaseSharp.Portable
                 }
 
                 return -1;
-            } else if (other.Type == PriorityType.None)
+            }
+            else if (other.Type == PriorityType.None)
             {
                 return 1;
             }

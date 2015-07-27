@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace FirebaseSharp.Portable
@@ -42,7 +40,9 @@ namespace FirebaseSharp.Portable
 
         public void Dispose()
         {
-            using (_queue) { }
+            using (_queue)
+            {
+            }
         }
     }
 }

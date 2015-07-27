@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using FakeItEasy;
 using FirebaseSharp.Portable;
 using FirebaseSharp.Portable.Interfaces;
@@ -12,12 +11,13 @@ using FirebaseSharp.Portable.Messages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 
-namespace FirebaseSharp.Tests.JsonCache 
+namespace FirebaseSharp.Tests.JsonCache
 {
     [TestClass]
     public class IntegrityTests
     {
         private readonly string _weather;
+
         public IntegrityTests()
         {
             _weather = LoadData("weather.json");
@@ -26,7 +26,8 @@ namespace FirebaseSharp.Tests.JsonCache
         private string LoadData(string fileName)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var name = assembly.GetManifestResourceNames().FirstOrDefault(n => n.EndsWith(string.Format(".{0}", fileName)));
+            var name =
+                assembly.GetManifestResourceNames().FirstOrDefault(n => n.EndsWith(string.Format(".{0}", fileName)));
 
             using (Stream stream = assembly.GetManifestResourceStream(name))
             using (StreamReader reader = new StreamReader(stream))
@@ -55,10 +56,7 @@ namespace FirebaseSharp.Tests.JsonCache
 
             using (var mre = new ManualResetEvent(false))
             {
-                jc.Set(new FirebasePath(), _weather, (error) =>
-                {
-                    mre.Set();
-                });
+                jc.Set(new FirebasePath(), _weather, (error) => { mre.Set(); });
 
                 Assert.IsTrue(mre.WaitOne(TimeSpan.FromSeconds(5)),
                     "Time out waiting for cache callback");
@@ -88,10 +86,7 @@ namespace FirebaseSharp.Tests.JsonCache
 
             using (var mre = new ManualResetEvent(false))
             {
-                jc.Update(new FirebasePath(), _weather, (error) =>
-                {
-                    mre.Set();
-                });
+                jc.Update(new FirebasePath(), _weather, (error) => { mre.Set(); });
 
                 Assert.IsTrue(mre.WaitOne(TimeSpan.FromSeconds(5)),
                     "Time out waiting for cache callback");
@@ -100,7 +95,6 @@ namespace FirebaseSharp.Tests.JsonCache
             Assert.IsTrue(JToken.DeepEquals(expected, JToken.Parse(jc.Dump())),
                 "The cache contents did not match the expected structure");
         }
-
 
 
         [TestMethod]
@@ -113,31 +107,26 @@ namespace FirebaseSharp.Tests.JsonCache
                         "/people/me",
                         "{\"name\": \"Robert\"}"),
                     "{\"people\": { \"me\": {\"name\": \"Robert\"}}}"),
-
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/me/name",
                         "Bob"),
                     "{\"people\": { \"me\": {\"name\": \"Bob\"}}}"),
-
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/you",
                         "{\"name\": \"Susan\"}"),
                     "{\"people\": { \"me\": {\"name\": \"Bob\"}, \"you\": {\"name\": \"Susan\"}}}"),
-
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/me/age",
                         "38"),
                     "{\"people\": { \"me\": {\"name\": \"Bob\", \"age\": \"38\"}, \"you\": {\"name\": \"Susan\"}}}"),
-
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/me",
                         "{\"name\": \"Bobby\"}"),
                     "{\"people\": { \"me\": {\"name\": \"Bobby\", \"age\": \"38\"}, \"you\": {\"name\": \"Susan\"}}}"),
-
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/",
@@ -150,19 +139,16 @@ namespace FirebaseSharp.Tests.JsonCache
                         "/people/me",
                         "{\"name\": null}"),
                     "{\"people\": { \"me\": { }, \"you\": {\"name\": \"Susan\"}}}"),
-
             };
 
             var client = A.Fake<IFirebaseNetworkConnection>();
-            A.CallTo(() => client.Send(A<FirebaseMessage>._)).Invokes((FirebaseMessage message) =>
-            {
-                message.Callback(null);
-            });
+            A.CallTo(() => client.Send(A<FirebaseMessage>._))
+                .Invokes((FirebaseMessage message) => { message.Callback(null); });
 
             var jc = new SyncDatabase(null, client);
             ManualResetEvent called = new ManualResetEvent(false);
 
-            foreach(var item in data)
+            foreach (var item in data)
             {
                 called.Reset();
                 string path = item.Item1.Item1;
@@ -190,50 +176,41 @@ namespace FirebaseSharp.Tests.JsonCache
                         "/people/me",
                         "{\"name\": \"Robert\"}"),
                     "{\"people\": { \"me\": {\"name\": \"Robert\"}}}"),
-
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/me/name",
                         "Bob"),
                     "{\"people\": { \"me\": {\"name\": \"Bob\"}}}"),
-
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/you",
                         "{\"name\": \"Susan\"}"),
                     "{\"people\": { \"me\": {\"name\": \"Bob\"}, \"you\": {\"name\": \"Susan\"}}}"),
-
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/me/age",
                         "38"),
                     "{\"people\": { \"me\": {\"name\": \"Bob\", \"age\": \"38\"}, \"you\": {\"name\": \"Susan\"}}}"),
-
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/me",
                         "{\"name\": \"Bobby\"}"),
                     "{\"people\": { \"me\": {\"name\": \"Bobby\" }, \"you\": {\"name\": \"Susan\"}}}"),
-
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/",
                         "{ \"me\": {\"name\": \"Bobert\"}}"),
                     "{\"people\": { \"me\": {\"name\": \"Bobert\" }}}"),
-
                 new Tuple<Tuple<string, string>, string>(
                     new Tuple<string, string>(
                         "/people/me/name",
                         null),
                     "{\"people\": { \"me\": {}}}"),
-
             };
 
             var client = A.Fake<IFirebaseNetworkConnection>();
-            A.CallTo(() => client.Send(A<FirebaseMessage>._)).Invokes((FirebaseMessage message) =>
-            {
-                message.Callback(null);
-            });
+            A.CallTo(() => client.Send(A<FirebaseMessage>._))
+                .Invokes((FirebaseMessage message) => { message.Callback(null); });
 
 
             var jc = new SyncDatabase(null, client);

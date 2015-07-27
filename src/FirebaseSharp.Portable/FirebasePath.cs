@@ -8,6 +8,7 @@ namespace FirebaseSharp.Portable
     {
         private readonly string[] _segments;
         private readonly string _normalized;
+
         public FirebasePath(string path = null)
         {
             if (string.IsNullOrWhiteSpace(path))
@@ -18,8 +19,8 @@ namespace FirebaseSharp.Portable
             else
             {
                 _segments = path.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries)
-                                .Select(s => s.Trim())
-                                .ToArray();
+                    .Select(s => s.Trim())
+                    .ToArray();
 
                 _normalized = String.Join("/", _segments);
             }
@@ -27,18 +28,12 @@ namespace FirebaseSharp.Portable
 
         public string Path
         {
-            get
-            {
-                return "/" + _normalized;
-            }
+            get { return "/" + _normalized; }
         }
 
         public Uri RelativeUri
         {
-            get
-            {
-                return new Uri(_normalized, UriKind.Relative);
-            }
+            get { return new Uri(_normalized, UriKind.Relative); }
         }
 
 
@@ -59,10 +54,7 @@ namespace FirebaseSharp.Portable
 
         public IEnumerable<string> Segments
         {
-            get
-            {
-                return _segments;
-            }
+            get { return _segments; }
         }
 
         public bool IsRoot
@@ -96,7 +88,7 @@ namespace FirebaseSharp.Portable
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
 
-            return Path == ((FirebasePath)obj).Path;
+            return Path == ((FirebasePath) obj).Path;
         }
 
         public override string ToString()

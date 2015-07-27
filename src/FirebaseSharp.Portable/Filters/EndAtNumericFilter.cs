@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using FirebaseSharp.Portable.Interfaces;
+﻿using System.Linq;
 using FirebaseSharp.Portable.Subscriptions;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable.Filters
 {
-    class EndAtNumericFilter : ISubscriptionFilter
+    internal class EndAtNumericFilter : ISubscriptionFilter
     {
         private readonly long _endingValue;
 
@@ -33,10 +29,10 @@ namespace FirebaseSharp.Portable.Filters
 
                     if (c.Value.Type == JTokenType.Object)
                     {
-                        var test = ((JObject)c.Value)[context.FilterColumn];
+                        var test = ((JObject) c.Value)[context.FilterColumn];
                         if (test is JProperty)
                         {
-                            test = ((JProperty)test).Value;
+                            test = ((JProperty) test).Value;
                         }
 
                         if (test != null && test.Type != JTokenType.Null)
@@ -60,7 +56,6 @@ namespace FirebaseSharp.Portable.Filters
                 {
                     result.Add(ordered);
                 }
-
             }
 
             return result;

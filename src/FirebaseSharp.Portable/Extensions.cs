@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 namespace FirebaseSharp.Portable
 {
-    static class Extensions
+    internal static class Extensions
     {
         public static Task<T> WithCancellation<T>(this Task<T> task, CancellationToken cancellationToken)
         {
@@ -19,6 +15,5 @@ namespace FirebaseSharp.Portable
                     TaskContinuationOptions.ExecuteSynchronously,
                     TaskScheduler.Default);
         }
-
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FirebaseSharp.Portable.Interfaces;
+﻿using System.Collections.Generic;
 
 namespace FirebaseSharp.Portable
 {
@@ -23,6 +17,5 @@ namespace FirebaseSharp.Portable
         string Value();
 
         IDataSnapshot this[string child] { get; }
-
     }
 }

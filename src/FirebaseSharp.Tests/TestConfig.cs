@@ -1,5 +1,4 @@
-﻿
-namespace FirebaseSharp.Tests
+﻿namespace FirebaseSharp.Tests
 {
     internal static class TestConfig
     {

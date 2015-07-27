@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using FirebaseSharp.Portable;
 
 namespace PriorityQueue
 {
-    class Program
+    internal class Program
     {
         private static void Main(string[] args)
         {
@@ -30,7 +26,7 @@ namespace PriorityQueue
 
         private static void Feeder(object queueObj)
         {
-            JobQueue<Job> queue = (JobQueue<Job>)queueObj;
+            JobQueue<Job> queue = (JobQueue<Job>) queueObj;
 
             Random rng = new Random();
 

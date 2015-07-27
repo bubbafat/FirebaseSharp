@@ -9,7 +9,7 @@ namespace FirebaseSharp.Portable
 {
     internal class Subscription
     {
-        private JToken _lastRead = null;
+        private JToken _lastRead;
 
         private readonly object _lock = new object();
         private readonly List<ISubscriptionFilter> _filters = new List<ISubscriptionFilter>();
@@ -170,7 +170,7 @@ namespace FirebaseSharp.Portable
         private void Fire(FirebasePath path, JToken state)
         {
             SnapshotCallback callback;
-            
+
             lock (_lock)
             {
                 callback = Callback;

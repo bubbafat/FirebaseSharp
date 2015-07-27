@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Subscriptions;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable.Filters
 {
-    class EqualToFilter<T> : ISubscriptionFilter
-        where T: IEquatable<T>
+    internal class EqualToFilter<T> : ISubscriptionFilter
+        where T : IEquatable<T>
     {
         private readonly T _value;
 
@@ -56,11 +53,9 @@ namespace FirebaseSharp.Portable.Filters
                 {
                     result.Add(ordered);
                 }
-
             }
 
             return result;
-
         }
     }
 }

@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using FirebaseSharp.Portable;
-using FirebaseSharp.Portable.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Tests.Filter
 {
@@ -23,7 +19,7 @@ namespace FirebaseSharp.Tests.Filter
 
                 ManualResetEvent fired = new ManualResetEvent(false);
                 var query = app.Child("/scores")
-                    .OrderByValue<int>()
+                    .OrderByValue()
                     .On("child_added", (snap, previous, context) =>
                     {
                         int current = snap.Value<int>();

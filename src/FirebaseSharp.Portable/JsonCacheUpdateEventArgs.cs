@@ -2,7 +2,7 @@ using System;
 
 namespace FirebaseSharp.Portable
 {
-    class JsonCacheUpdateEventArgs : EventArgs
+    internal class JsonCacheUpdateEventArgs : EventArgs
     {
         public JsonCacheUpdateEventArgs(FirebasePath path)
         {

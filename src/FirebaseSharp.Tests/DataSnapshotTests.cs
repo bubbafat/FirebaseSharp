@@ -24,7 +24,7 @@ namespace FirebaseSharp.Tests
 ";
             using (FirebaseApp app = AppFactory.FromJson(json))
             {
-                ManualResetEvent done= new ManualResetEvent(false);
+                ManualResetEvent done = new ManualResetEvent(false);
 
                 var query = app.Child("foo/bar/baz");
                 query.On("value", (snap, child, context) =>
@@ -35,7 +35,7 @@ namespace FirebaseSharp.Tests
                     // new ref should be at
                     // http://<app root>/foo/bar/baz
                     Assert.AreEqual(
-                        string.Format("{0}{1}", app.RootUri, "foo/bar/baz"), 
+                        string.Format("{0}{1}", app.RootUri, "foo/bar/baz"),
                         snap.Ref().AbsoluteUri.ToString());
 
                     var pipo = snap.Child("pipo");

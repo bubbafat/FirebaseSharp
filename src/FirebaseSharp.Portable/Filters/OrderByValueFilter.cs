@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using FirebaseSharp.Portable.Interfaces;
+﻿using System.Linq;
 using FirebaseSharp.Portable.Subscriptions;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable.Filters
 {
-    class OrderByValueFilter<T> : ISubscriptionFilter
+    internal class OrderByValueFilter : ISubscriptionFilter
     {
         public JToken Apply(JToken filtered, IFilterContext context)
         {
@@ -24,17 +20,14 @@ namespace FirebaseSharp.Portable.Filters
                         return c.Value;
                     }
 
-                    return (JObject)null;
+                    return (JObject) null;
                 }, new FirebaseValueSorter()))
                 {
                     result.Add(ordered);
                 }
-
             }
 
             return result;
-
-
         }
     }
 }

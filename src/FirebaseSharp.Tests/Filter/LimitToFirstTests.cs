@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Threading;
 using FirebaseSharp.Portable;
-using FirebaseSharp.Portable.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FirebaseSharp.Tests.Filter

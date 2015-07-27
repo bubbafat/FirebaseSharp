@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
 using FirebaseSharp.Portable.Filters;
 using FirebaseSharp.Portable.Interfaces;
-using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
 {
@@ -18,7 +15,7 @@ namespace FirebaseSharp.Portable
             _path = path;
         }
 
-        FirebaseQuery CreateQuery()
+        private FirebaseQuery CreateQuery()
         {
             return new FirebaseQuery(_app, _path);
         }
@@ -33,7 +30,8 @@ namespace FirebaseSharp.Portable
             return CreateQuery().On(eventName, callback, context);
         }
 
-        public IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback, FirebaseStatusCallback cancelledCallback = null)
+        public IFirebaseReadonlyQuery Once(string eventName, SnapshotCallback callback,
+            FirebaseStatusCallback cancelledCallback = null)
         {
             return CreateQuery().Once(eventName, callback, cancelledCallback);
         }
@@ -54,10 +52,9 @@ namespace FirebaseSharp.Portable
             return CreateQuery().OrderByKey();
         }
 
-        public IFilterableQueryExecutor OrderByValue<T>()
+        public IFilterableQueryExecutor OrderByValue()
         {
-
-            return CreateQuery().OrderByValue<T>();
+            return CreateQuery().OrderByValue();
         }
 
         public IFilterableQueryExecutor OrderByPriority()
@@ -138,7 +135,6 @@ namespace FirebaseSharp.Portable
         public Uri AbsoluteUri
         {
             get { return new Uri(_app.RootUri, _path.RelativeUri); }
-
         }
 
         public void Set(string value, FirebaseStatusCallback callback = null)

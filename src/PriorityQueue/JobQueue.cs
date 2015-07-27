@@ -7,9 +7,10 @@ namespace PriorityQueue
 {
     internal class QueueItem<T>
     {
-        public ServerValue.ServerTimestamp timestamp;
-        public T data;
+        public ServerValue.ServerTimestamp Timestamp;
+        public T Data;
     }
+
     internal sealed class JobQueue<T>
     {
         private readonly IFirebase _jobs;
@@ -25,13 +26,13 @@ namespace PriorityQueue
                 {
                     if (snap.Exists)
                     {
-                        if (snap["timestamp"][".sv"].Exists)
+                        if (snap["Timestamp"][".sv"].Exists)
                         {
                             // local version
                             return;
                         }
 
-                        T data = snap["data"].Value<T>();
+                        T data = snap["Data"].Value<T>();
 
                         try
                         {
@@ -53,8 +54,8 @@ namespace PriorityQueue
         {
             QueueItem<T> item = new QueueItem<T>
             {
-                data = job,
-                timestamp = ServerValue.TIMESTAMP,
+                Data = job,
+                Timestamp = ServerValue.TIMESTAMP,
             };
 
             IFirebase path = _jobs.Push();

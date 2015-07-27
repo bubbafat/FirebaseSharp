@@ -19,7 +19,8 @@ namespace FirebaseSharp.Portable
             _syncDb = syncDb;
         }
 
-        public Guid Subscribe(FirebasePath path, string eventName, SnapshotCallback callback, object context, bool once, IEnumerable<ISubscriptionFilter> filters)
+        public Guid Subscribe(FirebasePath path, string eventName, SnapshotCallback callback, object context, bool once,
+            IEnumerable<ISubscriptionFilter> filters)
         {
             var sub = new Subscription(_app, filters)
             {

@@ -270,9 +270,7 @@ namespace FirebaseSharp.Tests
                 });
 
                 Assert.IsTrue(called.WaitOne(TimeSpan.FromSeconds(5)), "callback was never fired");
-
             }
-        
         }
 
         [TestMethod]

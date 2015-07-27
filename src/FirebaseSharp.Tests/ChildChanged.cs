@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using FirebaseSharp.Portable;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Tests
 {
@@ -21,7 +20,9 @@ namespace FirebaseSharp.Tests
         [TestCleanup]
         public void TestCleanup()
         {
-            using (_app) { }
+            using (_app)
+            {
+            }
         }
 
         [TestMethod]
@@ -36,7 +37,7 @@ namespace FirebaseSharp.Tests
 
             ManualResetEvent done = new ManualResetEvent(false);
 
-            int[] counter = new []{ 0 };
+            int[] counter = new[] {0};
             var loc = _app.Child("/").On("child_changed", (snap, child, context) =>
             {
                 Assert.AreEqual("foo", snap.Key);

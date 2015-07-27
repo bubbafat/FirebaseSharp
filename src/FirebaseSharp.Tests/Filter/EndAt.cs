@@ -32,21 +32,21 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", 4, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test1", 3, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test1", 2, new[] { "keyAAA", "keyBBB" });
-            RunTest(json, "test1", 1, new[] { "keyAAA" });
+            RunTest(json, "test1", 4, new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test1", 3, new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test1", 2, new[] {"keyAAA", "keyBBB"});
+            RunTest(json, "test1", 1, new[] {"keyAAA"});
             RunTest(json, "test1", 0, new string[0]);
 
-            RunTest(json, "test2", 4, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test2", 3, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test2", 2, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test2", 1, new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test2", 4, new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test2", 3, new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test2", 2, new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test2", 1, new[] {"keyAAA", "keyBBB", "keyCCC"});
             RunTest(json, "test1", -1, new string[0]);
 
-            RunTest(json, "test3", 4, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", 3, new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", 2, new[] { "keyAAA", "keyBBB" });
+            RunTest(json, "test3", 4, new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test3", 3, new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test3", 2, new[] {"keyAAA", "keyBBB"});
             RunTest(json, "test3", 1, new string[0]);
         }
 
@@ -73,21 +73,21 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", "d", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test1", "c", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test1", "b", new[] { "keyAAA", "keyBBB" });
-            RunTest(json, "test1", "a", new[] { "keyAAA" });
+            RunTest(json, "test1", "d", new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test1", "c", new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test1", "b", new[] {"keyAAA", "keyBBB"});
+            RunTest(json, "test1", "a", new[] {"keyAAA"});
             RunTest(json, "test1", null, new string[0]);
 
-            RunTest(json, "test2", "d", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test2", "c", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test2", "b", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test2", "a", new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunTest(json, "test2", "d", new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test2", "c", new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test2", "b", new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test2", "a", new[] {"keyAAA", "keyBBB", "keyCCC"});
             RunTest(json, "test1", "$", new string[0]);
 
-            RunTest(json, "test3", "d", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", "c", new[] { "keyAAA", "keyBBB", "keyCCC" });
-            RunTest(json, "test3", "b", new[] { "keyAAA", "keyBBB" });
+            RunTest(json, "test3", "d", new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test3", "c", new[] {"keyAAA", "keyBBB", "keyCCC"});
+            RunTest(json, "test3", "b", new[] {"keyAAA", "keyBBB"});
             RunTest(json, "test3", "a", new string[0]);
         }
 
@@ -116,7 +116,7 @@ namespace FirebaseSharp.Tests.Filter
 
                 Assert.IsTrue(fired.WaitOne(TimeSpan.FromSeconds(5)), "callback did not fire during " + testName);
             }
-        } 
+        }
 
         private void RunTest(string json, string testName, long endAt, string[] expectedOrder)
         {
@@ -143,6 +143,6 @@ namespace FirebaseSharp.Tests.Filter
 
                 Assert.IsTrue(fired.WaitOne(TimeSpan.FromSeconds(5)), "callback did not fire during " + testName);
             }
-        } 
+        }
     }
 }

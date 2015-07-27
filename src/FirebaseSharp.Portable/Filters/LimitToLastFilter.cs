@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using FirebaseSharp.Portable.Interfaces;
+﻿using System.Linq;
 using FirebaseSharp.Portable.Subscriptions;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable.Filters
 {
-    class LimitToLastFilter : ISubscriptionFilter
+    internal class LimitToLastFilter : ISubscriptionFilter
     {
         private readonly int _limit;
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http.Headers;
 using System.Threading;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Subscriptions;
@@ -17,10 +16,10 @@ namespace FirebaseSharp.Portable
 
         public class ServerTimestamp
         {
-            [JsonProperty(PropertyName = ".sv")] 
-            public string Timestamp = "timestamp";
+            [JsonProperty(PropertyName = ".sv")] public string Timestamp = "timestamp";
         }
     }
+
     public sealed class FirebaseApp : IFirebaseApp
     {
         private readonly Uri _rootUri;
@@ -56,7 +55,7 @@ namespace FirebaseSharp.Portable
 
         internal Firebase Child(FirebasePath path)
         {
-            return new Firebase(this, path);   
+            return new Firebase(this, path);
         }
 
         public void GoOnline()
@@ -81,10 +80,7 @@ namespace FirebaseSharp.Portable
 
         internal Uri RootUri
         {
-            get
-            {
-                return _rootUri;
-            }
+            get { return _rootUri; }
         }
 
         internal void Set(FirebasePath path, string value, FirebaseStatusCallback callback)
@@ -112,7 +108,8 @@ namespace FirebaseSharp.Portable
             return _cache.Push(path, value, callback);
         }
 
-        internal Guid Subscribe(string eventName, FirebasePath path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters)
+        internal Guid Subscribe(string eventName, FirebasePath path, SnapshotCallback callback, object context,
+            IEnumerable<ISubscriptionFilter> filters)
         {
             return _subscriptions.Subscribe(path, eventName, callback, context, false, filters);
         }
@@ -122,7 +119,8 @@ namespace FirebaseSharp.Portable
             _subscriptions.Unsubscribe(queryId);
         }
 
-        internal Guid SubscribeOnce(string eventName, FirebasePath path, SnapshotCallback callback, object context, IEnumerable<ISubscriptionFilter> filters, FirebaseStatusCallback cancelledCallback)
+        internal Guid SubscribeOnce(string eventName, FirebasePath path, SnapshotCallback callback, object context,
+            IEnumerable<ISubscriptionFilter> filters, FirebaseStatusCallback cancelledCallback)
         {
             return _subscriptions.Subscribe(path, eventName, callback, context, true, filters);
         }
@@ -130,19 +128,26 @@ namespace FirebaseSharp.Portable
         public void Dispose()
         {
             _shutdownToken.Cancel();
-            using (_cache) { }
-            using (_shutdownToken) { }
-            using (_subProcessor) { }
+            using (_cache)
+            {
+            }
+            using (_shutdownToken)
+            {
+            }
+            using (_subProcessor)
+            {
+            }
         }
 
-        internal void SetPriority(FirebasePath _path, FirebasePriority priority, FirebaseStatusCallback callback)
+        internal void SetPriority(FirebasePath path, FirebasePriority priority, FirebaseStatusCallback callback)
         {
-            _cache.SetPriority(_path, priority, callback);
+            _cache.SetPriority(path, priority, callback);
         }
 
-        internal void SetWithPriority(FirebasePath _path, string value, FirebasePriority priority, FirebaseStatusCallback callback)
+        internal void SetWithPriority(FirebasePath path, string value, FirebasePriority priority,
+            FirebaseStatusCallback callback)
         {
-            _cache.SetWithPriority(_path, value, priority, callback);
+            _cache.SetWithPriority(path, value, priority, callback);
         }
 
         internal void Fire(SnapshotCallback callback, DataSnapshot snap, object context)

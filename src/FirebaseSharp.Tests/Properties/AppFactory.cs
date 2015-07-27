@@ -7,7 +7,7 @@ using FirebaseSharp.Portable.Messages;
 
 namespace FirebaseSharp.Tests
 {
-    static class AppFactory
+    internal static class AppFactory
     {
         internal static FirebaseApp Empty()
         {
@@ -28,7 +28,7 @@ namespace FirebaseSharp.Tests
                 Task.Run(() => connection.Received += Raise.With(args));
             });
 
-            return new FirebaseApp(new Uri("https://example.com/"), connection);            
+            return new FirebaseApp(new Uri("https://example.com/"), connection);
         }
 
         internal static FirebaseApp Dinosaurs()

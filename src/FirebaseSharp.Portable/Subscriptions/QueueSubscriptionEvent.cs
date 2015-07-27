@@ -2,12 +2,13 @@
 
 namespace FirebaseSharp.Portable.Subscriptions
 {
-    class QueueSubscriptionEvent
+    internal class QueueSubscriptionEvent
     {
         private readonly SnapshotCallback _callback;
         private readonly DataSnapshot _snap;
         private readonly object _context;
         private readonly object _lock = new object();
+
         public QueueSubscriptionEvent(SnapshotCallback callback, DataSnapshot snap, object context)
         {
             _callback = callback;

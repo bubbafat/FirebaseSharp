@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization;
 using FirebaseSharp.Portable.Interfaces;
 using FirebaseSharp.Portable.Messages;
 using Newtonsoft.Json;
@@ -28,7 +26,7 @@ namespace FirebaseSharp.Portable
     /// Would JSON Patch make sense?  It's basically what the REST APIs are sending anyway.
     /// How should conflicts be handled?
     /// </summary>
-    class SyncDatabase : IDisposable
+    internal class SyncDatabase : IDisposable
     {
         private JObject _root;
         private bool _initialReceive;
@@ -113,7 +111,8 @@ namespace FirebaseSharp.Portable
             Set(path, data, null, callback, MessageSouce.Local);
         }
 
-        private void Set(FirebasePath path, string data, FirebasePriority priority, FirebaseStatusCallback callback, MessageSouce source)
+        private void Set(FirebasePath path, string data, FirebasePriority priority, FirebaseStatusCallback callback,
+            MessageSouce source)
         {
             var message = new FirebaseMessage(WriteBehavior.Replace, path, data, priority, callback, source);
 
@@ -201,6 +200,7 @@ namespace FirebaseSharp.Portable
                 callback(this, new JsonCacheUpdateEventArgs(message.Path));
             }
         }
+
         private void Delete(FirebasePath path)
         {
             lock (_lock)
@@ -241,6 +241,7 @@ namespace FirebaseSharp.Portable
 
             return false;
         }
+
         private void InsertAt(FirebasePath path, JToken newData)
         {
             // if there is aleady a node at the path, delete it
@@ -311,7 +312,7 @@ namespace FirebaseSharp.Portable
 
                         InsertAt(root.Child(newChild.Path), newChild);
                     }
-                }                
+                }
             }
             else
             {
@@ -344,7 +345,7 @@ namespace FirebaseSharp.Portable
                     }
 
                     node = node[segment];
-                    
+
                     if (node == null)
                     {
                         return false;
@@ -369,7 +370,9 @@ namespace FirebaseSharp.Portable
 
         public void Dispose()
         {
-            using (_connection) { }
+            using (_connection)
+            {
+            }
         }
 
         internal void ExecuteInitial(Subscription sub)
@@ -391,7 +394,8 @@ namespace FirebaseSharp.Portable
             Set(path.Child(".priority"), priority.JsonValue, callback);
         }
 
-        internal void SetWithPriority(FirebasePath path, string value, FirebasePriority priority, FirebaseStatusCallback callback)
+        internal void SetWithPriority(FirebasePath path, string value, FirebasePriority priority,
+            FirebaseStatusCallback callback)
         {
             Set(path, value, priority, callback, MessageSouce.Local);
         }

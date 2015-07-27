@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable.Filters
 {
-    class OrderByKeyFilter :  ISubscriptionFilter
+    internal class OrderByKeyFilter : ISubscriptionFilter
     {
         public JToken Apply(JToken filtered, IFilterContext context)
         {

@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FirebaseSharp.Portable.Interfaces;
 
 namespace FirebaseSharp.Portable.Subscriptions
 {
-    class SubscriptionProcessor : IDisposable
+    internal class SubscriptionProcessor : IDisposable
     {
         private readonly BlockingQueue<QueueSubscriptionEvent> _queue;
         private CancellationToken _token;
         private Task _drainTask;
         private readonly object _startLock = new object();
-        private bool _started = false;
+        private bool _started;
 
         public SubscriptionProcessor(CancellationToken token)
         {
@@ -66,7 +63,9 @@ namespace FirebaseSharp.Portable.Subscriptions
 
         public void Dispose()
         {
-            using (_queue) { }
+            using (_queue)
+            {
+            }
         }
     }
 }

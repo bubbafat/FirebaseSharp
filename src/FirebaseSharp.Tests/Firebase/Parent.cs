@@ -1,10 +1,8 @@
-﻿using System;
-using FirebaseSharp.Portable;
+﻿using FirebaseSharp.Portable;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FirebaseSharp.Tests.Firebase
 {
-
     [TestClass]
     public class Parent
     {
@@ -19,7 +17,9 @@ namespace FirebaseSharp.Tests.Firebase
         [TestCleanup]
         public void TestCleanup()
         {
-            using (_app) { }
+            using (_app)
+            {
+            }
         }
 
         [TestMethod]

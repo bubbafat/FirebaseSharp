@@ -9,7 +9,7 @@ namespace FirebaseSharp.Portable.Filters
     /// Implements the orderByChild sorting rules described here:
     /// https://www.firebase.com/docs/web/guide/retrieving-data.html#section-ordered-data
     /// </summary>
-    class FirebaseValueSorter : Comparer<JToken>
+    internal class FirebaseValueSorter : Comparer<JToken>
     {
         public override int Compare(JToken x, JToken y)
         {
@@ -63,7 +63,7 @@ namespace FirebaseSharp.Portable.Filters
             return result;
         }
 
-        string KeyName(JToken x)
+        private string KeyName(JToken x)
         {
             if (x.Parent != null)
             {
@@ -171,7 +171,7 @@ namespace FirebaseSharp.Portable.Filters
                 if (x.Value<bool>() == y.Value<bool>())
                 {
                     result = ParentKeyTest(x, y);
-                } 
+                }
                 else
                 {
                     result = x.Value<bool>() ? 1 : -1;

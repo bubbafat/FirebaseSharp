@@ -1,5 +1,4 @@
-﻿
-namespace FirebaseSharp.Portable.Interfaces
+﻿namespace FirebaseSharp.Portable.Interfaces
 {
     public interface IFilterableQueryExecutor : IFirebaseQueryExecutor
     {

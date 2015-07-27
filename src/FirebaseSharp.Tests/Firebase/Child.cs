@@ -1,5 +1,4 @@
-﻿using System;
-using FirebaseSharp.Portable;
+﻿using FirebaseSharp.Portable;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FirebaseSharp.Tests.Firebase
@@ -18,7 +17,9 @@ namespace FirebaseSharp.Tests.Firebase
         [TestCleanup]
         public void TestCleanup()
         {
-            using (_app) { }
+            using (_app)
+            {
+            }
         }
 
 
@@ -59,13 +60,13 @@ namespace FirebaseSharp.Tests.Firebase
         [TestMethod]
         public void Empty()
         {
-            Assert.AreEqual("/", _app.Child("").Key);            
+            Assert.AreEqual("/", _app.Child("").Key);
         }
 
         [TestMethod]
         public void Null()
         {
-            Assert.AreEqual("/", _app.Child(null).Key); 
+            Assert.AreEqual("/", _app.Child(null).Key);
         }
     }
 }

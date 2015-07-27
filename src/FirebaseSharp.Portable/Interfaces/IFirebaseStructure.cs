@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace FirebaseSharp.Portable.Interfaces
 {
@@ -12,6 +9,5 @@ namespace FirebaseSharp.Portable.Interfaces
         IFirebase Root();
         string Key { get; }
         Uri AbsoluteUri { get; }
-
     }
 }

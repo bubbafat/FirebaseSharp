@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using FirebaseSharp.Portable.Interfaces;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Portable
 {
-    class DataSnapshot : IDataSnapshot
+    internal class DataSnapshot : IDataSnapshot
     {
         private readonly JToken _token;
         private readonly FirebaseApp _app;
         private readonly FirebasePath _path;
+
         internal DataSnapshot(FirebaseApp app, FirebasePath path, JToken token)
         {
             _token = token != null ? token.DeepClone() : null;
@@ -29,6 +28,7 @@ namespace FirebaseSharp.Portable
         {
             get { return _token != null; }
         }
+
         public IDataSnapshot Child(string childName)
         {
             JToken next = _token;
@@ -69,18 +69,19 @@ namespace FirebaseSharp.Portable
 
                 if (_token != null)
                 {
-
                     if (_token.Type == JTokenType.Array)
                     {
                         // arrays are keyed as "[0]" but we want them keyed as "0"
                         // so int based look-ups are easier
                         JArray array = (JArray) _token;
-                        snaps.AddRange(array.Select((t, i) => new DataSnapshot(_app, _path.Child(i.ToString()), t)).Cast<IDataSnapshot>());
+                        snaps.AddRange(
+                            array.Select((t, i) => new DataSnapshot(_app, _path.Child(i.ToString()), t)));
                     }
-                    else if(_token.Type == JTokenType.Property)
+                    else if (_token.Type == JTokenType.Property)
                     {
                         JProperty prop = (JProperty) _token;
-                        snaps.AddRange(_token.Children().Select(t => new DataSnapshot(_app, _path.Child(t.Path), prop.Value)));
+                        snaps.AddRange(
+                            _token.Children().Select(t => new DataSnapshot(_app, _path.Child(t.Path), prop.Value)));
                     }
                     else
                     {
@@ -98,18 +99,12 @@ namespace FirebaseSharp.Portable
 
         public bool HasChildren
         {
-            get
-            {
-                return (_token != null) && _token.Children().Any();
-            }
+            get { return (_token != null) && _token.Children().Any(); }
         }
 
         public int NumChildren
         {
-            get
-            {
-                return (_token == null) ? 0 : _token.Children().Count();
-            }
+            get { return (_token == null) ? 0 : _token.Children().Count(); }
         }
 
         public IFirebase Ref()
@@ -130,7 +125,7 @@ namespace FirebaseSharp.Portable
                 var pri = obj[".priority"];
                 if (pri != null)
                 {
-                    return new FirebasePriority((JValue)pri);
+                    return new FirebasePriority((JValue) pri);
                 }
             }
 
@@ -139,9 +134,10 @@ namespace FirebaseSharp.Portable
                 JProperty prop = (JProperty) _token;
                 if (prop.Name == ".priority")
                 {
-                    if (prop.Value is JValue)
+                    var value = prop.Value as JValue;
+                    if (value != null)
                     {
-                        return new FirebasePriority((JValue)prop.Value);
+                        return new FirebasePriority(value);
                     }
                     else
                     {
@@ -152,7 +148,11 @@ namespace FirebaseSharp.Portable
 
             return null;
         }
-        public string Key { get { return _path.Key; } }
+
+        public string Key
+        {
+            get { return _path.Key; }
+        }
 
         public T Value<T>()
         {

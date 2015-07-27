@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using FirebaseSharp.Portable;
-using FirebaseSharp.Portable.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FirebaseSharp.Tests.Filter
@@ -27,9 +26,9 @@ namespace FirebaseSharp.Tests.Filter
     }
 }";
 
-            RunTest(json, "test1", new[] { "keyXXX", "keyAAA" });
-            RunTest(json, "test2", new[] { "keyAAA", "keyXXX" });
-            RunTest(json, "test3", new[] { "keyAAA", "keyXXX" });
+            RunTest(json, "test1", new[] {"keyXXX", "keyAAA"});
+            RunTest(json, "test2", new[] {"keyAAA", "keyXXX"});
+            RunTest(json, "test3", new[] {"keyAAA", "keyXXX"});
         }
 
         [TestMethod]
@@ -55,9 +54,9 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", new[] { "keyBBB", "keyXXX", "keyAAA" });
-            RunTest(json, "test2", new[] { "keyAAA", "keyBBB", "keyXXX" });
-            RunTest(json, "test3", new[] { "keyBBB", "keyXXX", "keyAAA" });
+            RunTest(json, "test1", new[] {"keyBBB", "keyXXX", "keyAAA"});
+            RunTest(json, "test2", new[] {"keyAAA", "keyBBB", "keyXXX"});
+            RunTest(json, "test3", new[] {"keyBBB", "keyXXX", "keyAAA"});
         }
 
         [TestMethod]
@@ -83,9 +82,9 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", new[] { "keyXXX", "keyAAA", "keyBBB" });
-            RunTest(json, "test2", new[] { "keyAAA", "keyBBB", "keyXXX" });
-            RunTest(json, "test3", new[] { "keyAAA", "keyBBB", "keyXXX" });
+            RunTest(json, "test1", new[] {"keyXXX", "keyAAA", "keyBBB"});
+            RunTest(json, "test2", new[] {"keyAAA", "keyBBB", "keyXXX"});
+            RunTest(json, "test3", new[] {"keyAAA", "keyBBB", "keyXXX"});
         }
 
         [TestMethod]
@@ -111,9 +110,9 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", new[] { "keyXXX", "keyAAA", "keyBBB" });
-            RunTest(json, "test2", new[] { "keyAAA", "keyBBB", "keyXXX" });
-            RunTest(json, "test3", new[] { "keyAAA", "keyBBB", "keyXXX" });
+            RunTest(json, "test1", new[] {"keyXXX", "keyAAA", "keyBBB"});
+            RunTest(json, "test2", new[] {"keyAAA", "keyBBB", "keyXXX"});
+            RunTest(json, "test3", new[] {"keyAAA", "keyBBB", "keyXXX"});
         }
 
         [TestMethod]
@@ -139,9 +138,9 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", new[] { "keyXXX", "keyAAA", "keyBBB" });
-            RunTest(json, "test2", new[] { "keyAAA", "keyBBB", "keyXXX" });
-            RunTest(json, "test3", new[] { "keyAAA", "keyBBB", "keyXXX" });
+            RunTest(json, "test1", new[] {"keyXXX", "keyAAA", "keyBBB"});
+            RunTest(json, "test2", new[] {"keyAAA", "keyBBB", "keyXXX"});
+            RunTest(json, "test3", new[] {"keyAAA", "keyBBB", "keyXXX"});
         }
 
 
@@ -174,11 +173,11 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", new[] { "keyXXX", "keyAAA", "keyBBB" });
-            RunTest(json, "test2", new[] { "keyXXX", "keyAAA", "keyBBB" });
-            RunTest(json, "test3", new[] { "keyAAA", "keyBBB", "keyXXX" });
-            RunTest(json, "test4", new[] { "keyAAA", "keyBBB", "keyXXX" });
-            RunTest(json, "test5", new[] { "keyXXX", "keyBBB", "keyAAA" });
+            RunTest(json, "test1", new[] {"keyXXX", "keyAAA", "keyBBB"});
+            RunTest(json, "test2", new[] {"keyXXX", "keyAAA", "keyBBB"});
+            RunTest(json, "test3", new[] {"keyAAA", "keyBBB", "keyXXX"});
+            RunTest(json, "test4", new[] {"keyAAA", "keyBBB", "keyXXX"});
+            RunTest(json, "test5", new[] {"keyXXX", "keyBBB", "keyAAA"});
         }
 
         [TestMethod]
@@ -221,8 +220,10 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", new[] { "keyAAA", "keyBBB", "keyCCC", "keyDDD", "keyEEE", "keyFFF", "keyGGG", "keyHHH"});
-            RunTest(json, "test2", new[] { "keyHHH", "keyGGG", "keyFFF", "keyEEE", "keyDDD", "keyCCC", "keyBBB", "keyAAA", });
+            RunTest(json, "test1",
+                new[] {"keyAAA", "keyBBB", "keyCCC", "keyDDD", "keyEEE", "keyFFF", "keyGGG", "keyHHH"});
+            RunTest(json, "test2",
+                new[] {"keyHHH", "keyGGG", "keyFFF", "keyEEE", "keyDDD", "keyCCC", "keyBBB", "keyAAA",});
         }
 
         [TestMethod]
@@ -245,8 +246,8 @@ namespace FirebaseSharp.Tests.Filter
 }
 ";
 
-            RunTest(json, "test1", new[] { "keyAAA", "keyBBB", "keyXXX" });
-            RunTest(json, "test2", new[] { "keyBBB", "keyAAA", "keyXXX" });
+            RunTest(json, "test1", new[] {"keyAAA", "keyBBB", "keyXXX"});
+            RunTest(json, "test2", new[] {"keyBBB", "keyAAA", "keyXXX"});
         }
 
 
@@ -275,6 +276,5 @@ namespace FirebaseSharp.Tests.Filter
                 Assert.IsTrue(fired.WaitOne(TimeSpan.FromSeconds(5)), "callback did not fire during " + testName);
             }
         }
-
     }
 }

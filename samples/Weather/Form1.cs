@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using FirebaseSharp.Portable;
@@ -24,26 +17,23 @@ namespace Weather
 
         private void UpdateChart(IDataSnapshot snap)
         {
-                chart1.Series["Weather"].Points.Clear();
-                foreach (var update in snap.Children)
-                {
-                    int index = int.Parse(update.Key);
-                    float temp = update.Child("apparentTemperature").Value<float>();
-                    chart1.Series["Weather"].Points.AddXY(index, temp);
-                }
+            chart1.Series["Weather"].Points.Clear();
+            foreach (var update in snap.Children)
+            {
+                int index = int.Parse(update.Key);
+                float temp = update.Child("apparentTemperature").Value<float>();
+                chart1.Series["Weather"].Points.AddXY(index, temp);
+            }
 
-                chart1.Invalidate();
+            chart1.Invalidate();
         }
 
         public delegate void UpdateDelegate(IDataSnapshot snap);
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            
-            _app.Child("chicago/hourly/data").On("value", (snap, child, context) =>
-            {
-                chart1.BeginInvoke(new UpdateDelegate(UpdateChart), snap);
-            });
+            _app.Child("chicago/hourly/data")
+                .On("value", (snap, child, context) => { chart1.BeginInvoke(new UpdateDelegate(UpdateChart), snap); });
 
             chart1.Series.Clear();
             var series1 = new System.Windows.Forms.DataVisualization.Charting.Series

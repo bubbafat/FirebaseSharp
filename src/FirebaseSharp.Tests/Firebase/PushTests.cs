@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using FirebaseSharp.Portable;
-using FirebaseSharp.Portable.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
 
 namespace FirebaseSharp.Tests.Firebase
 {
@@ -17,7 +15,7 @@ namespace FirebaseSharp.Tests.Firebase
         {
             using (FirebaseApp app = AppFactory.Empty())
             {
-                ManualResetEvent done= new ManualResetEvent(false);
+                ManualResetEvent done = new ManualResetEvent(false);
 
                 var list = app.Child("message_list");
                 List<string> ids = new List<string>();

@@ -13,7 +13,7 @@ namespace FirebaseSharp.Portable
         private readonly Random _rng = new Random();
 
         // Timestamp of last push, used to prevent local collisions if you push twice in one ms.
-        private long _lastPushTime = 0;
+        private long _lastPushTime;
         private readonly byte[] _lastRandChars = new byte[12];
 
         static FirebasePushIdGenerator()
@@ -36,9 +36,9 @@ namespace FirebaseSharp.Portable
             char[] timeStampChars = new char[8];
             for (int i = 7; i >= 0; i--)
             {
-                int index = (int)(now % PushChars.Length);
+                int index = (int) (now%PushChars.Length);
                 timeStampChars[i] = PushChars[index];
-                now = (long)Math.Floor((double)now / PushChars.Length);
+                now = (long) Math.Floor((double) now/PushChars.Length);
             }
             if (now != 0)
             {
@@ -51,7 +51,7 @@ namespace FirebaseSharp.Portable
             {
                 for (int i = 0; i < 12; i++)
                 {
-                    _lastRandChars[i] = (byte)_rng.Next(0, PushChars.Length);
+                    _lastRandChars[i] = (byte) _rng.Next(0, PushChars.Length);
                 }
             }
             else
