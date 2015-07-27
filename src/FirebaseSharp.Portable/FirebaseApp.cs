@@ -132,6 +132,7 @@ namespace FirebaseSharp.Portable
             _shutdownToken.Cancel();
             using (_cache) { }
             using (_shutdownToken) { }
+            using (_subProcessor) { }
         }
 
         internal void SetPriority(FirebasePath _path, FirebasePriority priority, FirebaseStatusCallback callback)

@@ -41,10 +41,6 @@ namespace FirebaseSharp.Portable
             }
         }
 
-        public string Json
-        {
-            get { return _normalized.Replace('/', '.'); }
-        }
 
         public FirebasePath Child(string child)
         {

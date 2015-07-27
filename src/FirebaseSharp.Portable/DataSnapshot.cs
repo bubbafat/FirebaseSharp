@@ -139,7 +139,7 @@ namespace FirebaseSharp.Portable
                 JProperty prop = (JProperty) _token;
                 if (prop.Name == ".priority")
                 {
-                    if (prop.Value.Type is JValue)
+                    if (prop.Value is JValue)
                     {
                         return new FirebasePriority((JValue)prop.Value);
                     }

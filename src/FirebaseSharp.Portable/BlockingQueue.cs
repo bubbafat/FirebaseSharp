@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace FirebaseSharp.Portable
 {
-    internal class BlockingQueue<T>
+    internal class BlockingQueue<T> : IDisposable
     {
         private readonly BlockingCollection<T> _queue = new BlockingCollection<T>(new ConcurrentQueue<T>());
 
@@ -38,6 +38,11 @@ namespace FirebaseSharp.Portable
             }
 
             throw new Exception("Unable to dequeue the item");
+        }
+
+        public void Dispose()
+        {
+            using (_queue) { }
         }
     }
 }

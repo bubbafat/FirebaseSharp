@@ -163,7 +163,7 @@ namespace FirebaseSharp.Portable
                     case PriorityType.String:
                         return string.Format("\"{0}\"", _sp);
                     default:
-                        throw new NotImplementedException("Unknown format type: {0}" + Type);
+                        throw new InvalidOperationException("Unknown format type: {0}" + Type);
                 }
             }
         }
@@ -181,7 +181,7 @@ namespace FirebaseSharp.Portable
                     case PriorityType.String:
                         return _sp;
                     default:
-                        throw new NotImplementedException("Unknown format type: {0}" + Type);
+                        throw new InvalidOperationException("Unknown format type: {0}" + Type);
                 }
             }
         }

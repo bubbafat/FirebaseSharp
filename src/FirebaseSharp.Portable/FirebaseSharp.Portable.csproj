@@ -78,6 +78,7 @@
     <Compile Include="Filters\StartAtNumericFilter.cs" />
     <Compile Include="Filters\StartAtStringFilter.cs" />
     <Compile Include="Subscriptions\ISubscriptionFilter.cs" />
+    <Compile Include="Subscriptions\QueueSubscriptionEvent.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Subscriptions\SubscriptionDatabase.cs" />
     <Compile Include="Subscriptions\SubscriptionProcessor.cs" />
@@ -91,7 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\portable-net45+wp80+win8+wpa81+dnxcore50\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Collections.Concurrent">

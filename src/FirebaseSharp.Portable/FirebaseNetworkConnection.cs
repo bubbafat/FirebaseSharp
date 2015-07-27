@@ -250,6 +250,7 @@ namespace FirebaseSharp.Portable
             Disconnect();
             using (_client) {  }
             using (_cancelSource) { }
+            using (_sendQueue) { }
         }
     }
 }
