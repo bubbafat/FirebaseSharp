@@ -96,6 +96,18 @@ namespace FirebaseSharp.Portable.Filters
             return this;
         }
 
+        public IFirebaseQueryExecutorAny StartAtKey(string startingValue)
+        {
+            _filters.Add(new StartAtKeyFilter(startingValue));
+            return this;
+        }
+
+        public IFirebaseQueryExecutorAny EndAtKey(string endingValue)
+        {
+            _filters.Add(new EndAtKeyFilter(endingValue));
+            return this;
+        }
+
         public IFirebaseQueryExecutorAny EqualTo(string value)
         {
             _filters.Add(new EqualToFilter<string>(value));

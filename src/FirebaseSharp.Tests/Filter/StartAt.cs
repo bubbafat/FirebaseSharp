@@ -87,6 +87,57 @@ namespace FirebaseSharp.Tests.Filter
             RunTest(json, "test3", "d", new string[0]);
         }
 
+        [TestMethod]
+        public void StartAtKey()
+        {
+            string json = @"
+{
+    'keyAAA': {
+        'test1': 1
+    },
+    'keyBBB': {
+        'test1': 2
+    },
+    'keyCCC': {
+        'test1': 3
+    },
+}
+";
+
+            RunKeyTest(json, "test1", "key", new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunKeyTest(json, "test1", "keyAAA", new[] { "keyAAA", "keyBBB", "keyCCC" });
+            RunKeyTest(json, "test1", "keyBBB", new[] { "keyBBB", "keyCCC" });
+            RunKeyTest(json, "test1", "keyCCC", new[] { "keyCCC" });
+            RunKeyTest(json, "test1", "keyDDD", new string[0]);
+        }
+
+        private void RunKeyTest(string json, string testName, string startAt, string[] expectedOrder)
+        {
+            using (FirebaseApp app = AppFactory.FromJson(json))
+            {
+                ManualResetEvent fired = new ManualResetEvent(false);
+                var query = app.Child("/")
+                    .OrderByChild(testName)
+                    .StartAtKey(startAt)
+                    .On("value", (snap, previous, context) =>
+                    {
+                        Assert.IsNotNull(snap.Children, testName);
+                        var children = snap.Children.ToList();
+
+                        Assert.AreEqual(expectedOrder.Length, children.Count, testName);
+
+                        for (int i = 0; i < expectedOrder.Length; i++)
+                        {
+                            Assert.AreEqual(expectedOrder[i], children[i].Key, testName);
+                        }
+
+                        fired.Set();
+                    });
+
+                Assert.IsTrue(fired.WaitOne(TimeSpan.FromSeconds(555)), "callback did not fire during " + testName);
+            }
+        }
+
         private void RunTest(string json, string testName, string startAt, string[] expectedOrder)
         {
             using (FirebaseApp app = AppFactory.FromJson(json))

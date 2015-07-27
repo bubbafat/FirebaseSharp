@@ -82,6 +82,16 @@ namespace FirebaseSharp.Portable
             return CreateQuery().EndAt(endingValue);
         }
 
+        public IFirebaseQueryExecutorAny StartAtKey(string startingValue)
+        {
+            return CreateQuery().StartAtKey(startingValue);
+        }
+
+        public IFirebaseQueryExecutorAny EndAtKey(string endingValue)
+        {
+            return CreateQuery().EndAtKey(endingValue);
+        }
+
         public IFirebaseQueryExecutorAny EqualTo(string value)
         {
             return CreateQuery().EqualTo(value);

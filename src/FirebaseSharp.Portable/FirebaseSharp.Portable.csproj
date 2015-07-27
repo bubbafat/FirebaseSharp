@@ -38,6 +38,7 @@
   <ItemGroup>
     <Compile Include="BlockingQueue.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Filters\EndAtKeyFilter.cs" />
     <Compile Include="Filters\EndAtNumericFilter.cs" />
     <Compile Include="Filters\EndAtStringFilter.cs" />
     <Compile Include="Filters\EqualToFilter.cs" />
@@ -46,6 +47,7 @@
     <Compile Include="Filters\FirebasePrioritySorter.cs" />
     <Compile Include="Filters\FirebaseQuery.cs" />
     <Compile Include="Filters\FirebaseValueSorter.cs" />
+    <Compile Include="Filters\StartAtKeyFilter.cs" />
     <Compile Include="FirebasePath.cs" />
     <Compile Include="FirebasePriority.cs" />
     <Compile Include="FirebasePushIdGenerator.cs" />
