@@ -3,14 +3,15 @@ FirebaseSharp 2.0
 
 A (new) Firebase API for .NET.
 
-This is work-in-progress and is not ready yet.  Most things don't work.  Those that do are probably happy accidents.
+This is the alpha FirebaseSharp 2.0 library - some things are broken, other are missing.  There are many happy accidents that seem to work.
 
 # Usage
 
 ## Create the FirebaseApp object
 
 ```CSharp
-FirebaseApp app = new FirebaseApp(new Uri("https://dinosaur-facts.firebaseio.com/"));
+// this is IDisposable ... please clean up when done!
+FirebaseApp app = new FirebaseApp(new Uri("https://dinosaur-facts.firebaseio.com/") /*, <auth token> */);
 ```
 
 ## Subscribe to a location
@@ -22,7 +23,9 @@ var scoresRef = app.Child("scores");
 ## Perform a query
 
 ```CSharp
-scoresRef.OrderByValue<int>().LimitToLast(3).On("value", (snapshot, child, context) => {
+scoresRef.OrderByValue()
+         .LimitToLast(3)
+         .On("value", (snapshot, child, context) => {
   foreach (var data in snapshot.Children) {
     Console.WriteLine("The {0} dinosaur\'s score is {1}",
                         data.Key, data.Value<int>());
@@ -30,5 +33,3 @@ scoresRef.OrderByValue<int>().LimitToLast(3).On("value", (snapshot, child, conte
 });
 ```
     
-
-
