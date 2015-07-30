@@ -55,14 +55,50 @@ namespace FirebaseSharp.Portable
                         {
                             if (message.Callback != null)
                             {
-                                var error = rsp.Exception != null
-                                    ? new FirebaseError(rsp.Exception.Message)
-                                    : rsp.IsCanceled
-                                        ? new FirebaseError("Canceled")
-                                        : null;
+                                FirebaseError error;
+                                if (rsp.IsFaulted)
+                                {
+                                    if (rsp.Exception != null)
+                                    {
+                                        error = new FirebaseError(rsp.Exception.Message);
+                                    }
+                                    else
+                                    {
+                                        error = new FirebaseError("Unknown error");
+                                    }
+                                }
+                                else if (rsp.IsCanceled)
+                                {
+                                    error = new FirebaseError("Canceled");
+                                }
+                                else if (rsp.IsCompleted)
+                                {
+                                    if (rsp.Result != null)
+                                    {
+                                        if (!rsp.Result.IsSuccessStatusCode)
+                                        {
+                                            error =
+                                                new FirebaseError(string.Format("[{0}] {1}", rsp.Result.StatusCode,
+                                                    rsp.Result.ReasonPhrase));
+                                        }
+                                        else
+                                        {
+                                            error = null;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        error = new FirebaseError("Empty server response");
+                                    }
+                                }
+                                else
+                                {
+                                    error = new FirebaseError("Unknown Error");
+                                }
+
                                 message.Callback(error);
                             }
-                        }, TaskContinuationOptions.NotOnCanceled).ConfigureAwait(false);
+                        }).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)
